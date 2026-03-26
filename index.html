@@ -50,7 +50,7 @@
     .filter-tag-include { background: #edf5ff; }
     .filter-tag-exclude { background: #ffecec; }
     .filter-tag .tag-text {
-      font-size: 12px; font-weight: 600; line-height: 16px;
+      font-size: 12px; font-weight: 400; line-height: 16px; font-family: Helvetica, sans-serif;
       letter-spacing: 0.24px; color: #0e0f10; white-space: nowrap;
       overflow: hidden; text-overflow: ellipsis;
     }
@@ -91,6 +91,8 @@
       width: 8px; height: 8px; background: #4e5a63; margin-top: -4px;
     }
     .count-tag-wrap:hover .count-tag-tooltip { display: block; }
+    .edit-col-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+    .edit-col-scroll::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body>
@@ -763,7 +765,7 @@
       const [hovered, setHovered] = useState(false);
       const [count, setCount] = useState(0);
       const [resetKey, setResetKey] = useState(0);
-      const headerBg = open ? "#edf5ff" : hovered ? "#f5f9ff" : "white";
+      const headerBg = (open || hovered) ? "#f7f8f8" : "white";
       const globalCtx = useContext(GlobalFilterContext);
 
       const register = useCallback((delta) => {
@@ -788,16 +790,16 @@
               onMouseLeave={() => setHovered(false)}
               style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", cursor:"pointer", userSelect:"none", background:headerBg, position:"relative" }}
             >
-              <span style={{ flex:1, fontWeight:500, fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#0e0f10", fontFamily:"'Inter', sans-serif" }}>{title}</span>
+              <span style={{ flex:1, fontWeight:500, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"'Inter', sans-serif" }}>{title}</span>
               {count > 0 && (
                 <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                  <div style={{ background: open ? "#0056ce" : "#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ background:"#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
                     <span style={{ fontSize:12, fontWeight:700, color:"white", lineHeight:"16px" }}>{count}</span>
                   </div>
-                  <span onClick={handleClear} style={{ fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#4e5a63", cursor:"pointer" }}>Clear</span>
+                  <span onClick={handleClear} style={{ fontSize:14, lineHeight:"20px", color:"#4e5a63", cursor:"pointer" }}>Clear</span>
                 </div>
               )}
-              <FilterArrow up={open} blue={open} />
+              <FilterArrow up={open} />
             </div>
             {open && (
               <div style={{ display:"flex", flexDirection:"column", gap:16, padding:"20px 16px", width:"100%" }}>
@@ -822,8 +824,8 @@
       );
     }
 
-    const _imgKnobOn  = "https://www.figma.com/api/mcp/asset/e719a7e9-be2a-4845-b1e5-e24b65a54ab7";
-    const _imgKnobOff = "https://www.figma.com/api/mcp/asset/48b45681-3c5f-4a12-93d8-91ab180ad35d";
+    const _imgKnobOn  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAzNiAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaCIgeD0iLTYwJSIgeT0iLTYwJSIgd2lkdGg9IjIyMCUiIGhlaWdodD0iMjIwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjEuNSIgc3RkRGV2aWF0aW9uPSIyLjUiIGZsb29kLWNvbG9yPSIjMDAwMDAwIiBmbG9vZC1vcGFjaXR5PSIwLjE2Ii8+PC9maWx0ZXI+PC9kZWZzPjxjaXJjbGUgY3g9IjE4IiBjeT0iMTIiIHI9IjciIGZpbGw9IndoaXRlIiBmaWx0ZXI9InVybCgjc2gpIi8+PC9zdmc+";
+    const _imgKnobOff = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAzNiAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48ZmlsdGVyIGlkPSJzaCIgeD0iLTYwJSIgeT0iLTYwJSIgd2lkdGg9IjIyMCUiIGhlaWdodD0iMjIwJSI+PGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjEuNSIgc3RkRGV2aWF0aW9uPSIyLjUiIGZsb29kLWNvbG9yPSIjMDAwMDAwIiBmbG9vZC1vcGFjaXR5PSIwLjE2Ii8+PC9maWx0ZXI+PC9kZWZzPjxjaXJjbGUgY3g9IjE4IiBjeT0iMTIiIHI9IjciIGZpbGw9IndoaXRlIiBmaWx0ZXI9InVybCgjc2gpIi8+PC9zdmc+";
     function Toggle({ checked, onChange, disabled }) {
       return (
         <div
@@ -848,11 +850,6 @@
       );
     }
 
-    const _sliderImgDefault = "https://www.figma.com/api/mcp/asset/ed2cb5d1-ea07-43de-8247-c08f9645ff54";
-    const _sliderImgHover   = "https://www.figma.com/api/mcp/asset/1dbd4820-8e70-4de5-8196-bd479b5b1327";
-    const _sliderImgActive  = "https://www.figma.com/api/mcp/asset/419936dd-6045-4991-aebb-6c8c28d8bbcb";
-    const _sliderHaloHover  = "https://www.figma.com/api/mcp/asset/d27ed89a-75ee-455c-8bf5-48b3ae1a1194";
-    const _sliderHaloActive = "https://www.figma.com/api/mcp/asset/d5fbc70f-2ffc-48ad-97a4-0cb6b29320de";
 
     function RadiusSlider() {
       return (
@@ -909,10 +906,10 @@
               onClick={() => setOpen(o => !o)}
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
-              style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", background: open ? "#edf5ff" : hovered ? "#f5f9ff" : "white", position:"relative", cursor:"pointer", userSelect:"none" }}
+              style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", background: (open || hovered) ? "#f7f8f8" : "white", position:"relative", cursor:"pointer", userSelect:"none" }}
             >
               <div style={{ display:"flex", flex:1, gap:4, alignItems:"center", minWidth:0 }}>
-                <span style={{ fontWeight:500, fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Who to contact</span>
+                <span style={{ fontWeight:500, fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Who to contact</span>
                 {open && (
                   <div
                     style={{ position:"relative", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center" }}
@@ -938,20 +935,20 @@
                     )}
                     {/* Info icon image */}
                     <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:18, height:18, cursor:"default" }}>
-                      <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none", filter: open ? "brightness(0) saturate(100%) invert(25%) sepia(97%) saturate(1200%) hue-rotate(202deg) brightness(97%) contrast(102%)" : "none" }} src={imgInfoIcon} />
+                      <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgInfoIcon} />
                     </div>
                   </div>
                 )}
               </div>
               {whoCount > 0 && (
                 <div style={{ display:"flex", alignItems:"center", gap:4 }} onClick={e => e.stopPropagation()}>
-                  <div style={{ background: open ? "#0056ce" : "#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ background:"#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
                     <span style={{ fontSize:12, fontWeight:700, color:"white", lineHeight:"16px" }}>{whoCount}</span>
                   </div>
-                  <span onClick={() => { setSelected("Any"); setHasContact(false); setShowUnlocked(false); }} style={{ fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#4e5a63", cursor:"pointer" }}>Clear</span>
+                  <span onClick={() => { setSelected("Any"); setHasContact(false); setShowUnlocked(false); }} style={{ fontSize:14, lineHeight:"20px", color:"#4e5a63", cursor:"pointer" }}>Clear</span>
                 </div>
               )}
-              <FilterArrow up={open} blue={open} />
+              <FilterArrow up={open} />
             </div>
             {/* Collapsible content */}
             {open && (
@@ -974,7 +971,7 @@
                           </div>
                         </div>
                         <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-start", width:"100%" }}>
-                          <span style={{ fontSize:14, lineHeight:"20px", fontWeight:600, color: active ? "#003987" : "#4e5a63", whiteSpace:"nowrap" }}>{t.label}</span>
+                          <span style={{ fontSize:14, lineHeight:"20px", fontWeight:400, color: active ? "#003987" : "#4e5a63", whiteSpace:"nowrap" }}>{t.label}</span>
                           <span style={{ fontSize:12, lineHeight:"16px", fontWeight:400, color: active ? "#003987" : "#4e5a63" }}>{t.count}</span>
                         </div>
                       </button>
@@ -988,7 +985,7 @@
                       <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>Has contact information</span>
                       <div style={{ position:"relative", flexShrink:0, width:18, height:18, overflow:"hidden" }}>
                         <div style={{ position:"absolute", inset:"8.33%" }}>
-                          <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="https://www.figma.com/api/mcp/asset/b4a3b7d8-64f9-4b55-bc1b-a6d75221950f" />
+                          <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgInfoIcon} />
                         </div>
                       </div>
                     </div>
@@ -1022,7 +1019,8 @@
       "90001", "90210", "10001", "60601", "77001", "85001",
     ];
 
-    const _imgCloseX = "https://www.figma.com/api/mcp/asset/b3bcd316-82ad-4ea1-895d-e76a4c2865b8";
+    const _imgCloseX = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNCA0TDEyIDEyTTEyIDRMNCAxMiIgc3Ryb2tlPSIjMjcyRDMyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+";
+    const imgWhiteCheck = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiByeD0iMyIgZmlsbD0iIzAwNTZDRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEzLjcwNzEgNy4yOTI4OUMxNC4wOTc2IDcuNjgzNDIgMTQuMDk3NiA4LjMxNjU4IDEzLjcwNzEgOC43MDcxMUw5LjcwNzExIDEyLjcwNzFDOS4zMTY1OCAxMy4wOTc2IDguNjgzNDIgMTMuMDk3NiA4LjI5Mjg5IDEyLjcwNzFMNi4yOTI4OSAxMC43MDcxQzUuOTAyMzcgMTAuMzE2NiA1LjkwMjM3IDkuNjgzNDIgNi4yOTI4OSA5LjI5Mjg5QzYuNjgzNDIgOC45MDIzNyA3LjMxNjU4IDguOTAyMzcgNy43MDcxMSA5LjI5Mjg5TDkgMTAuNTg1OEwxMi4yOTI5IDcuMjkyODlDMTIuNjgzNCA2LjkwMjM3IDEzLjMxNjYgNi45MDIzNyAxMy43MDcxIDcuMjkyODlaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K";
 
     function SaveFiltersModal({ locVal, filterItems, onClose, onSave }) {
       const buildTitle = () => {
@@ -1053,7 +1051,7 @@
               {/* Name input with floating label */}
               <div style={{ position:"relative" }}>
                 <input value={title} onChange={e => setTitle(e.target.value)}
-                  style={{ width:"100%", boxSizing:"border-box", height:40, border:"1px solid #818d96", borderRadius:8, padding:"8px 16px", fontSize:16, lineHeight:"24px", color:"#0e0f10", fontFamily:"Helvetica, sans-serif", outline:"none", background:"white" }} />
+                  style={{ width:"100%", boxSizing:"border-box", height:40, border:"1px solid #818d96", borderRadius:8, padding:"8px 16px", fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica, sans-serif", fontWeight:400, outline:"none", background:"white" }} />
                 <div style={{ position:"absolute", top:-8, left:12, background:"white", padding:"0 4px", display:"flex", alignItems:"center", height:16 }}>
                   <span style={{ fontSize:12, lineHeight:"16px", color:"#4e5a63", fontFamily:"Helvetica, sans-serif" }}>Name Saved Filter</span>
                 </div>
@@ -1081,13 +1079,8 @@
                         const overflow = row.tags.length - MAX_TAGS;
                         return (
                           <div key={row.key} style={{ display:"flex", alignItems:"center", gap:12 }}>
-                            <div style={{ position:"relative", width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", padding:2, flexShrink:0, boxSizing:"border-box" }}>
-                              <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", width:12, height:12, overflow:"hidden", zIndex:2 }}>
-                                <div style={{ position:"absolute", top:"25%", bottom:"25%", left:"16.67%", right:"16.67%" }}>
-                                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="https://www.figma.com/api/mcp/asset/9286fe32-712b-41ef-b8de-63afbd30c987" />
-                                </div>
-                              </div>
-                              <div style={{ background:"#0056ce", borderRadius:3, width:16, height:16, flexShrink:0, zIndex:1 }} />
+                            <div style={{ position:"relative", width:20, height:20, flexShrink:0 }}>
+                              <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgWhiteCheck} />
                             </div>
                             <div style={{ display:"flex", flex:1, gap:8, alignItems:"center", minWidth:0 }}>
                               <div style={{ display:"flex", flex:1, gap:8, alignItems:"center", flexWrap:"nowrap", overflow:"hidden", minWidth:0 }}>
@@ -1126,8 +1119,8 @@
       );
     }
 
-    const _imgToastCheck = "https://www.figma.com/api/mcp/asset/d17d4749-a491-4b54-9470-41fe8c9f781e";
-    const _imgToastClose = "https://www.figma.com/api/mcp/asset/44c2b4e2-2062-4fe6-82d4-23be252e3478";
+    const _imgToastCheck = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI5IiBjeT0iOSIgcj0iOC41IiBmaWxsPSIjMDBBNjkzIi8+PHBhdGggZD0iTTUgOS41TDcuNSAxMkwxMyA2LjUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=";
+    const _imgToastClose = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNCA0TDEyIDEyTTEyIDRMNCAxMiIgc3Ryb2tlPSIjMjcyRDMyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+";
 
     function ToastNotification({ onDismiss }) {
       const [exiting, setExiting] = React.useState(false);
@@ -1375,7 +1368,7 @@
           <button onClick={() => setShowSaveModal(true)} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", background:"white", border:"1px solid #818d96", borderRadius:8, fontSize:14, fontWeight:600, lineHeight:"20px", color:"#0e0f10", cursor:"pointer", fontFamily:"'Inter', sans-serif", whiteSpace:"nowrap" }}>
             <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
               <div style={{ position:"absolute", top:"12.5%", right:"20.83%", bottom:"12.5%", left:"20.83%" }}>
-                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="https://www.figma.com/api/mcp/asset/0ec96b75-a172-4347-b6e2-8a41b076063d" />
+                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSavedBookmark} />
               </div>
             </div>
             Save Filters
@@ -1420,31 +1413,21 @@
       );
     }
 
-    // ── Landing page image assets (fresh Figma URLs – refreshed) ─────────────
-    const imgLandHoriLines  = "https://www.figma.com/api/mcp/asset/38befb7a-1065-44aa-bb93-b7905d9ec24a";
-    const imgLandVertiLines = "https://www.figma.com/api/mcp/asset/a124ac22-de04-40ba-8520-d38bcf78daa8";
-    const imgLandRect1172   = "https://www.figma.com/api/mcp/asset/7c4496f6-dc63-4978-b5d4-ad6d3f6e3de8";
-    const imgLandRect1173   = "https://www.figma.com/api/mcp/asset/f3bda2b3-8dc2-4901-beb5-92c769eebd1f";
-    const imgLandPhone      = "https://www.figma.com/api/mcp/asset/d56e1019-6622-4743-b16b-11218e9e644b";
-    const imgLandT0         = "https://www.figma.com/api/mcp/asset/4c912751-35b2-4228-8cfd-ad9c3ecc4f42";
-    const imgLandT1         = "https://www.figma.com/api/mcp/asset/05dece42-6f33-4d83-a93d-e32bdeeae47f";
-    const imgLandT2         = "https://www.figma.com/api/mcp/asset/6f5018cf-2017-4c41-8de8-deaa34aed3d9";
-    const imgLandT3         = "https://www.figma.com/api/mcp/asset/6002204c-779f-49cb-b32e-eda98038dc42";
-    const imgLandT4         = "https://www.figma.com/api/mcp/asset/b51cce73-9500-468a-9b65-6978fac96f83";
-    // T5 reuses T3 (same row style); T6-T9 reuse T0-T3 for the front table; WC0/WC1 share same asset
-    const imgLandT5         = "https://www.figma.com/api/mcp/asset/6002204c-779f-49cb-b32e-eda98038dc42";
-    const imgLandWC0        = "https://www.figma.com/api/mcp/asset/a12f0005-a871-4e32-b07d-c190458e4465";
-    const imgLandT6         = "https://www.figma.com/api/mcp/asset/7f22e094-f6b8-44b2-b184-7a1c5f0521b3";
-    const imgLandT7         = "https://www.figma.com/api/mcp/asset/6bac8bca-d29b-4cfb-8492-deecf176a4a1";
-    const imgLandT8         = "https://www.figma.com/api/mcp/asset/d4cf5556-a789-4981-9f2e-34aa503de158";
-    const imgLandT9         = "https://www.figma.com/api/mcp/asset/194eea61-ceb2-4df3-ada3-b460c48879c0";
-    const imgLandT10        = "https://www.figma.com/api/mcp/asset/8db12162-b06d-4b1e-9315-a92fc1e3f462";
-    const imgLandWC1        = "https://www.figma.com/api/mcp/asset/fefe2d9c-c598-46de-8730-efa440960493";
-    const imgLandBuilding   = "https://www.figma.com/api/mcp/asset/bdd53b71-b847-46ff-bfaa-7bef28b9e0ba";
-    const imgLandAvatar     = "https://www.figma.com/api/mcp/asset/1d8dc654-02fc-484f-8ae4-a3b1079f0e8d";
-    const imgLandHome       = "https://www.figma.com/api/mcp/asset/19285a96-384a-4f97-b38a-9807328e7376";
-    const imgLandShape      = "https://www.figma.com/api/mcp/asset/22b2bb9a-f8d7-4ac2-9eed-4260518c60a5";
-    const imgLandInfo       = "https://www.figma.com/api/mcp/asset/43b4ea46-96cb-4cb2-a3d7-1d47c84d350b";
+    // ── Landing page image assets ───────────────────────────────────────────
+    const imgLandRect1172   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwIiB2aWV3Qm94PSIwIDAgMTAwIDEwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMTAwIiB5Mj0iMCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIHN0b3AtY29sb3I9IiM3QUI4RkYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNCOEUwRkYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwIiByeD0iNSIgZmlsbD0idXJsKCNnKSIvPjwvc3ZnPg==";
+    const imgLandRect1173   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwIiB2aWV3Qm94PSIwIDAgMTAwIDEwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMTAwIiB5Mj0iMCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIHN0b3AtY29sb3I9IiNGRkIwN0MiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNGRkQ4QjAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwIiByeD0iNSIgZmlsbD0idXJsKCNnKSIvPjwvc3ZnPg==";
+    const imgLandPhone      = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMy41IDIuNUMzLjUgMi41IDUgMiA2IDQuNUw1IDZDNSA2IDYgOCAxMCAxMEwxMS41IDlDMTMuNSAxMCAxNCAxMS41IDE0IDExLjVDMTQgMTEuNSAxMy41IDE0IDExIDEzLjVDNiAxMi41IDMgNyAyLjUgNUMyIDMgMy41IDIuNSAzLjUgMi41WiIgc3Ryb2tlPSIjMDA1NkNFIiBzdHJva2Utd2lkdGg9IjEuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIi8+PC9zdmc+";
+    const imgLandT6         = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMzAwIDI2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjYiIGZpbGw9IiNGN0Y4RjgiLz48cmVjdCB4PSI4IiB5PSI5IiB3aWR0aD0iNDgiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNDMEM2Q0IiLz48cmVjdCB4PSI2NCIgeT0iOSIgd2lkdGg9IjM4IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjQzBDNkNCIi8+PHJlY3QgeD0iMTEwIiB5PSI5IiB3aWR0aD0iNTUiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNDMEM2Q0IiLz48cmVjdCB4PSIxNzMiIHk9IjkiIHdpZHRoPSIzMiIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0MwQzZDQiIvPjxyZWN0IHg9IjIxMyIgeT0iOSIgd2lkdGg9IjQyIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjQzBDNkNCIi8+PHJlY3QgeD0iMjYzIiB5PSI5IiB3aWR0aD0iMjgiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNDMEM2Q0IiLz48L3N2Zz4=";
+    const imgLandT7         = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMzAwIDI2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjYiIGZpbGw9IndoaXRlIi8+PHJlY3QgeD0iOCIgeT0iOSIgd2lkdGg9IjUyIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRUZGMUYyIi8+PHJlY3QgeD0iNjgiIHk9IjkiIHdpZHRoPSIzNiIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0VGRjFGMiIvPjxyZWN0IHg9IjExMiIgeT0iOSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRUZGMUYyIi8+PHJlY3QgeD0iMTgwIiB5PSI5IiB3aWR0aD0iMjgiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNFRkYxRjIiLz48cmVjdCB4PSIyMTYiIHk9IjkiIHdpZHRoPSI0NCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0VGRjFGMiIvPjxyZWN0IHg9IjI2OCIgeT0iOSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRUZGMUYyIi8+PC9zdmc+";
+    const imgLandT8         = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMzAwIDI2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjYiIGZpbGw9IiNGQUZCRkIiLz48cmVjdCB4PSI4IiB5PSI5IiB3aWR0aD0iNDQiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNFOEVBRUMiLz48cmVjdCB4PSI2MCIgeT0iOSIgd2lkdGg9IjQyIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRThFQUVDIi8+PHJlY3QgeD0iMTEwIiB5PSI5IiB3aWR0aD0iNTAiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNFOEVBRUMiLz48cmVjdCB4PSIxNjgiIHk9IjkiIHdpZHRoPSIzNiIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0U4RUFFQyIvPjxyZWN0IHg9IjIxMiIgeT0iOSIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRThFQUVDIi8+PHJlY3QgeD0iMjY4IiB5PSI5IiB3aWR0aD0iMjIiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNFOEVBRUMiLz48L3N2Zz4=";
+    const imgLandT9         = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMzAwIDI2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjYiIGZpbGw9IndoaXRlIi8+PHJlY3QgeD0iOCIgeT0iOSIgd2lkdGg9IjU2IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRUZGMUYyIi8+PHJlY3QgeD0iNzIiIHk9IjkiIHdpZHRoPSIzMiIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0VGRjFGMiIvPjxyZWN0IHg9IjExMiIgeT0iOSIgd2lkdGg9IjU4IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRUZGMUYyIi8+PHJlY3QgeD0iMTc4IiB5PSI5IiB3aWR0aD0iMzAiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNFRkYxRjIiLz48cmVjdCB4PSIyMTYiIHk9IjkiIHdpZHRoPSI0MCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0VGRjFGMiIvPjxyZWN0IHg9IjI2NCIgeT0iOSIgd2lkdGg9IjI4IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjRUZGMUYyIi8+PC9zdmc+";
+    const imgLandT10        = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI2IiB2aWV3Qm94PSIwIDAgMzAwIDI2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjYiIGZpbGw9IiNFREY1RkYiIGZpbGwtb3BhY2l0eT0iMC41Ii8+PHJlY3QgeD0iOCIgeT0iOSIgd2lkdGg9IjUwIiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjQUFDQ0Y1Ii8+PHJlY3QgeD0iNjYiIHk9IjkiIHdpZHRoPSIzOCIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0FBQ0NGNSIvPjxyZWN0IHg9IjExMiIgeT0iOSIgd2lkdGg9IjU0IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjQUFDQ0Y1Ii8+PHJlY3QgeD0iMTc0IiB5PSI5IiB3aWR0aD0iMzQiIGhlaWdodD0iOCIgcng9IjQiIGZpbGw9IiNBQUNDRjUiLz48cmVjdCB4PSIyMTYiIHk9IjkiIHdpZHRoPSI0MiIgaGVpZ2h0PSI4IiByeD0iNCIgZmlsbD0iI0FBQ0NGNSIvPjxyZWN0IHg9IjI2NiIgeT0iOSIgd2lkdGg9IjI2IiBoZWlnaHQ9IjgiIHJ4PSI0IiBmaWxsPSIjQUFDQ0Y1Ii8+PC9zdmc+";
+    const imgLandWC1        = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiIGhlaWdodD0iNSIgdmlld0JveD0iMCAwIDIxIDUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMi41IiBjeT0iMi41IiByPSIyLjUiIGZpbGw9IiNGRjVGNTciLz48Y2lyY2xlIGN4PSIxMC41IiBjeT0iMi41IiByPSIyLjUiIGZpbGw9IiNGRUJDMkUiLz48Y2lyY2xlIGN4PSIxOC41IiBjeT0iMi41IiByPSIyLjUiIGZpbGw9IiMyOEM4NDAiLz48L3N2Zz4=";
+    const imgLandBuilding   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMS41IDdMOCAyLjVMMTQuNSA3VjE0LjVIMTBWMTAuNUg2VjE0LjVIMS41VjdaIiBzdHJva2U9IiMwMDU2Q0UiIHN0cm9rZS13aWR0aD0iMS4zIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cmVjdCB4PSI2LjUiIHk9IjEwLjUiIHdpZHRoPSIzIiBoZWlnaHQ9IjQiIHJ4PSIwLjUiIHN0cm9rZT0iIzAwNTZDRSIgc3Ryb2tlLXdpZHRoPSIxLjMiLz48L3N2Zz4=";
+    const imgLandAvatar     = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzciIGhlaWdodD0iMzciIHZpZXdCb3g9IjAgMCAzNyAzNyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImF2IiB4MT0iMTguNSIgeTE9IjAiIHgyPSIxOC41IiB5Mj0iMzciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBzdG9wLWNvbG9yPSIjRURGNUZGIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjQzhFMEZGIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjE4LjUiIHI9IjE4LjUiIGZpbGw9InVybCgjYXYpIi8+PC9zdmc+";
+    const imgLandHome       = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMiA3LjVMOCAyLjVMMTQgNy41VjE0LjVIMTAuNVYxMC41SDUuNVYxNC41SDJWNy41WiIgc3Ryb2tlPSIjRTA2NjBDIiBzdHJva2Utd2lkdGg9IjEuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+";
+    const imgLandShape      = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCAyQzQuNjg2IDIgMiA0LjY4NiAyIDhDMiAxMS4zMTQgNC42ODYgMTQgOCAxNEMxMS4zMTQgMTQgMTQgMTEuMzE0IDE0IDhIOFYyWiIgZmlsbD0iI0UwNjYwQyIgZmlsbC1vcGFjaXR5PSIwLjc1Ii8+PHBhdGggZD0iTTggMlY4SDE0QzE0IDQuNjg2IDExLjMxNCAyIDggMloiIGZpbGw9IiNGRkIwN0MiLz48L3N2Zz4=";
+    const imgLandInfo       = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCAxLjMzM0M0LjMxOCAxLjMzMyAxLjMzMyA0LjMxOCAxLjMzMyA4QzEuMzMzIDExLjY4MiA0LjMxOCAxNC42NjcgOCAxNC42NjdDMTEuNjgyIDE0LjY2NyAxNC42NjcgMTEuNjgyIDE0LjY2NyA4QzE0LjY2NyA0LjMxOCAxMS42ODIgMS4zMzMgOCAxLjMzM1pNOCAyLjY2N0MxMC45NDEgMi42NjcgMTMuMzMzIDUuMDU5IDEzLjMzMyA4QzEzLjMzMyAxMC45NDEgMTAuOTQxIDEzLjMzMyA4IDEzLjMzM0M1LjA1OSAxMy4zMzMgMi42NjcgMTAuOTQxIDIuNjY3IDhDMi42NjcgNS4wNTkgNS4wNTkgMi42NjcgOCAyLjY2N1pNOCA3LjI1QzcuNTg2IDcuMjUgNy4yNSA3LjU4NiA3LjI1IDhWMTAuNUM3LjI1IDEwLjkxNCA3LjU4NiAxMS4yNSA4IDExLjI1QzguNDE0IDExLjI1IDguNzUgMTAuOTE0IDguNzUgMTAuNVY4QzguNzUgNy41ODYgOC40MTQgNy4yNSA4IDcuMjVaTTggNS4yNUM3LjU4NiA1LjI1IDcuMjUgNS41ODYgNy4yNSA2QzcuMjUgNi40MTQgNy41ODYgNi43NSA4IDYuNzVDOC40MTQgNi43NSA4Ljc1IDYuNDE0IDguNzUgNkM4Ljc1IDUuNTg2IDguNDE0IDUuMjUgOCA1LjI1WiIgZmlsbD0iIzRFNUE2MyIvPjwvc3ZnPg==";
 
     // ── Landing section ───────────────────────────────────────────────────────
     function LandingSection() {
@@ -1678,16 +1661,11 @@
     const imgTblColumns  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUuNTU1NjkgOS45OTk5N0M2Ljc4Mjk5IDkuOTk5OTcgNy43NzgzNSAxMC45OTUzIDcuNzc4MzUgMTIuMjIyNlYxNC40NDQzQzcuNzc4MzUgMTUuNjcxNiA2Ljc4Mjk5IDE2LjY2NyA1LjU1NTY5IDE2LjY2N0M0LjMyODQgMTYuNjY3IDMuMzMzMDQgMTUuNjcxNiAzLjMzMzA0IDE0LjQ0NDNWMTIuMjIyNkMzLjMzMzA0IDEwLjk5NTMgNC4zMjg0IDkuOTk5OTcgNS41NTU2OSA5Ljk5OTk3Wk0xMy41ODQgOS45OTk5N0MxMy45NzQ1IDkuOTk5OTUgMTQuMzExNCA5Ljk5OTc2IDE0LjU4ODkgMTAuMDIyNEMxNC44ODE3IDEwLjA0NjQgMTUuMTcyOSAxMC4wOTk0IDE1LjQ1MzIgMTAuMjQyMkMxNS44NzEyIDEwLjQ1NTIgMTYuMjExOCAxMC43OTQ4IDE2LjQyNDggMTEuMjEyOUMxNi41Njc2IDExLjQ5MzEgMTYuNjE5NyAxMS43ODUyIDE2LjY0MzYgMTIuMDc4MUMxNi42NjYyIDEyLjM1NTUgMTYuNjY3IDEyLjY5MjcgMTYuNjY3IDEzLjA4M1YxMy41ODRDMTYuNjY3IDEzLjk3NDQgMTYuNjY2MyAxNC4zMTE0IDE2LjY0MzYgMTQuNTg4OEMxNi42MTk3IDE0Ljg4MTYgMTYuNTY3NSAxNS4xNzI5IDE2LjQyNDggMTUuNDUzMUMxNi4yMTE4IDE1Ljg3MTIgMTUuODcxMyAxNi4yMTE3IDE1LjQ1MzIgMTYuNDI0OEMxNS4xNzMgMTYuNTY3NSAxNC44ODE2IDE2LjYxOTYgMTQuNTg4OSAxNi42NDM1QzE0LjMxMTQgMTYuNjY2MiAxMy45NzQ1IDE2LjY2NyAxMy41ODQgMTYuNjY3SDEyLjM0MThDMTEuOTUxMyAxNi42NjcgMTEuNjE0NCAxNi42NjYyIDExLjMzNjkgMTYuNjQzNUMxMS4wNDQyIDE2LjYxOTYgMTAuNzUyOSAxNi41Njc1IDEwLjQ3MjcgMTYuNDI0OEMxMC4wNTQ1IDE2LjIxMTcgOS43MTQwNiAxNS44NzEyIDkuNTAxIDE1LjQ1MzFDOS4zNTgzMiAxNS4xNzI5IDkuMzA2MTcgMTQuODgxNiA5LjI4MjI1IDE0LjU4ODhDOS4yNTk1OSAxNC4zMTE0IDkuMjU4OCAxMy45NzQ0IDkuMjU4ODIgMTMuNTg0VjEzLjA4M0M5LjI1ODggMTIuNjkyNyA5LjI1OTYxIDEyLjM1NTUgOS4yODIyNSAxMi4wNzgxQzkuMzA2MTggMTEuNzg1MiA5LjM1ODE5IDExLjQ5MzEgOS41MDEgMTEuMjEyOUM5LjcxNDA2IDEwLjc5NDggMTAuMDU0NiAxMC40NTUyIDEwLjQ3MjcgMTAuMjQyMkMxMC43NTI5IDEwLjA5OTQgMTEuMDQ0MSAxMC4wNDY0IDExLjMzNjkgMTAuMDIyNEMxMS42MTQ0IDkuOTk5NzYgMTEuOTUxMyA5Ljk5OTk1IDEyLjM0MTggOS45OTk5N0gxMy41ODRaTTUuNTU1NjkgMTEuNDgxNEM1LjE0NjU5IDExLjQ4MTQgNC44MTQ0OCAxMS44MTM1IDQuODE0NDggMTIuMjIyNlYxNC40NDQzQzQuODE0NDggMTQuODUzNCA1LjE0NjU5IDE1LjE4NTUgNS41NTU2OSAxNS4xODU1QzUuOTY0NzkgMTUuMTg1NSA2LjI5NjkgMTQuODUzNCA2LjI5NjkgMTQuNDQ0M1YxMi4yMjI2QzYuMjk2OSAxMS44MTM1IDUuOTY0NzkgMTEuNDgxNCA1LjU1NTY5IDExLjQ4MTRaTTEyLjM3MDEgMTEuNDgxNEMxMS45NDM1IDExLjQ4MTQgMTEuNjY3OCAxMS40ODE5IDExLjQ1OCAxMS40OTlDMTEuMjU3MSAxMS41MTU0IDExLjE4MjIgMTEuNTQzOCAxMS4xNDU1IDExLjU2MjVDMTEuMDA2MiAxMS42MzM1IDEwLjg5MjMgMTEuNzQ2NCAxMC44MjEzIDExLjg4NTdDMTAuODAyNyAxMS45MjIzIDEwLjc3NTMgMTEuOTk3MSAxMC43NTg4IDEyLjE5ODJDMTAuNzQxNyAxMi40MDgxIDEwLjc0MTIgMTIuNjg0MiAxMC43NDEyIDEzLjExMTNWMTMuNTU1NkMxMC43NDEyIDEzLjk4MjMgMTAuNzQxNyAxNC4yNTc5IDEwLjc1ODggMTQuNDY3N0MxMC43NzUyIDE0LjY2ODIgMTAuODAyNyAxNC43NDM1IDEwLjgyMTMgMTQuNzgwMkMxMC44OTIzIDE0LjkxOTYgMTEuMDA2MiAxNS4wMzM0IDExLjE0NTUgMTUuMTA0NUMxMS4xODIzIDE1LjEyMzEgMTEuMjU3MyAxNS4xNTA2IDExLjQ1OCAxNS4xNjdDMTEuNjY3OCAxNS4xODQxIDExLjk0MzQgMTUuMTg1NSAxMi4zNzAxIDE1LjE4NTVIMTMuNTU1N0MxMy45ODI0IDE1LjE4NTUgMTQuMjU4IDE1LjE4NDEgMTQuNDY3OCAxNS4xNjdDMTQuNjY4MyAxNS4xNTA2IDE0Ljc0MzUgMTUuMTIzMSAxNC43ODAzIDE1LjEwNDVDMTQuOTE5NyAxNS4wMzM0IDE1LjAzMzUgMTQuOTE5NiAxNS4xMDQ1IDE0Ljc4MDJDMTUuMTIzMiAxNC43NDM1IDE1LjE1MDYgMTQuNjY4MyAxNS4xNjcgMTQuNDY3N0MxNS4xODQxIDE0LjI1NzkgMTUuMTg1NiAxMy45ODIzIDE1LjE4NTYgMTMuNTU1NlYxMy4xMTEzQzE1LjE4NTYgMTIuNjg0MiAxNS4xODQyIDEyLjQwODEgMTUuMTY3IDEyLjE5ODJDMTUuMTUwNiAxMS45OTcxIDE1LjEyMzIgMTEuOTIyMyAxNS4xMDQ1IDExLjg4NTdDMTUuMDMzNSAxMS43NDY0IDE0LjkxOTYgMTEuNjMzNSAxNC43ODAzIDExLjU2MjVDMTQuNzQzNiAxMS41NDM4IDE0LjY2ODYgMTEuNTE1NCAxNC40Njc4IDExLjQ5OUMxNC4yNTggMTEuNDgxOSAxMy45ODI0IDExLjQ4MTQgMTMuNTU1NyAxMS40ODE0SDEyLjM3MDFaTTE0LjEzNjcgMy4zMzI5OEMxNC40MTg1IDMuMzMyNzUgMTQuNjYxMiAzLjMzMjg0IDE0Ljg3OCAzLjM3NTk0QzE1Ljc1OTUgMy41NTEyOSAxNi40NDg3IDQuMjQwNTEgMTYuNjI0MSA1LjEyMjA0QzE2LjY2NzIgNS4zMzg5NSAxNi42NjcyIDUuNTgyMjYgMTYuNjY3IDUuODY0MjNWNS45ODgyNUMxNi42NjcyIDYuMjcwMDEgMTYuNjY3MSA2LjUxMjY3IDE2LjYyNDEgNi43Mjk0NkMxNi40NDg3IDcuNjEwOTkgMTUuNzU5NSA4LjMwMDIxIDE0Ljg3OCA4LjQ3NTU1QzE0LjY2MTIgOC41MTg2NyAxNC40MTg1IDguNTE4NzUgMTQuMTM2NyA4LjUxODUySDUuODY0MjlDNS41ODIyOSA4LjUxODc1IDUuMzM5MDMgOC41MTg3IDUuMTIyMSA4LjQ3NTU1QzQuMjQwNjEgOC4zMDAxOCAzLjU1MTM1IDcuNjEwOTYgMy4zNzYgNi43Mjk0NkMzLjMzMjk0IDYuNTEyNjggMy4zMzI4MSA2LjI3IDMuMzMzMDQgNS45ODgyNVY1Ljg2NDIzQzMuMzMyODEgNS41ODIyNiAzLjMzMjg3IDUuMzM4OTUgMy4zNzYgNS4xMjIwNEMzLjU1MTM1IDQuMjQwNTIgNC4yNDA1OSAzLjU1MTMgNS4xMjIxIDMuMzc1OTRDNS4zMzkwMyAzLjMzMjc5IDUuNTgyMjkgMy4zMzI3NSA1Ljg2NDI5IDMuMzMyOThIMTQuMTM2N1pNNS45MjU4MSA0LjgxNDQyQzUuNTQ2MzMgNC44MTQ0MiA1LjQ2NDY3IDQuODE4NDMgNS40MTExNiA0LjgyOTA3QzUuMTE3MzMgNC44ODc1MyA0Ljg4NzU4IDUuMTE3MjYgNC44MjkxMyA1LjQxMTFDNC44MTg1IDUuNDY0NjEgNC44MTQ0OCA1LjU0NjQgNC44MTQ0OCA1LjkyNTc1QzQuODE0NDggNi4zMDQ1NiA0LjgxODU0IDYuMzg2ODcgNC44MjkxMyA2LjQ0MDRDNC44ODc1NyA2LjczNDIyIDUuMTE3MzUgNi45NjM5NSA1LjQxMTE2IDcuMDIyNDNDNS40NjQ2NyA3LjAzMzA3IDUuNTQ2MzMgNy4wMzcwOCA1LjkyNTgxIDcuMDM3MDhIMTQuMDc0MkMxNC40NTM3IDcuMDM3MDggMTQuNTM1NCA3LjAzMzA2IDE0LjU4ODkgNy4wMjI0M0MxNC44ODI3IDYuOTYzOTggMTUuMTEyNSA2LjczNDI0IDE1LjE3MDkgNi40NDA0QzE1LjE4MTUgNi4zODY4NyAxNS4xODU2IDYuMzA0NjUgMTUuMTg1NiA1LjkyNTc1QzE1LjE4NTYgNS41NDYzMiAxNS4xODE2IDUuNDY0NjEgMTUuMTcwOSA1LjQxMTFDMTUuMTEyNSA1LjExNzI2IDE0Ljg4MjcgNC44ODc1MiAxNC41ODg5IDQuODI5MDdDMTQuNTM1NCA0LjgxODQ1IDE0LjQ1MzUgNC44MTQ0MiAxNC4wNzQyIDQuODE0NDJINS45MjU4MVoiIGZpbGw9IiMwRTBGMTAiLz4KPC9zdmc+Cg==";
     const imgTblDownload = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE2LjY2NyA5LjE2Njk5QzE3LjEyNzEgOS4xNjcxNyAxNy41IDkuNTM5ODcgMTcuNSAxMFYxMi43MDEyQzE3LjUgMTMuMzcxOSAxNy40OTk3IDEzLjkyNiAxNy40NjI5IDE0LjM3N0MxNy40MjQ2IDE0Ljg0NTEgMTcuMzQyNiAxNS4yNzU0IDE3LjEzNjcgMTUuNjc5N0MxNi44MTcxIDE2LjMwNjkgMTYuMzA2OSAxNi44MTcxIDE1LjY3OTcgMTcuMTM2N0MxNS4yNzU0IDE3LjM0MjYgMTQuODQ1MSAxNy40MjQ2IDE0LjM3NyAxNy40NjI5QzEzLjkyNiAxNy40OTk3IDEzLjM3MTkgMTcuNSAxMi43MDEyIDE3LjVINy4yOTg4M0M2LjYyODA2IDE3LjUgNi4wNzQwMiAxNy40OTk3IDUuNjIzMDUgMTcuNDYyOUM1LjE1NDkgMTcuNDI0NiA0LjcyNDU2IDE3LjM0MjYgNC4zMjAzMSAxNy4xMzY3QzMuNjkzMTEgMTYuODE3MSAzLjE4Mjg2IDE2LjMwNjkgMi44NjMyOCAxNS42Nzk3QzIuNjU3MzYgMTUuMjc1NCAyLjU3NTM5IDE0Ljg0NTEgMi41MzcxMSAxNC4zNzdDMi41MDAyNiAxMy45MjYgMi40OTk5OSAxMy4zNzE5IDIuNSAxMi43MDEyVjEwQzIuNSA5LjUzOTg3IDIuODcyOTIgOS4xNjcxNyAzLjMzMzAxIDkuMTY2OTlDMy43OTMyNCA5LjE2Njk5IDQuMTY2OTkgOS41Mzk3NiA0LjE2Njk5IDEwVjEyLjY2N0M0LjE2Njk5IDEzLjM4MDYgNC4xNjc2IDEzLjg2NjIgNC4xOTgyNCAxNC4yNDEyQzQuMjI4MDggMTQuNjA2IDQuMjgyMzEgMTQuNzkyNiA0LjM0ODYzIDE0LjkyMjlDNC41MDg0MiAxNS4yMzY1IDQuNzYzNTUgMTUuNDkxNiA1LjA3NzE1IDE1LjY1MTRDNS4yMDc0MiAxNS43MTc3IDUuMzkzOTUgMTUuNzcxOSA1Ljc1ODc5IDE1LjgwMThDNi4xMzM4MSAxNS44MzI0IDYuNjE5MzcgMTUuODMzIDcuMzMzMDEgMTUuODMzSDEyLjY2N0MxMy4zODA2IDE1LjgzMyAxMy44NjYyIDE1LjgzMjQgMTQuMjQxMiAxNS44MDE4QzE0LjYwNiAxNS43NzE5IDE0Ljc5MjYgMTUuNzE3NyAxNC45MjI5IDE1LjY1MTRDMTUuMjM2NSAxNS40OTE2IDE1LjQ5MTYgMTUuMjM2NSAxNS42NTE0IDE0LjkyMjlDMTUuNzE3NyAxNC43OTI2IDE1Ljc3MTkgMTQuNjA2IDE1LjgwMTggMTQuMjQxMkMxNS44MzI0IDEzLjg2NjIgMTUuODMzIDEzLjM4MDYgMTUuODMzIDEyLjY2N1YxMEMxNS44MzMgOS41Mzk3NiAxNi4yMDY4IDkuMTY2OTkgMTYuNjY3IDkuMTY2OTlaTTEwIDIuNUMxMC40NjAxIDIuNSAxMC44MzI4IDIuODcyOTIgMTAuODMzIDMuMzMzMDFWMTAuNDg4M0wxMS45MTExIDkuNDExMTNDMTIuMjM2NiA5LjA4NTcgMTIuNzYzNCA5LjA4NTcgMTMuMDg4OSA5LjQxMTEzQzEzLjQxNDMgOS43MzY1NyAxMy40MTQzIDEwLjI2MzQgMTMuMDg4OSAxMC41ODg5TDEwLjU4ODkgMTMuMDg4OUMxMC4yNjM0IDEzLjQxNDMgOS43MzY1NyAxMy40MTQzIDkuNDExMTMgMTMuMDg4OUw2LjkxMTEzIDEwLjU4ODlDNi41ODU3IDEwLjI2MzQgNi41ODU3IDkuNzM2NTcgNi45MTExMyA5LjQxMTEzQzcuMjM2NTcgOS4wODU3IDcuNzYzNDMgOS4wODU3IDguMDg4ODcgOS40MTExM0w5LjE2Njk5IDEwLjQ4ODNWMy4zMzMwMUM5LjE2NzE3IDIuODcyOTIgOS41Mzk4NyAyLjUgMTAgMi41WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==";
     const imgTblUser     = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjUgMTEuNjY3QzE0LjgwMTEgMTEuNjY3IDE2LjY2NjggMTMuNTMyIDE2LjY2NyAxNS44MzNDMTYuNjY3IDE3LjIxMzYgMTUuNTQ3NiAxOC4zMzI4IDE0LjE2NyAxOC4zMzNINS44MzMwMUM0LjQ1MjQ1IDE4LjMzMjggMy4zMzMwMSAxNy4yMTM2IDMuMzMzMDEgMTUuODMzQzMuMzMzMTggMTMuNTMyIDUuMTk4OTIgMTEuNjY3IDcuNSAxMS42NjdIMTIuNVpNMTAgMS42NjY5OUMxMi4zMDExIDEuNjY2OTkgMTQuMTY2OCAzLjUzMTk3IDE0LjE2NyA1LjgzMzAxQzE0LjE2NyA4LjEzNDE5IDEyLjMwMTIgMTAgMTAgMTBDNy42OTg4MSAxMCA1LjgzMzAxIDguMTM0MTkgNS44MzMwMSA1LjgzMzAxQzUuODMzMTggMy41MzE5NyA3LjY5ODkyIDEuNjY2OTkgMTAgMS42NjY5OVoiIGZpbGw9IiM2MTcxN0MiLz4KPC9zdmc+Cg==";
-    const imgEditColReset  = "https://www.figma.com/api/mcp/asset/869c3858-9d6a-4c83-b847-7946233532ab";
-    const imgEditColSearch = "https://www.figma.com/api/mcp/asset/219be5b9-37c4-4ff0-926e-c5473c18d486";
-    const imgEditColDrag   = "https://www.figma.com/api/mcp/asset/872996d3-e55c-488f-b269-a876bb605a79";
-    const imgEditColCheck  = "https://www.figma.com/api/mcp/asset/88001ecd-c4f2-4499-8e33-a4c682c9237b";
-
-    // ── Edit Columns components ───────────────────────────────────────────────
-    const imgEditColCheck2  = "https://www.figma.com/api/mcp/asset/d9d045cc-21e1-4890-90ba-ac691a8f30d7";
-    const imgEditColDots2   = "https://www.figma.com/api/mcp/asset/412bbfbe-2c51-40e1-9ba4-56f7918a5361";
-    const imgEditColReset2  = "https://www.figma.com/api/mcp/asset/d5512929-18f2-4464-a8fc-5b086b5e5d85";
-    const imgEditColSearch2 = "https://www.figma.com/api/mcp/asset/fde21a93-7186-46ac-ae06-29044400c9d4";
+    // ── Edit Columns assets ──────────────────────────────────────────────────
+    const imgEditColCheck2  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiByeD0iMyIgZmlsbD0iIzAwNTZDRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEzLjcwNzEgNy4yOTI4OUMxNC4wOTc2IDcuNjgzNDIgMTQuMDk3NiA4LjMxNjU4IDEzLjcwNzEgOC43MDcxMUw5LjcwNzExIDEyLjcwNzFDOS4zMTY1OCAxMy4wOTc2IDguNjgzNDIgMTMuMDk3NiA4LjI5Mjg5IDEyLjcwNzFMNi4yOTI4OSAxMC43MDcxQzUuOTAyMzcgMTAuMzE2NiA1LjkwMjM3IDkuNjgzNDIgNi4yOTI4OSA5LjI5Mjg5QzYuNjgzNDIgOC45MDIzNyA3LjMxNjU4IDguOTAyMzcgNy43MDcxMSA5LjI5Mjg5TDkgMTAuNTg1OEwxMi4yOTI5IDcuMjkyODlDMTIuNjgzNCA2LjkwMjM3IDEzLjMxNjYgNi45MDIzNyAxMy43MDcxIDcuMjkyODlaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K";
+    const imgEditColDots2   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExLjI1IDE1LjgzM0MxMS4yNTAyIDE0LjkxMjcgMTEuOTk2NiAxNC4xNjcgMTIuOTE3IDE0LjE2N0MxMy44MzcyIDE0LjE2NzIgMTQuNTgyOCAxNC45MTI4IDE0LjU4MyAxNS44MzNDMTQuNTgzIDE2Ljc1MzQgMTMuODM3MyAxNy40OTk4IDEyLjkxNyAxNy41QzExLjk5NjUgMTcuNSAxMS4yNSAxNi43NTM1IDExLjI1IDE1LjgzM1pNMTEuMjUgMTBDMTEuMjUgOS4wNzk1MiAxMS45OTY1IDguMzMzMDEgMTIuOTE3IDguMzMzMDFDMTMuODM3MyA4LjMzMzE4IDE0LjU4MyA5LjA3OTYzIDE0LjU4MyAxMEMxNC41ODMgMTAuOTIwNCAxMy44MzczIDExLjY2NjggMTIuOTE3IDExLjY2N0MxMS45OTY1IDExLjY2NyAxMS4yNSAxMC45MjA1IDExLjI1IDEwWk0xMS4yNSA0LjE2Njk5QzExLjI1IDMuMjQ2NTIgMTEuOTk2NSAyLjUgMTIuOTE3IDIuNUMxMy44MzczIDIuNTAwMTggMTQuNTgzIDMuMjQ2NjMgMTQuNTgzIDQuMTY2OTlDMTQuNTgyOCA1LjA4NzIxIDEzLjgzNzIgNS44MzI4MyAxMi45MTcgNS44MzMwMUMxMS45OTY2IDUuODMzMDEgMTEuMjUwMiA1LjA4NzMyIDExLjI1IDQuMTY2OTlaTTUuNDE2OTkgMTUuODMzQzUuNDE3MTcgMTQuOTEyOCA2LjE2Mjc5IDE0LjE2NzIgNy4wODMwMSAxNC4xNjdDOC4wMDMzNyAxNC4xNjcgOC43NDk4MiAxNC45MTI3IDguNzUgMTUuODMzQzguNzUgMTYuNzUzNSA4LjAwMzQ4IDE3LjUgNy4wODMwMSAxNy41QzYuMTYyNjggMTcuNDk5OCA1LjQxNjk5IDE2Ljc1MzQgNS40MTY5OSAxNS44MzNaTTUuNDE2OTkgMTBDNS40MTY5OSA5LjA3OTYzIDYuMTYyNjggOC4zMzMxOCA3LjA4MzAxIDguMzMzMDFDOC4wMDM0OCA4LjMzMzAxIDguNzUgOS4wNzk1MiA4Ljc1IDEwQzguNzUgMTAuOTIwNSA4LjAwMzQ4IDExLjY2NyA3LjA4MzAxIDExLjY2N0M2LjE2MjY4IDExLjY2NjggNS40MTY5OSAxMC45MjA0IDUuNDE2OTkgMTBaTTUuNDE2OTkgNC4xNjY5OUM1LjQxNjk5IDMuMjQ2NjMgNi4xNjI2OCAyLjUwMDE4IDcuMDgzMDEgMi41QzguMDAzNDggMi41IDguNzUgMy4yNDY1MiA4Ljc1IDQuMTY2OTlDOC43NDk4MiA1LjA4NzMyIDguMDAzMzcgNS44MzMwMSA3LjA4MzAxIDUuODMzMDFDNi4xNjI3OSA1LjgzMjgzIDUuNDE3MTcgNS4wODcyMSA1LjQxNjk5IDQuMTY2OTlaIiBmaWxsPSIjODE4RDk2Ii8+Cjwvc3ZnPgo=";
+    const imgEditColReset2  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMuNDg4MjggNy41MDcwMkMzLjk0NDg2IDcuNTY0MDggNC4yNjg4NSA3Ljk4MDA4IDQuMjExOTEgOC40MzY3QzQuMTgyMTMgOC42NzU1NSA0LjE2Njk5IDguOTE5NTQgNC4xNjY5OSA5LjE2NzE3QzQuMTY3MTggMTIuMzg4NyA2Ljc3ODQ5IDE1LjAwMDEgMTAgMTUuMDAwMkMxMC4xNTc2IDE1LjAwMDIgMTAuMzEzNiAxNC45OTE5IDEwLjQ2NzggMTQuOTc5N0wxMC4yNDQxIDE0Ljc1NkM5LjkxODc4IDE0LjQzMDYgOS45MTg3NiAxMy45MDI3IDEwLjI0NDEgMTMuNTc3M0MxMC41Njk2IDEzLjI1MjEgMTEuMDk3NSAxMy4yNTIgMTEuNDIyOSAxMy41NzczTDEzLjA4ODkgMTUuMjQ0M0MxMy40MTQzIDE1LjU2OTggMTMuNDE0MyAxNi4wOTc2IDEzLjA4ODkgMTYuNDIzTDExLjQyMjkgMTguMDg5QzExLjA5NzQgMTguNDE0NCAxMC41Njk2IDE4LjQxNDQgMTAuMjQ0MSAxOC4wODlDOS45MTkgMTcuNzYzNyA5LjkxODk4IDE3LjIzNjcgMTAuMjQ0MSAxNi45MTEzTDEwLjUwNjggMTYuNjQ5NkMxMC4zMzkzIDE2LjY2MDggMTAuMTcwMiAxNi42NjcyIDEwIDE2LjY2NzJDNS44NTgwMSAxNi42NjcxIDIuNTAwMTggMTMuMzA5MSAyLjUgOS4xNjcxN0MyLjUgOC44NTA1MSAyLjUxOTM1IDguNTM3NjcgMi41NTc2MiA4LjIzMDY1QzIuNjE0NTcgNy43NzM5NSAzLjAzMTU4IDcuNDUwMDcgMy40ODgyOCA3LjUwNzAyWk04LjU3NzE1IDEuOTExMzFDOC45MDI1OSAxLjU4NTg4IDkuNDMwNDIgMS41ODU4OCA5Ljc1NTg2IDEuOTExMzFDMTAuMDgxIDIuMjM2NzIgMTAuMDgxIDIuNzYzNjkgOS43NTU4NiAzLjA4OTA1TDkuNDkzMTYgMy4zNTA3N0M5LjY2MDc1IDMuMzM5NTcgOS44Mjk3OSAzLjMzMzE5IDEwIDMuMzMzMTlDMTQuMTQyIDMuMzMzMjMgMTcuNDk5OSA2LjY5MTIgMTcuNSAxMC44MzMyQzE3LjUgMTEuMTQ5OSAxNy40ODA3IDExLjQ2MjcgMTcuNDQyNCAxMS43Njk3QzE3LjM4NTQgMTIuMjI2NCAxNi45Njg0IDEyLjU1MDMgMTYuNTExNyAxMi40OTMzQzE2LjA1NTIgMTIuNDM2MyAxNS43MzEyIDEyLjAyMDMgMTUuNzg4MSAxMS41NjM3QzE1LjgxNzkgMTEuMzI0OCAxNS44MzMgMTEuMDgwOCAxNS44MzMgMTAuODMzMkMxNS44MzI5IDcuNjExNjcgMTMuMjIxNSA1LjAwMDIyIDEwIDUuMDAwMThDOS44NDIzNiA1LjAwMDE4IDkuNjg2NDMgNS4wMDg0OCA5LjUzMjIzIDUuMDIwNjlMOS43NTU4NiA1LjI0NDMyQzEwLjA4MTIgNS41Njk3NyAxMC4wODEzIDYuMDk3NjMgOS43NTU4NiA2LjQyMzAzQzkuNDMwNDQgNi43NDgyNCA4LjkwMjUzIDYuNzQ4MyA4LjU3NzE1IDYuNDIzMDNMNi45MTExMyA0Ljc1NjA0QzYuNTg1NzEgNC40MzA2MiA2LjU4NTczIDMuOTAyNzcgNi45MTExMyAzLjU3NzMzTDguNTc3MTUgMS45MTEzMVoiIGZpbGw9IiMxNjI1NDAiLz4KPC9zdmc+Cg==";
+    const imgEditColSearch2 = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTguMzMzMDEgMi41QzExLjU1NDYgMi41IDE0LjE2NjggNS4xMTE1IDE0LjE2NyA4LjMzMzAxQzE0LjE2NyA5LjY0MzIgMTMuNzM0MSAxMC44NTI0IDEzLjAwNDkgMTEuODI2MkwxNy4yNTU5IDE2LjA3NzFDMTcuNTgxMyAxNi40MDI2IDE3LjU4MTMgMTYuOTMwNCAxNy4yNTU5IDE3LjI1NTlDMTYuOTMwNCAxNy41ODEzIDE2LjQwMjYgMTcuNTgxMyAxNi4wNzcxIDE3LjI1NTlMMTEuODI2MiAxMy4wMDQ5QzEwLjg1MjQgMTMuNzM0MSA5LjY0MzIgMTQuMTY3IDguMzMzMDEgMTQuMTY3QzUuMTExNSAxNC4xNjY4IDIuNSAxMS41NTQ2IDIuNSA4LjMzMzAxQzIuNTAwMTggNS4xMTE2IDUuMTExNiAyLjUwMDE4IDguMzMzMDEgMi41Wk04LjMzMzAxIDQuMTY2OTlDNi4wMzIwOCA0LjE2NzE3IDQuMTY3MTcgNi4wMzIwOCA0LjE2Njk5IDguMzMzMDFDNC4xNjY5OSAxMC42MzQxIDYuMDMxOTcgMTIuNDk5OCA4LjMzMzAxIDEyLjVDMTAuNjM0MiAxMi41IDEyLjUgMTAuNjM0MiAxMi41IDguMzMzMDFDMTIuNDk5OCA2LjAzMTk3IDEwLjYzNDEgNC4xNjY5OSA4LjMzMzAxIDQuMTY2OTlaIiBmaWxsPSIjMTYyNTQwIi8+Cjwvc3ZnPgo=";
 
     function ColumnItem({ col, checked, onChange, showDrag, onDragStart, onDragEnd }) {
       const [dragHandleHovered, setDragHandleHovered] = React.useState(false);
@@ -1708,14 +1686,7 @@
           <div style={{ position:"relative", width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, cursor:"pointer" }}
             onClick={e => { e.stopPropagation(); onChange(col.key, !checked); }}>
             {checked ? (
-              <>
-                <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", width:12, height:12, overflow:"hidden", zIndex:2 }}>
-                  <div style={{ position:"absolute", top:"25%", bottom:"25%", left:"16.67%", right:"16.67%" }}>
-                    <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColCheck2} />
-                  </div>
-                </div>
-                <div style={{ background:"#0056ce", borderRadius:3, width:16, height:16, flexShrink:0, zIndex:1 }} />
-              </>
+              <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColCheck2} />
             ) : (
               <div style={{ width:16, height:16, border:"2px solid #a0aab0", borderRadius:3, background:"white", flexShrink:0 }} />
             )}
@@ -1741,12 +1712,8 @@
                 </div>
               )}
               {/* Icon */}
-              <div draggable={false} style={{ position:"relative", overflow:"hidden", width:20, height:20 }}>
-                <div draggable={false} style={{ position:"absolute", top:"12.5%", right:"27.08%", bottom:"12.5%", left:"12.5%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                  <div draggable={false} style={{ transform:"rotate(-90deg)", width:18, height:11, position:"relative", flexShrink:0 }}>
-                    <img draggable={false} alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none", userSelect:"none" }} src={imgEditColDots2} />
-                  </div>
-                </div>
+              <div draggable={false} style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
+                <img draggable={false} alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none", userSelect:"none" }} src={imgEditColDots2} />
               </div>
             </div>
           )}
@@ -1838,9 +1805,7 @@
             onMouseDown={e => e.currentTarget.style.background = "#eff1f2"}
             onMouseUp={e => e.currentTarget.style.background = "#f7f8f8"}>
             <div style={{ position:"relative", width:20, height:20, flexShrink:0 }}>
-              <div style={{ position:"absolute", top:"8.33%", right:"12.5%", bottom:"8.33%", left:"8.33%" }}>
-                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColReset2} />
-              </div>
+              <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColReset2} />
             </div>
             <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>Reset to Default</span>
           </div>
@@ -1852,15 +1817,13 @@
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Search columns"
                 style={{ flex:1, border:"none", outline:"none", fontSize:14, color:"#4e5a63", fontFamily:"inherit", background:"transparent", minWidth:0 }} />
-              <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
-                <div style={{ position:"absolute", inset:"12.5%" }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColSearch2} />
-                </div>
+              <div style={{ position:"relative", width:20, height:20, flexShrink:0 }}>
+                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColSearch2} />
               </div>
             </div>
           </div>
           {/* Column list */}
-          <div style={{ maxHeight:495, overflowY:"auto" }}>
+          <div className="edit-col-scroll" style={{ maxHeight:495, overflowY:"auto" }}>
             {/* Selected items — item stays in DOM while dragging (opacity faded), box-shadow blue line */}
             <div ref={selectedListRef}>
               {filteredSelected.map((col, i) => {
@@ -2053,9 +2016,7 @@
                           const someSelected = !pageAllSelected && TABLE_ROWS.some((_, i) => selectedRows.has(i));
                           const allSelected = pageAllSelected;
                           return allSelected
-                            ? <div style={{ width:16, height:16, borderRadius:3, background:"#0056ce", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              </div>
+                            ? <img alt="" src={imgEditColCheck2} style={{ width:20, height:20, display:"block", flexShrink:0 }} />
                             : someSelected
                             ? <div style={{ width:16, height:16, border:"2px solid #0056ce", borderRadius:3, background:"white", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
                                 <div style={{ width:8, height:2, background:"#0056ce", borderRadius:1 }} />
@@ -2084,9 +2045,7 @@
                         {/* Checkbox */}
                         <div style={{ ...cellStyle, width:44, borderRight:"1px solid #eff1f2", background:"transparent" }}>
                           {isSelected
-                            ? <div style={{ width:16, height:16, borderRadius:3, background:"#0056ce", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              </div>
+                            ? <img alt="" src={imgEditColCheck2} style={{ width:20, height:20, display:"block", flexShrink:0 }} />
                             : <div style={{ width:16, height:16, border:"2px solid #a0aab0", borderRadius:3, background:"white", flexShrink:0 }} />
                           }
                         </div>
@@ -2101,7 +2060,6 @@
                               {isPropType ? (
                                 <div style={{ display:"flex", flexDirection:"column", width:"100%" }}>
                                   <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{row.propType}</span>
-                                  <span style={{ fontSize:12, lineHeight:"16px", color:"#4e5a63", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{row.propSubtype}</span>
                                 </div>
                               ) : isOwnerType ? (
                                 <div style={{ background:"#f5f2ff", borderRadius:99, height:20, display:"flex", alignItems:"center", padding:"0 8px", flexShrink:0 }}>
@@ -2189,7 +2147,10 @@
       { id:2, title:"Pasadena property list", results:"2,428 results" },
       { id:3, title:"Pasadena property list", results:"2,428 results" },
     ];
-    const imgSavedBookmark = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik00LjE2Njk5IDYuMjUwOTRDNC4xNjY5OSA0LjE3OTM1IDUuNzk5MjkgMi41IDcuODEyODQgMi41SDEyLjE4NzhDMTQuMjAxNCAyLjUgMTUuODMzNyA0LjE3OTM1IDE1LjgzMzcgNi4yNTA5NFYxNS4yNDUxQzE1LjgzMzcgMTcuMTYwOSAxMy42NTU0IDE4LjIwMDYgMTIuMjMzNiAxNi45NjM1TDEwLjQ3MTIgMTUuNDMwMUMxMC4xOTk0IDE1LjE5MzYgOS44MDEzIDE1LjE5MzYgOS41Mjk0OCAxNS40MzAxTDcuNzY3MDggMTYuOTYzNUM2LjM0NTI3IDE4LjIwMDYgNC4xNjY5OSAxNy4xNjA5IDQuMTY2OTkgMTUuMjQ1MVY2LjI1MDk0Wk03LjgxMjg0IDQuMDAwMzhDNi42MDQ3MSA0LjAwMDM4IDUuNjI1MzMgNS4wMDc5OSA1LjYyNTMzIDYuMjUwOTRWMTUuMjQ1MUM1LjYyNTMzIDE1Ljg4MzcgNi4zNTE0MiAxNi4yMzAzIDYuODI1MzYgMTUuODE3OUw4LjU4Nzc3IDE0LjI4NDVDOS40MDMyMyAxMy41NzQ5IDEwLjU5NzUgMTMuNTc0OSAxMS40MTI5IDE0LjI4NDVMMTMuMTc1MyAxNS44MTc5QzEzLjY0OTIgMTYuMjMwMyAxNC4zNzUzIDE1Ljg4MzcgMTQuMzc1MyAxNS4yNDUxVjYuMjUwOTRDMTQuMzc1MyA1LjAwNzk5IDEzLjM5NTkgNC4wMDAzOCAxMi4xODc4IDQuMDAwMzhINy44MTI4NFoiIGZpbGw9IiMxNjI1NDAiLz4KPC9zdmc+Cg==";
+    const imgHistory        = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTguMDA5NDQgMS4zMzI2NEM0LjMyNzU3IDEuMzMyNjQgMS4zNDI3NyA0LjMxNzMxIDEuMzQyNzcgNy45OTkzMUMxLjM0Mjc3IDExLjY4MTMgNC4zMjc1MSAxNC42NjYgOC4wMDk0NCAxNC42NjZDMTEuNjkxMyAxNC42NjYgMTQuNjc2MSAxMS42ODEzIDE0LjY3NjEgNy45OTkzMUMxNC42NzYxIDQuMzE3MzEgMTEuNjkxMyAxLjMzMjY0IDguMDA5NDQgMS4zMzI2NFpNOC4wMDk0NCAyLjY2NTk3QzEwLjk1NSAyLjY2NTk3IDEzLjM0MjggNS4wNTM5NyAxMy4zNDI4IDcuOTk5MzFDMTMuMzQyOCAxMC45NDQ2IDEwLjk1NSAxMy4zMzI2IDguMDA5NDQgMTMuMzMyNkM1LjA2MzkxIDEzLjMzMjYgMi42NzYxMSAxMC45NDQ2IDIuNjc2MTEgNy45OTkzMUMyLjY3NjExIDUuMDUzOTcgNS4wNjM5MSAyLjY2NTk3IDguMDA5NDQgMi42NjU5N1pNOC4wMDk0NCAzLjk5OTMxQzcuNjQxMjQgMy45OTkzMSA3LjM0Mjc3IDQuMjk3OTcgNy4zNDI3NyA0LjY2NTk3VjcuOTk5MzFDNy4zNDI3NyA4LjE3NTk3IDcuNDA1MjQgOC4zNTMzIDcuNTMwMjQgOC40Nzg2NEw5LjUzMDI0IDEwLjQ3ODZDOS43OTA2NCAxMC43Mzg2IDEwLjIyODIgMTAuNzM4NiAxMC40ODg2IDEwLjQ3ODZDMTAuNzQ5IDEwLjIxOCAxMC43NDkgOS43ODA2NSAxMC40ODg2IDkuNTE5OThMOC42NzYxMSA3LjcwNzMyVjQuNjY1OTdDOC42NzYxMSA0LjI5Nzk3IDguMzc3NjQgMy45OTkzMSA4LjAwOTQ0IDMuOTk5MzFaIiBmaWxsPSIjNEU1QTYzIi8+Cjwvc3ZnPgo=";
+    const imgArrowRight2    = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkuNjQxODYgMTIuNjM4MUM5LjM4MTM3IDEyLjg5ODQgOC45NTg5NSAxMi44OTg1IDguNjk4NSAxMi42MzgxQzguNDM4MDggMTIuMzc3NyA4LjQzODE3IDExLjk1NTMgOC42OTg1IDExLjY5NDhMMTEuNzI1OCA4LjY2NjQ0TDIuNjMxMTIgOC42NjY0NEMyLjI4NDUgOC42NjY0NCAyLjAwMzM2IDguMzY4MjYgMi4wMDMxOSA4LjAwMDQyQzIuMDAzMTkgNy42MzI0MiAyLjI4NDM5IDcuMzMzNDMgMi42MzExMiA3LjMzMzQzTDExLjcyNDkgNy4zMzM0M0w4LjY5ODUgNC4zMDYwOUM4LjQzODA5IDQuMDQ1NjQgOC40MzgxOSAzLjYyMzI0IDguNjk4NSAzLjM2MjczQzguOTU5IDMuMTAyMjkgOS4zODEzNyAzLjEwMjI4IDkuNjQxODYgMy4zNjI3M0wxMy44MDQ5IDcuNTI1ODFDMTMuOTE4OSA3LjYzOTc5IDEzLjk4MDIgNy43ODUxOCAxMy45OTQ0IDcuOTM0MDJDMTQuMDE0MyA4LjEyNjkxIDEzLjk1MjcgOC4zMjYyMyAxMy44MDQ5IDguNDc0MDZMOS42NDE4NiAxMi42MzgxWiIgZmlsbD0iIzI3MkQzMiIvPgo8L3N2Zz4K";
+    const imgMoreDots       = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjY2NyA5LjMzMzAxQzExLjkzMDYgOS4zMzMwMSAxMS4zMzMgOC43MzYzOCAxMS4zMzMgOEMxMS4zMzMgNy4yNjM2MiAxMS45MzA2IDYuNjY2OTkgMTIuNjY3IDYuNjY2OTlDMTMuNDAzMiA2LjY2NzE3IDE0IDcuMjYzNzMgMTQgOEMxNCA4LjczNjI3IDEzLjQwMzIgOS4zMzI4MyAxMi42NjcgOS4zMzMwMVpNOCA5LjMzMzAxQzcuMjYzNjIgOS4zMzMwMSA2LjY2Njk5IDguNzM2MzggNi42NjY5OSA4QzYuNjY2OTkgNy4yNjM2MiA3LjI2MzYyIDYuNjY2OTkgOCA2LjY2Njk5QzguNzM2MzggNi42NjY5OSA5LjMzMzAxIDcuMjYzNjIgOS4zMzMwMSA4QzkuMzMzMDEgOC43MzYzOCA4LjczNjM4IDkuMzMzMDEgOCA5LjMzMzAxWk0zLjMzMzAxIDkuMzMzMDFDMi41OTY3OCA5LjMzMjgzIDIgOC43MzYyNyAyIDhDMiA3LjI2MzczIDIuNTk2NzggNi42NjcxNyAzLjMzMzAxIDYuNjY2OTlDNC4wNjkzOSA2LjY2Njk5IDQuNjY2OTkgNy4yNjM2MiA0LjY2Njk5IDhDNC42NjY5OSA4LjczNjM4IDQuMDY5MzkgOS4zMzMwMSAzLjMzMzAxIDkuMzMzMDFaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=";
+    const imgSavedBookmark  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik00LjE2Njk5IDYuMjUwOTRDNC4xNjY5OSA0LjE3OTM1IDUuNzk5MjkgMi41IDcuODEyODQgMi41SDEyLjE4NzhDMTQuMjAxNCAyLjUgMTUuODMzNyA0LjE3OTM1IDE1LjgzMzcgNi4yNTA5NFYxNS4yNDUxQzE1LjgzMzcgMTcuMTYwOSAxMy42NTU0IDE4LjIwMDYgMTIuMjMzNiAxNi45NjM1TDEwLjQ3MTIgMTUuNDMwMUMxMC4xOTk0IDE1LjE5MzYgOS44MDEzIDE1LjE5MzYgOS41Mjk0OCAxNS40MzAxTDcuNzY3MDggMTYuOTYzNUM2LjM0NTI3IDE4LjIwMDYgNC4xNjY5OSAxNy4xNjA5IDQuMTY2OTkgMTUuMjQ1MVY2LjI1MDk0Wk03LjgxMjg0IDQuMDAwMzhDNi42MDQ3MSA0LjAwMDM4IDUuNjI1MzMgNS4wMDc5OSA1LjYyNTMzIDYuMjUwOTRWMTUuMjQ1MUM1LjYyNTMzIDE1Ljg4MzcgNi4zNTE0MiAxNi4yMzAzIDYuODI1MzYgMTUuODE3OUw4LjU4Nzc3IDE0LjI4NDVDOS40MDMyMyAxMy41NzQ5IDEwLjU5NzUgMTMuNTc0OSAxMS40MTI5IDE0LjI4NDVMMTMuMTc1MyAxNS44MTc5QzEzLjY0OTIgMTYuMjMwMyAxNC4zNzUzIDE1Ljg4MzcgMTQuMzc1MyAxNS4yNDUxVjYuMjUwOTRDMTQuMzc1MyA1LjAwNzk5IDEzLjM5NTkgNC4wMDAzOCAxMi4xODc4IDQuMDAwMzhINy44MTI4NFoiIGZpbGw9IiMxNjI1NDAiLz4KPC9zdmc+Cg==";
 
     function FilterPillsRow() {
       return (
@@ -2241,7 +2202,7 @@
               {/* Bookmark */}
               <div style={{ width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                 <div style={{ position:"relative", width:16, height:16, flexShrink:0 }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="https://www.figma.com/api/mcp/asset/3538ef86-6a0f-4574-8234-e31191c29b2d" />
+                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSavedBookmark} />
                 </div>
               </div>
             </div>
