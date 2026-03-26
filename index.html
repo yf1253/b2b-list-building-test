@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    * { font-family: Helvetica, sans-serif; box-sizing: border-box; }
     body { margin: 0; }
     html, body, #root { height: 100%; }
 
@@ -81,7 +81,7 @@
     .toast-exit  { animation: toastSlideOut 0.25s ease-in forwards; }
     .count-tag-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
     .count-tag-tooltip {
-      display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      display: none; position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%);
       background: #4e5a63; border-radius: 4px; padding: 8px;
       white-space: nowrap; font-size: 12px; color: white; font-family: Helvetica, sans-serif;
       line-height: 16px; z-index: 100; pointer-events: none;
@@ -105,48 +105,55 @@
 
 
     // ── Table data ───────────────────────────────────────────────────────────
+    // Fixed section order for the unselected groups in the dropdown
+    const SECTION_ORDER = ["Who to Contact","Location","Property Details","Price","Financial Insight","Ownership","Owner Demographics","School District"];
+
+    // Column order matches Figma default selected order, then optional columns within each section
     const ALL_COLUMNS = [
-      { key:"address",       label:"Address",                        width:220, default:true, blurred:false },
-      { key:"city",          label:"City",                           width:100, default:true },
-      { key:"state",         label:"State",                          width:60,  default:true },
-      { key:"zip",           label:"Zip",                            width:80,  default:true },
-      { key:"owners",        label:"Owners",                         width:200, default:true, blurred:true },
-      { key:"residents",     label:"Residents",                      width:200, default:true, blurred:true },
-      { key:"apn",           label:"APN",                            width:120, default:true },
-      { key:"propType",      label:"Property Type",                  width:140, default:true },
-      { key:"beds",          label:"Beds",                           width:70,  default:true },
-      { key:"baths",         label:"Baths",                          width:70,  default:true },
-      { key:"estValue",      label:"Estimated Value",                width:120, default:true },
-      { key:"lastSaleDate",  label:"Last Sale Date",                 width:110, default:true },
-      { key:"lastSalePrice", label:"Last Sale Price",                width:110, default:true },
-      { key:"ownerType",     label:"Owner Type",                     width:120, default:true },
-      { key:"occupancy",     label:"Occupancy Status",               width:140, default:true },
-      { key:"buildingSize",  label:"Building Size (SqFt)",           width:140, section:"Property Details" },
-      { key:"lotSize",       label:"Lot Size (SqFt)",                width:120, section:"Property Details" },
-      { key:"yearBuilt",     label:"Year built",                     width:100, section:"Property Details" },
-      { key:"stories",       label:"Number of Stories",              width:130, section:"Property Details" },
-      { key:"zoningCode",    label:"Zoning Code",                    width:100, section:"Property Details" },
-      { key:"pricePerSqft",  label:"Price per sqft (Last Sold Price)",width:190, section:"Price" },
-      { key:"preForeclosure",label:"Pre-Foreclosure",                width:130, section:"Financial Insight" },
-      { key:"equityPct",     label:"Equity Percentage (LTV)",        width:170, section:"Financial Insight" },
-      { key:"upsideDown",    label:"Upside Down",                    width:110, section:"Financial Insight" },
-      { key:"freeClear",     label:"Free & Clear",                   width:100, section:"Financial Insight" },
-      { key:"wholesale",     label:"Wholesale",                      width:100, section:"Financial Insight" },
-      { key:"retail",        label:"Retail",                         width:80,  section:"Financial Insight" },
-      { key:"investorScore", label:"Investor Score",                 width:120, section:"Financial Insight" },
-      { key:"distresses",    label:"Distresses Indicator",           width:160, section:"Financial Insight" },
-      { key:"absenteeOwner", label:"Absentee Owner Location",        width:180, section:"Ownership" },
-      { key:"yearsOwned",    label:"Years of Ownership",             width:150, section:"Ownership" },
-      { key:"numPropsOwned", label:"Number of Properties Owned",     width:200, section:"Ownership" },
-      { key:"inherited",     label:"Inherited",                      width:90,  section:"Ownership" },
-      { key:"taxExemption",  label:"Tax Exemption Status",           width:160, section:"Ownership" },
-      { key:"ownerAge",      label:"Owner Age",                      width:90,  section:"Owner Demographics" },
-      { key:"changedJobs",   label:"Recently Changed Jobs",          width:170, section:"Owner Demographics" },
-      { key:"deceased",      label:"Deceased",                       width:90,  section:"Owner Demographics" },
-      { key:"schoolDistrict",label:"School District",                width:130, section:"School District" },
-      { key:"schoolType",    label:"School Type",                    width:110, section:"School District" },
+      // Default selected (in Figma display order)
+      { key:"address",       label:"Address",                         width:220, default:true,                section:"Location" },
+      { key:"city",          label:"City",                            width:100, default:true,                section:"Location" },
+      { key:"state",         label:"State",                           width:60,  default:true,                section:"Location" },
+      { key:"zip",           label:"Zip",                             width:80,  default:true,                section:"Location" },
+      { key:"owners",        label:"Owners",                          width:200, default:true, blurred:true,  section:"Who to Contact" },
+      { key:"residents",     label:"Residents",                       width:200, default:true, blurred:true,  section:"Who to Contact" },
+      { key:"propType",      label:"Property Type",                   width:140, default:true,                section:"Property Details" },
+      { key:"beds",          label:"Beds",                            width:70,  default:true,                section:"Property Details" },
+      { key:"baths",         label:"Baths",                           width:70,  default:true,                section:"Property Details" },
+      { key:"estValue",      label:"Estimated Value",                 width:120, default:true,                section:"Financial Insight" },
+      { key:"lastSaleDate",  label:"Last Sale Date",                  width:110, default:true,                section:"Price" },
+      { key:"lastSalePrice", label:"Last Sale Price",                 width:110, default:true,                section:"Price" },
+      { key:"ownerType",     label:"Owner Type",                      width:120, default:true,                section:"Ownership" },
+      { key:"occupancy",     label:"Occupancy Status",                width:140, default:true,                section:"Ownership" },
+      // Optional columns by section
+      { key:"apn",           label:"APN",                             width:120,                              section:"Location" },
+      { key:"buildingSize",  label:"Building Size (SqFt)",            width:140,                              section:"Property Details" },
+      { key:"lotSize",       label:"Lot Size (SqFt)",                 width:120,                              section:"Property Details" },
+      { key:"yearBuilt",     label:"Year built",                      width:100,                              section:"Property Details" },
+      { key:"stories",       label:"Number of Stories",               width:130,                              section:"Property Details" },
+      { key:"zoningCode",    label:"Zoning Code",                     width:100,                              section:"Property Details" },
+      { key:"pricePerSqft",  label:"Price per sqft (Last Sold Price)",width:190,                              section:"Price" },
+      { key:"preForeclosure",label:"Pre-Foreclosure",                 width:130,                              section:"Financial Insight" },
+      { key:"equityPct",     label:"Equity Percentage (LTV)",         width:170,                              section:"Financial Insight" },
+      { key:"upsideDown",    label:"Upside Down",                     width:110,                              section:"Financial Insight" },
+      { key:"freeClear",     label:"Free & Clear",                    width:100,                              section:"Financial Insight" },
+      { key:"wholesale",     label:"Wholesale",                       width:100,                              section:"Financial Insight" },
+      { key:"retail",        label:"Retail",                          width:80,                               section:"Financial Insight" },
+      { key:"investorScore", label:"Investor Score",                  width:120,                              section:"Financial Insight" },
+      { key:"distresses",    label:"Distresses Indicator",            width:160,                              section:"Financial Insight" },
+      { key:"absenteeOwner", label:"Absentee Owner Location",         width:180,                              section:"Ownership" },
+      { key:"yearsOwned",    label:"Years of Ownership",              width:150,                              section:"Ownership" },
+      { key:"numPropsOwned", label:"Number of Properties Owned",      width:200,                              section:"Ownership" },
+      { key:"inherited",     label:"Inherited",                       width:90,                               section:"Ownership" },
+      { key:"taxExemption",  label:"Tax Exemption Status",            width:160,                              section:"Ownership" },
+      { key:"ownerAge",      label:"Owner Age",                       width:90,                               section:"Owner Demographics" },
+      { key:"changedJobs",   label:"Recently Changed Jobs",           width:170,                              section:"Owner Demographics" },
+      { key:"deceased",      label:"Deceased",                        width:90,                               section:"Owner Demographics" },
+      { key:"schoolDistrict",label:"School District",                 width:130,                              section:"School District" },
+      { key:"schoolType",    label:"School Type",                     width:110,                              section:"School District" },
     ];
     const DEFAULT_COL_KEYS = new Set(ALL_COLUMNS.filter(c => c.default).map(c => c.key));
+    const DEFAULT_COL_ORDER = ALL_COLUMNS.filter(c => c.default).map(c => c.key);
     const TABLE_COLS = ALL_COLUMNS.filter(c => c.default);
     const TABLE_ROWS = [
       { address:"1781 E Mountain St, Apt 1901", city:"Pasadena",   state:"CA", zip:"91104", apn:"5742-018-041", owners:"Matthew Washington",  ownerCount:3, residents:"Tom Harris, John Smith",       resCount:3, propType:"Condominium",   propSubtype:"Residential", beds:3, baths:3, estValue:"$2,592,000", lastSaleDate:"09/07/2025", lastSalePrice:"$1,985,000", ownerType:"Individual", occupancy:"Absentee Owner"  },
@@ -177,67 +184,23 @@
     ];
     const TOTAL_RECORDS = 1374;
 
-    // ── Sidebar icon asset URLs (Figma) ──────────────────────────────────────
-    // expanded state assets
-    const imgSideCollapseIcon   = "https://www.figma.com/api/mcp/asset/a551a631-f592-465d-9230-9dff167d7700";
-    const imgSideRegHead        = "https://www.figma.com/api/mcp/asset/063f0061-be85-4381-a1c6-d3601935f09a";
-    const imgSideRegBody        = "https://www.figma.com/api/mcp/asset/00fb484b-3dcc-4c0e-9c9e-6a7a91bd61a6";
-    const imgSideRegMag         = "https://www.figma.com/api/mcp/asset/2d290832-67b8-4a1d-b179-83aa3bd3f7fd";
-    const imgSidePublicSearch   = "https://www.figma.com/api/mcp/asset/b97bff4c-2c3c-44e5-b64f-19080f550f75";
-    const imgSideBatchAppend    = "https://www.figma.com/api/mcp/asset/93b87200-f603-4b3f-b096-56c92f2cbd97";
-    const imgSideListBuilding   = "https://www.figma.com/api/mcp/asset/560c9962-c77a-4571-b299-467d998e733b";
-    const imgSideArrowUp        = "https://www.figma.com/api/mcp/asset/89aed7c3-5dd4-4503-8f04-d34a37db03b7";
-    // collapsed state assets
-    const imgSideExpandIcon     = "https://www.figma.com/api/mcp/asset/c5a46f81-fdbe-4712-a44a-e176ec779135";
-    const imgSideRegHeadC       = "https://www.figma.com/api/mcp/asset/54a80ec5-d636-4cdf-8da8-f83e51dda555";
-    const imgSideRegBodyC       = "https://www.figma.com/api/mcp/asset/9245fba8-8eb5-4714-a475-009b1a583f4e";
-    const imgSideRegMagC        = "https://www.figma.com/api/mcp/asset/9f08f01d-9583-4fce-91fd-b4e3e91dac8d";
-    const imgSidePublicSearchC  = "https://www.figma.com/api/mcp/asset/e9821d9e-c764-4b05-b957-a0bcdb79e226";
-    const imgSideBatchAppendC   = "https://www.figma.com/api/mcp/asset/37ca1daa-583a-4717-9830-621cdb3b19b9";
-    const imgSideListBuildingC  = "https://www.figma.com/api/mcp/asset/77a102ce-0a31-40a4-b121-832c9841f46a";
-    const imgSideArrowUpC       = "https://www.figma.com/api/mcp/asset/ddcb49f9-da96-4ea8-9524-d2b138326894";
-
-    // ── Header asset URLs (Figma) ─────────────────────────────────────────────
-    const imgHeaderBgCircle = "https://www.figma.com/api/mcp/asset/13892f18-f194-45a0-9a6e-1f047dbeb5bb";
-    const imgHeaderMenu     = "https://www.figma.com/api/mcp/asset/232e52a7-ddb0-41fb-bcbd-c6474241a636";
-    const imgLogoV0  = "https://www.figma.com/api/mcp/asset/6c2ed6de-51eb-46e9-bc7d-e04f4384c674";
-    const imgLogoV1  = "https://www.figma.com/api/mcp/asset/192fcb9f-06e2-47df-827f-569518f59f97";
-    const imgLogoV2  = "https://www.figma.com/api/mcp/asset/a53b08fc-d984-47ba-8f95-827b834c9755";
-    const imgLogoV3  = "https://www.figma.com/api/mcp/asset/e94dbc1e-3729-4f58-8ec8-c7e6beb2112a";
-    const imgLogoV4  = "https://www.figma.com/api/mcp/asset/4d5e79dc-04b0-41b0-b488-87c2f6549d01";
-    const imgLogoV5  = "https://www.figma.com/api/mcp/asset/36c1af5c-afe2-4c16-b208-02b62ab02dfc";
-    const imgLogoV6  = "https://www.figma.com/api/mcp/asset/445d824f-c98c-4478-a575-a10013150977";
-    const imgLogoV7  = "https://www.figma.com/api/mcp/asset/da55d020-022d-4970-9b5d-b89a6c63fa28";
-    const imgLogoV8  = "https://www.figma.com/api/mcp/asset/460a5e6e-10db-43ba-9d27-63e34eb6069e";
-    const imgLogoV9  = "https://www.figma.com/api/mcp/asset/3c0cec0d-f207-48b0-9e62-eca8966257a9";
-    const imgLogoV10 = "https://www.figma.com/api/mcp/asset/7d8dcaaa-dcad-41fc-a336-ee2c7b0151e8";
-    const imgLogoV11 = "https://www.figma.com/api/mcp/asset/3a67c249-7eca-4506-961a-982fae330023";
-    const imgLogoV12 = "https://www.figma.com/api/mcp/asset/16dac015-cccb-437d-97d0-4e29aea6ae1c";
-    const imgLogoV13 = "https://www.figma.com/api/mcp/asset/739b3456-7daa-4f3f-ac72-9cababfa406e";
-    const imgLogoV14 = "https://www.figma.com/api/mcp/asset/8cefb5eb-afed-4a36-ac86-7dc2c6ad894c";
-    const imgLogoSym = "https://www.figma.com/api/mcp/asset/bf726d32-d5fd-4693-a22a-115a89bf3a1b";
+    // ── Icons (permanent base64 SVG data URIs — never expire) ────────────────
+    const imgLogo = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTk2IiBoZWlnaHQ9IjI1IiB2aWV3Qm94PSIwIDAgMTk2IDI1IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMTUxLjA0NSA2LjkwMzU4QzE1MS43MDMgNi45MDM1OCAxNTIuMjM2IDYuMzcwNDQgMTUyLjIzNiA1LjcxMjc4QzE1Mi4yMzYgNS4wNTUxMSAxNTEuNzAzIDQuNTIxOTcgMTUxLjA0NSA0LjUyMTk3QzE1MC4zODggNC41MjE5NyAxNDkuODU0IDUuMDU1MTEgMTQ5Ljg1NCA1LjcxMjc4QzE0OS44NTQgNi4zNzA0NCAxNTAuMzg4IDYuOTAzNTggMTUxLjA0NSA2LjkwMzU4WiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTIzLjMzMiAxMi4wOTY1TDEyMy4yNDcgMTIuMDY5MUwxMjMuMzI0IDEyLjAyMzdDMTI0LjU0MiAxMS4zMTMgMTI1LjE2IDEwLjE5NTEgMTI1LjE2IDguNzAwODRDMTI1LjE2IDcuNTU0MjYgMTI0Ljc2MyA2LjU5MDUgMTIzLjk4IDUuODM2MTZDMTIzLjE5NiA1LjA4MTMyIDEyMi4wNzYgNC42OTg3MyAxMjAuNjUgNC42OTg3M0gxMTUuNTY1VjIwLjMwMTVIMTIwLjkzN0MxMjIuNTQgMjAuMzAxNSAxMjMuODMyIDE5LjkyNTQgMTI0Ljc3OCAxOS4xODMyQzEyNS43MjEgMTguNDI5NiAxMjYuMTk5IDE3LjM1NTIgMTI2LjE5OSAxNS45OUMxMjYuMTk5IDE0LjAxNjEgMTI1LjIzNCAxMi43MDYyIDEyMy4zMzIgMTIuMDk2NVpNMTIzLjcyNCAxOC4wOTY1QzEyMy4xMyAxOC42MTYxIDEyMi4yNTkgMTguODc5NiAxMjEuMTM2IDE4Ljg3OTZIMTE3LjEyVjEyLjk0NTlIMTIxLjEzNkMxMjIuMjc1IDEyLjk0NTkgMTIzLjE0NiAxMy4yMjQ2IDEyMy43MjYgMTMuNzc0NUwxMjMuNzI3IDEzLjc3NTNDMTI0LjMyIDE0LjMwOTUgMTI0LjYyMiAxNS4wMzI0IDEyNC42MjIgMTUuOTIzOEMxMjQuNjIyIDE2Ljg0NDUgMTI0LjMyIDE3LjU3NTQgMTIzLjcyNCAxOC4wOTY1Wk0xMTcuMTIgMTEuNjEyNFY2LjEyMDQ4SDEyMC42NUMxMjEuNTQgNi4xMjA0OCAxMjIuMjU2IDYuMzg0NjMgMTIyLjc3NyA2LjkwNTk5QzEyMy4zMTIgNy40MjU5OSAxMjMuNTgzIDguMDgxODggMTIzLjU4MyA4Ljg1NTUzQzEyMy41ODMgOS42NzI5IDEyMy4zMTkgMTAuMzQ0IDEyMi43OTggMTAuODVMMTIyLjc5OCAxMC44NTA1QzEyMi4yOTIgMTEuMzU2MSAxMjEuNTY5IDExLjYxMjQgMTIwLjY1IDExLjYxMjRIMTE3LjEyWiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTM2LjU0NyAxNi42MzdMMTM2LjU0NSAxNi42NDMzQzEzNS45OTYgMTguMjczNiAxMzQuODc2IDE5LjEwMDMgMTMzLjIxNiAxOS4xMDAzQzEzMi4yNjcgMTkuMTAwMyAxMzEuNTA2IDE4LjgwNjIgMTMwLjk1NiAxOC4yMjY0QzEzMC40MDcgMTcuNjQ2NyAxMzAuMTI4IDE2Ljg3MTkgMTMwLjEyOCAxNS45MjM3VjkuMzM3MzRIMTI4LjY2MVYxNi4wMzQyQzEyOC42NjEgMTcuMzg1OSAxMjkuMDQ0IDE4LjQ3NjQgMTI5Ljc5OSAxOS4yNzZDMTMwLjU2OCAyMC4wNzM3IDEzMS42MjEgMjAuNDc4IDEzMi45MjkgMjAuNDc4QzEzNC40NTQgMjAuNDc4IDEzNS42NDggMTkuOTE4NyAxMzYuNDc1IDE4LjgxNTVMMTM2LjU0NyAxOC43MTk2VjIwLjMwMTVIMTM4LjAxM1Y5LjMzNzM0SDEzNi41NDdWMTYuNjM3WiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTQ1LjExMSAxNC4yMTYyTDE0NC4xNCAxMy44NjMzQzE0My40NjUgMTMuNjA3OSAxNDMuMDA0IDEzLjM0NDMgMTQyLjczMyAxMy4wNTg0QzE0Mi40NjEgMTIuNzU2NSAxNDIuMzIzIDEyLjM4MjcgMTQyLjMyMyAxMS45NDc4QzE0Mi4zMjMgMTEuNDk1NSAxNDIuNSAxMS4xMzU1IDE0Mi44NDkgMTAuODc2OUMxNDMuMTkyIDEwLjYwODQgMTQzLjYzOSAxMC40NzIxIDE0NC4xNzUgMTAuNDcyMUMxNDUuMDgzIDEwLjQ3MjEgMTQ1Ljc0MyAxMC44NTM5IDE0Ni4xMzYgMTEuNjA2N0wxNDYuMTU4IDExLjY0ODlMMTQ3LjMyNSAxMC45ODIzTDE0Ny4zMDMgMTAuOTQyOEMxNDYuNjYyIDkuNzYwMTYgMTQ1LjYxIDkuMTYwNTIgMTQ0LjE3NSA5LjE2MDUyQzE0My4yMTggOS4xNjA1MiAxNDIuNDE2IDkuNDMyMTMgMTQxLjc5NCA5Ljk2ODA2QzE0MS4xODcgMTAuNDg3MiAxNDAuODggMTEuMTYwOSAxNDAuODggMTEuOTdDMTQwLjg4IDEzLjQxNzMgMTQxLjczMyAxNC40Njc1IDE0My40MTUgMTUuMDkxMkwxNDQuMzQ1IDE1LjQ0NTFDMTQ1LjA4MiAxNS43MTAzIDE0NS42MTQgMTUuOTk1NCAxNDUuOTI3IDE2LjI5NDJDMTQ2LjI1NyAxNi41NzggMTQ2LjQyNCAxNi45ODExIDE0Ni40MjQgMTcuNDkyMUMxNDYuNDI0IDE3Ljk4OTQgMTQ2LjIwMyAxOC40MDE2IDE0NS43NjcgMTguNzE3MUMxNDUuMzUgMTkuMDE1NSAxNDQuODE0IDE5LjE2NjggMTQ0LjE3NSAxOS4xNjY4QzE0My4wNDQgMTkuMTY2OCAxNDIuMTU1IDE4LjYxNDYgMTQxLjUzNSAxNy41MjZMMTQxLjUxIDE3LjQ4MzNMMTQwLjM0IDE4LjI1NjJMMTQwLjM2MSAxOC4yOTM1QzE0MS4xNzcgMTkuNzQzMSAxNDIuNDQ1IDIwLjQ3ODEgMTQ0LjEzMSAyMC40NzgxQzE0NS4yNjQgMjAuNDc4MSAxNDYuMTg0IDIwLjE4NDEgMTQ2Ljg2NiAxOS42MDQzQzE0Ny41NDYgMTkuMDI1NSAxNDcuODkgMTguMyAxNDcuODkgMTcuNDQ3OUMxNDcuODkgMTYuNjY2NiAxNDcuNjYzIDE2LjAxNDMgMTQ3LjIxNiAxNS41MDg3QzE0Ni43NjYgMTUuMDAwOSAxNDYuMDU4IDE0LjU2NTkgMTQ1LjExMSAxNC4yMTYyWiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTUxLjc3OCA5LjMzNzM0SDE1MC4zMTJWMjAuMzAxNUgxNTEuNzc4VjkuMzM3MzRaIiBmaWxsPSIjMTM3MEYzIi8+CjxwYXRoIGQ9Ik0xNjAuMjI0IDkuMTYwNTJDMTU4LjY1NSA5LjE2MDUyIDE1Ny40NTQgOS43MjcxMiAxNTYuNjU1IDEwLjg0NDZMMTU2LjU4MyAxMC45NDYyVjkuMzM3NDFIMTU1LjExN1YyMC4zMDE1SDE1Ni41ODNMMTU2LjU4NiAxMy4wNTc0QzE1Ni44MDggMTIuMjc2MSAxNTcuMjEzIDExLjY1NDMgMTU3Ljc5MSAxMS4yMDkyQzE1OC4zNzEgMTAuNzY0MSAxNTkuMDg1IDEwLjUzODQgMTU5LjkxNCAxMC41Mzg0QzE2MC44NzggMTAuNTM4NCAxNjEuNjQ2IDEwLjgzMjUgMTYyLjE5NiAxMS40MTIzQzE2Mi43NDYgMTEuOTkxOCAxNjMuMDI0IDEyLjc2NjUgMTYzLjAyNCAxMy43MTQ4VjIwLjMwMTVIMTY0LjQ5MVYxMy42MDQ1QzE2NC40OTEgMTIuMjY3NyAxNjQuMDkzIDExLjE4NDYgMTYzLjMxIDEwLjM4NjFDMTYyLjU0IDkuNTcyNzYgMTYxLjUwMiA5LjE2MDUyIDE2MC4yMjQgOS4xNjA1MloiIGZpbGw9IiMxMzcwRjMiLz4KPHBhdGggZD0iTTE3Ny43MDIgMTUuMDQyNEMxNzcuNjg3IDEzLjMxOCAxNzcuMiAxMS44OTkzIDE3Ni4yNTUgMTAuODI1OUMxNzUuMjk1IDkuNzIwODUgMTczLjk5NyA5LjE2MDUyIDE3Mi4zOTYgOS4xNjA1MkMxNzAuODY5IDkuMTYwNTIgMTY5LjU1NiA5LjcxMzczIDE2OC40OTQgMTAuODA1MkMxNjcuNDQ2IDExLjg5NTYgMTY2LjkxNSAxMy4yNDYyIDE2Ni45MTUgMTQuODE5NkMxNjYuOTE1IDE2LjQwNyAxNjcuNDU0IDE3Ljc2NTEgMTY4LjUxNiAxOC44NTYxQzE2OS41NzcgMTkuOTMyMyAxNzAuOTM1IDIwLjQ3ODEgMTcyLjU1MiAyMC40NzgxQzE3NC4yOTggMjAuNDc4MSAxNzUuNzU1IDE5LjkwNzIgMTc2Ljg4MyAxOC43ODE1TDE3Ni45MTQgMTguNzUwM0wxNzUuOTc0IDE3LjcyNjZMMTc1Ljk0IDE3Ljc1OTVDMTc1LjAyIDE4LjY0OTIgMTczLjg4IDE5LjEwMDQgMTcyLjU1MiAxOS4xMDA0QzE3MS40NDEgMTkuMTAwNCAxNzAuNDgxIDE4LjczMjcgMTY5LjY5OCAxOC4wMDhDMTY4LjkyOCAxNy4yNjc5IDE2OC40OTIgMTYuMzAwMSAxNjguNDAzIDE1LjEzMTdMMTY4LjQgMTUuMDg4NkgxNzcuNzAzTDE3Ny43MDIgMTUuMDQyNFpNMTY5Ljg5OCAxMS4zNjQ0QzE3MC42MDkgMTAuODAxNyAxNzEuNDIgMTAuNTE2NCAxNzIuMzA5IDEwLjUxNjJDMTcyLjMzNyAxMC41MTU5IDE3Mi4zNjQgMTAuNTE1NSAxNzIuMzkxIDEwLjUxNTVDMTczLjM2IDEwLjUxNTUgMTc0LjE4IDEwLjc5MzcgMTc0LjgzIDExLjM0M0MxNzUuNDk4IDExLjkwNzMgMTc1LjkwNCAxMi43MTg0IDE3Ni4wMzcgMTMuNzU0TDE3Ni4wNDMgMTMuNzk5MkgxNjguNTA1TDE2OC41MTUgMTMuNzUxM0MxNjguNzIyIDEyLjczMDIgMTY5LjE4NyAxMS45MjczIDE2OS44OTggMTEuMzY0NFoiIGZpbGw9IiMxMzcwRjMiLz4KPHBhdGggZD0iTTE4My44NzUgMTQuMjE2MkwxODIuOTA0IDEzLjg2MzNDMTgyLjIyOCAxMy42MDc5IDE4MS43NjggMTMuMzQ0NCAxODEuNDk3IDEzLjA1ODRDMTgxLjIyNiAxMi43NTczIDE4MS4wODggMTIuMzgzNiAxODEuMDg4IDExLjk0NzhDMTgxLjA4OCAxMS40OTQ5IDE4MS4yNjQgMTEuMTM0OCAxODEuNjEyIDEwLjg3NjlDMTgxLjk1NiAxMC42MDg0IDE4Mi40MDIgMTAuNDcyMSAxODIuOTM5IDEwLjQ3MjFDMTgzLjg0NiAxMC40NzIxIDE4NC41MDYgMTAuODUzOSAxODQuOTAxIDExLjYwNjdMMTg0LjkyMyAxMS42NDg5TDE4Ni4wODggMTAuOTgyNUwxODYuMDY3IDEwLjk0M0MxODUuNDI2IDkuNzYwMTYgMTg0LjM3MyA5LjE2MDUyIDE4Mi45MzkgOS4xNjA1MkMxODEuOTgxIDkuMTYwNTIgMTgxLjE4IDkuNDMyMTMgMTgwLjU1NyA5Ljk2ODA2QzE3OS45NTEgMTAuNDg4MSAxNzkuNjQzIDExLjE2MTYgMTc5LjY0MyAxMS45N0MxNzkuNjQzIDEzLjQxNzMgMTgwLjQ5NyAxNC40Njc1IDE4Mi4xNzkgMTUuMDkxMkwxODMuMTA4IDE1LjQ0NTFDMTgzLjg0NSAxNS43MTAzIDE4NC4zNzggMTUuOTk1MyAxODQuNjkyIDE2LjI5MzhDMTg1LjAyMSAxNi41NzkgMTg1LjE4OCAxNi45ODIxIDE4NS4xODggMTcuNDkyMUMxODUuMTg4IDE3Ljk4ODkgMTg0Ljk2NyAxOC40MDA5IDE4NC41MyAxOC43MTcxQzE4NC4xMTMgMTkuMDE1NSAxODMuNTc4IDE5LjE2NjggMTgyLjkzOSAxOS4xNjY4QzE4MS44MDcgMTkuMTY2OCAxODAuOTE5IDE4LjYxNDYgMTgwLjI5OCAxNy41MjZMMTgwLjI3NCAxNy40ODMzTDE3OS4xMDQgMTguMjU2MkwxNzkuMTI1IDE4LjI5MzVDMTc5Ljk0IDE5Ljc0MzEgMTgxLjIwOCAyMC40NzgxIDE4Mi44OTUgMjAuNDc4MUMxODQuMDI4IDIwLjQ3ODEgMTg0Ljk0OCAyMC4xODQxIDE4NS42MjkgMTkuNjA0M0MxODYuMzA5IDE5LjAyNTUgMTg2LjY1NCAxOC4zIDE4Ni42NTQgMTcuNDQ3OUMxODYuNjU0IDE2LjY2NjYgMTg2LjQyNyAxNi4wMTQzIDE4NS45NzkgMTUuNTA4N0MxODUuNTMgMTUuMDAxIDE4NC44MjIgMTQuNTY2MSAxODMuODc1IDE0LjIxNjJaIiBmaWxsPSIjMTM3MEYzIi8+CjxwYXRoIGQ9Ik0xOTQuOTI2IDE1LjUwODdDMTk0LjQ3NiAxNS4wMDA5IDE5My43NjggMTQuNTY1OSAxOTIuODIxIDE0LjIxNjJMMTkxLjg1IDEzLjg2MzNDMTkxLjE3NSAxMy42MDc5IDE5MC43MTQgMTMuMzQ0NCAxOTAuNDQzIDEzLjA1ODRDMTkwLjE3MSAxMi43NTY3IDE5MC4wMzMgMTIuMzgyOSAxOTAuMDMzIDExLjk0NzhDMTkwLjAzMyAxMS40OTU0IDE5MC4yMSAxMS4xMzUzIDE5MC41NTggMTAuODc2OUMxOTAuOTAyIDEwLjYwODQgMTkxLjM0OSAxMC40NzIxIDE5MS44ODUgMTAuNDcyMUMxOTIuNzkzIDEwLjQ3MjEgMTkzLjQ1MiAxMC44NTM5IDE5My44NDYgMTEuNjA2N0wxOTMuODY4IDExLjY0ODlMMTk1LjAzNSAxMC45ODIzTDE5NS4wMTMgMTAuOTQyOEMxOTQuMzcyIDkuNzYwMTYgMTkzLjMxOSA5LjE2MDUyIDE5MS44ODUgOS4xNjA1MkMxOTAuOTI3IDkuMTYwNTIgMTkwLjEyNiA5LjQzMjEzIDE4OS41MDQgOS45NjgwNkMxODguODk3IDEwLjQ4NyAxODguNTkgMTEuMTYwNiAxODguNTkgMTEuOTdDMTg4LjU5IDEzLjQxNzMgMTg5LjQ0MyAxNC40Njc1IDE5MS4xMjUgMTUuMDkxMkwxOTIuMDU0IDE1LjQ0NTFDMTkyLjc5MiAxNS43MTAzIDE5My4zMjQgMTUuOTk1MyAxOTMuNjM3IDE2LjI5NDJDMTkzLjk2NyAxNi41NzgxIDE5NC4xMzQgMTYuOTgxMiAxOTQuMTM0IDE3LjQ5MjFDMTk0LjEzNCAxNy45ODk0IDE5My45MTMgMTguNDAxNiAxOTMuNDc3IDE4LjcxNzFDMTkzLjA2IDE5LjAxNTUgMTkyLjUyNCAxOS4xNjY4IDE5MS44ODUgMTkuMTY2OEMxOTAuNzU0IDE5LjE2NjggMTg5Ljg2NSAxOC42MTQ2IDE4OS4yNDUgMTcuNTI2TDE4OS4yMiAxNy40ODMzTDE4OC4wNSAxOC4yNTYyTDE4OC4wNzEgMTguMjkzNUMxODguODg2IDE5Ljc0MzEgMTkwLjE1NSAyMC40NzgxIDE5MS44NDEgMjAuNDc4MUMxOTIuOTc0IDIwLjQ3ODEgMTkzLjg5NCAyMC4xODQxIDE5NC41NzYgMTkuNjA0M0MxOTUuMjU2IDE5LjAyNTUgMTk1LjYgMTguMyAxOTUuNiAxNy40NDc5QzE5NS42IDE2LjY2NjYgMTk1LjM3MyAxNi4wMTQzIDE5NC45MjYgMTUuNTA4N1oiIGZpbGw9IiMxMzcwRjMiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik01MS45OTMyIDEyLjQ5OTdDNTEuOTkzMiA3Ljk5OTU1IDU1LjQxNjQgNC41MzExMyA1OS42NjM4IDQuNTMxMTNDNjMuOTMyMyA0LjUzMTEzIDY3LjMzNDUgNy45OTk1NSA2Ny4zMzQ1IDEyLjQ5OTdDNjcuMzM0NSAxNi45OTk5IDYzLjkzMjMgMjAuNDY4MyA1OS42NjM4IDIwLjQ2ODNDNTUuNDE2NCAyMC40NjgzIDUxLjk5MzIgMTYuOTk5OSA1MS45OTMyIDEyLjQ5OTdaTTY0Ljg0MiAxMi40OTlDNjQuODQyIDkuMzgxNzkgNjIuNjIzIDYuOTQ1MDYgNTkuNjY0MyA2Ljk0NTA2QzU2LjcwNTcgNi45NDUwNiA1NC40ODY4IDkuMzgxNzkgNTQuNDg2OCAxMi40OTlDNTQuNDg2OCAxNS42MTYyIDU2LjcwNTcgMTguMDUyOCA1OS42NjQzIDE4LjA1MjhDNjIuNjIzIDE4LjA1MjggNjQuODQyIDE1LjYxNjIgNjQuODQyIDEyLjQ5OVoiIGZpbGw9IiMzQTQ0NEEiLz4KPHBhdGggZD0iTTMwLjcxNDMgMTYuMTg4MkwyOC44NTQ1IDE3LjgxMjdDMjkuODA1NSAxOS40MTUyIDMxLjY0NDEgMjAuNDY4OSAzMy45MDU0IDIwLjQ2ODlDMzYuODAwNiAyMC40Njg5IDM4LjY4MTQgMTguNjY4NyAzOC42ODE0IDE2LjAzNDRDMzguNjgxNCAxMy44NjEzIDM3LjI4NjcgMTIuNTAwMiAzNS4yMzY4IDExLjU3ODJMMzQuMDc0NCAxMS4wMjk0QzMyLjU3NCAxMC4zNzA4IDMxLjg5NzYgOS42NDY0OSAzMS44OTc2IDguNjM2NjZDMzEuODk3NiA3LjU2MDk4IDMyLjg2OTggNi45NDYzMiAzMy44ODQzIDYuOTQ2MzJDMzQuOTYyIDYuOTQ2MzIgMzUuNjM4MyA3LjM2MzQyIDM2LjQyMDIgOC4zMjkzM0wzOC4xMTA4IDYuNTA3MzVDMzcuMDEyIDUuMTQ2MjkgMzUuNjM4MyA0LjUzMTYyIDMzLjkwNTQgNC41MzE2MkMzMS42MjMgNC41MzE2MiAyOS40NDYzIDYuMTU2MDMgMjkuNDQ2MyA4LjY1ODYyQzI5LjQ0NjMgMTAuNjc4MiAzMC41NjYzIDEyLjE3MDkgMzIuODI3NSAxMy4yMDI3TDM0LjAxMTEgMTMuNzI5NkMzNS40OTA0IDE0LjQxIDM2LjE4NzggMTUuMDkwNiAzNi4xODc4IDE2LjI1NEMzNi4xODc4IDE3LjM3MzYgMzUuMzQyMyAxOC4wNTQxIDMzLjg4NDMgMTguMDU0MUMzMi41NzQgMTguMDU0MSAzMS40MTE2IDE3LjE3NTkgMzAuNzE0MyAxNi4xODgyWiIgZmlsbD0iIzNBNDQ0QSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ1LjUyOCA0LjcwNzU4SDQxLjA0NzlWMjAuMjkzNUg0My40OTkyVjE0LjYzSDQ1LjUyOEM0OC42MzQ3IDE0LjYzIDUwLjc2OTEgMTIuNTY2NCA1MC43NjkxIDkuNjY4NzhDNTAuNzY5MSA2LjcyNzE0IDQ4LjYzNDcgNC43MDc1OCA0NS41MjggNC43MDc1OFpNNDguMjc1MSA5LjY2ODM2QzQ4LjI3NTEgMTEuMjI2OSA0Ny4yMTg0IDEyLjI1ODcgNDUuNDIyMSAxMi4yNTg3SDQzLjQ5OTFWNy4wNzgwNEg0NS40MjIxQzQ3LjIxODQgNy4wNzgwNCA0OC4yNzUxIDguMTA5NzMgNDguMjc1MSA5LjY2ODM2WiIgZmlsbD0iIzNBNDQ0QSIvPgo8cGF0aCBkPSJNNzIuMjYgNC43MDgxM0g2OS44MDg2VjIwLjI5NDFINzIuMjZWMTIuOTQwMkw3OC45NTkzIDIwLjI5NDFIODIuMTI5M0w3NS4xMzQyIDEyLjU4ODlMODEuNDk1MyA0LjcwODEzSDc4LjU3ODhMNzIuMjYgMTIuNTQ1VjQuNzA4MTNaIiBmaWxsPSIjM0E0NDRBIi8+CjxwYXRoIGQ9Ik04My43OTg4IDQuNzA4MTNIOTIuNjk1OFY3LjIxMDcySDg2LjI1MDNWMTEuMTYySDkxLjQyNzhWMTMuNjIwN0g4Ni4yNTAzVjE3Ljc5MTdIOTIuNjk1OFYyMC4yOTQxSDgzLjc5ODhWNC43MDgxM1oiIGZpbGw9IiMzQTQ0NEEiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMDIuMDk4IDQuNTMxMTNDOTcuODUxIDQuNTMxMTMgOTQuNDI3NyA3Ljk5OTU1IDk0LjQyNzcgMTIuNDk5N0M5NC40Mjc3IDE2Ljk5OTkgOTcuODUxIDIwLjQ2ODMgMTAyLjA5OCAyMC40NjgzQzEwNi4zNjcgMjAuNDY4MyAxMDkuNzY5IDE2Ljk5OTkgMTA5Ljc2OSAxMi40OTk3QzEwOS43NjkgNy45OTk1NSAxMDYuMzY3IDQuNTMxMTMgMTAyLjA5OCA0LjUzMTEzWk0xMDIuMDk5IDYuOTQ1MDZDMTA1LjA1OCA2Ljk0NTA2IDEwNy4yNzcgOS4zODE3OSAxMDcuMjc3IDEyLjQ5OUMxMDcuMjc3IDE1LjYxNjIgMTA1LjA1OCAxOC4wNTI4IDEwMi4wOTkgMTguMDUyOEM5OS4xNDAxIDE4LjA1MjggOTYuOTIxNCAxNS42MTYyIDk2LjkyMTQgMTIuNDk5Qzk2LjkyMTQgOS4zODE3OSA5OS4xNDAxIDYuOTQ1MDYgMTAyLjA5OSA2Ljk0NTA2WiIgZmlsbD0iIzNBNDQ0QSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE0LjE5NTQgNS4xODY1TDEyLjQ1NjEgMEMxOS4zMzkgMC4wMjM5Mjc5IDI0LjkxMTMgNS42MTExIDI0LjkxMTMgMTIuNUMyNC45MTEzIDE5LjM5MjcgMTkuMzQ0MSAyNC45ODIxIDEyLjQ1NjEgMjVMMTQuMTgzMiAxOS44MTY0QzE3LjQ4NDkgMTkuMDE5NiAxOS45MzggMTYuMDQ2NiAxOS45MzggMTIuNUMxOS45MzggOC45NTc3OSAxNy40OTEgNS45ODc1OSAxNC4xOTU0IDUuMTg2NVoiIGZpbGw9IiMzMzkyRkYiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMC43MTU5IDUuMTg2NUwxMi40NTUyIDBDNS41NzIyNSAwLjAyMzkyNzkgMCA1LjYxMTEgMCAxMi41QzAgMTkuMzkyNyA1LjU2NzE3IDI0Ljk4MjEgMTIuNDU1MiAyNUwxMC43MjggMTkuODE2NEM3LjQyNjM4IDE5LjAxOTYgNC45NzMyOSAxNi4wNDY2IDQuOTczMjkgMTIuNUM0Ljk3MzI5IDguOTU3NzkgNy40MjAzMyA1Ljk4NzU5IDEwLjcxNTkgNS4xODY1WiIgZmlsbD0iIzMzOTJGRiIvPgo8L3N2Zz4K";
+    const imgHeaderBgCircle = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgiIGhlaWdodD0iMjgiIHZpZXdCb3g9IjAgMCAyOCAyOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0IDBDMjEuNzMyIDAgMjggNi4yNjgwMSAyOCAxNEMyOCAxNC4wODM4IDI3Ljk5NzYgMTQuMTY3NSAyNy45OTYxIDE0LjI1MUMyNy4zNTggMTQuMDg3MSAyNi42ODkyIDE0IDI2IDE0QzIxLjU4MTcgMTQgMTggMTcuNTgxNyAxOCAyMkMxOCAyMy44MTI1IDE4LjYwMzIgMjUuNDgzOCAxOS42MTkxIDI2LjgyNTJDMTcuODk5MSAyNy41Nzk5IDE1Ljk5ODcgMjggMTQgMjhDNi4yNjgwMSAyOCAwIDIxLjczMiAwIDE0QzAgNi4yNjgwMSA2LjI2ODAxIDAgMTQgMFoiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8yMDA0XzY1NjkpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMjAwNF82NTY5IiB4MT0iMjguMDIyMyIgeTE9IjE0IiB4Mj0iMC4wMjIyNzY5IiB5Mj0iMTQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iI0Q2RTlGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNFREY1RkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K";
+    const imgHeaderMenu     = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI3IiB2aWV3Qm94PSIwIDAgOCA3IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNNy4yMDAyIDUuMzk4NDRDNC42NDE3OSA1LjM5ODU1IDcuOTk5ODkgNS43MzQzOCA4IDYuMTQ4NDRDOCA2LjU2MjU4IDcuNjQxODYgNi44OTgzMiA3LjIwMDIgNi44OTg0NEgwLjgwMDc4MUMwLjM1OTA1NCA2Ljg5ODQgMC4wMDA5NzY1NjIgNi41NjI2MiAwLjAwMDk3NjU2MiA2LjE0ODQ0QzAuMDAxMDg5MjIgNS43MzQzNCAwLjM1OTEyMyA1LjM5ODQ4IDAuODAwNzgxIDUuMzk4NDRINy4yMDAyWk03LjIwMDIgMi42OTgyNEM3LjY0MTcyIDIuNjk4MzUgNy45OTk3NyAzLjAzNDI4IDggMy40NDgyNEM4IDMuODYyMzkgNy42NDE4NiA0LjE5ODEzIDcuMjAwMiA0LjE5ODI0SDAuODAwNzgxQzAuMzU5MDU0IDQuMTk4MiAwLjAwMDk3NjU2MiAzLjg2MjQzIDAuMDAwOTc2NTYyIDMuNDQ4MjRDMC4wMDEyMDE1NiAzLjAzNDIzIDAuMzU5MTkyIDIuNjk4MjggMC44MDA3ODEgMi42OTgyNEg3LjIwMDJaTTcuMTk5MjIgMEM3LjY0MDg4IDAuMDAwMTEyNjM3IDcuOTk5MDIgMC4zMzU4NTYgNy45OTkwMiAwLjc1QzcuOTk5MDIgMS4xNjQxNCA3LjY0MDg4IDEuNDk5ODkgNy4xOTkyMiAxLjVIMC43OTk4MDVDMC4zNTgwNzcgMS40OTk5NiAwIDEuMTY0MTkgMCAwLjc1QzAgMC4zMzU4MTMgMC4zNTgwNzcgNC4yNDYzMWUtMDUgMC43OTk4MDUgMEg3LjE5OTIyWiIgZmlsbD0iIzRFNUE2MyIvPgo8L3N2Zz4K";
+    const imgSideCollapseIcon = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0Ljg0MzEgMy4yNTUyNUMxNi43NTQ5IDMuMjU1MjUgMTguMzMyOCA0LjczNjkxIDE4LjMzMjcgNi41ODg1OFYxMy4yNTUyQzE4LjMzMjcgMTUuMTA2OSAxNi43NTQ5IDE2LjU4ODYgMTQuODQzMSAxNi41ODg2SDcuNDk5MzVINS4xNTU2QzMuMjQzNzcgMTYuNTg4NiAxLjY2NTkzIDE1LjEwNjkgMS42NjYwMiAxMy4yNTUyVjYuNTg4NThDMS42NjYwMiA0LjczNjkxIDMuMjQzNzcgMy4yNTUyNSA1LjE1NTYgMy4yNTUyNUg3LjQ5OTM1SDE0Ljg0MzFaTTE0Ljg0MzEgNC45MjE5MUg4LjMzMjY4VjE0LjkyMTlIMTQuODQzMUMxNS44NTUxIDE0LjkyMTkgMTYuNjY2IDE0LjE2NDQgMTYuNjY2IDEzLjI1NTJWNi41ODg1OEMxNi42NjYgNS42Nzk0MSAxNS44NTUxIDQuOTIxOTEgMTQuODQzMSA0LjkyMTkxWk02LjY2NjAyIDQuOTIxOTFINS4xNTU2QzQuMTQzNiA0LjkyMTkxIDMuMzMyNjggNS42Nzk0MSAzLjMzMjY4IDYuNTg4NThWMTMuMjU1MkMzLjMzMjY4IDE0LjE2NDQgNC4xNDM2IDE0LjkyMTkgNS4xNTU2IDE0LjkyMTlINi42NjYwMlY0LjkyMTkxWiIgZmlsbD0iIzI3MkQzMiIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE0Ljk5OTcgMTAuODMzM0MxNS40NTk5IDEwLjgzMzMgMTUuODMzIDEwLjQ2MDIgMTUuODMzIDEwQzE1LjgzMyA5LjUzOTc2IDE1LjQ1OTkgOS4xNjY2NyAxNC45OTk3IDkuMTY2NjdMMTIuMDExNSA5LjE2NjY3TDEyLjI1NTYgOC45MjI1OUMxMi41ODEgOC41OTcxNSAxMi41ODEgOC4wNjk1MSAxMi4yNTU2IDcuNzQ0MDhDMTEuOTMwMiA3LjQxODY0IDExLjQwMjUgNy40MTg2NCAxMS4wNzcxIDcuNzQ0MDhMOS40MTA0MiA5LjQxMDc0QzkuMDg0OTggOS43MzYxOCA5LjA4NDk4IDEwLjI2MzggOS40MTA0MiAxMC41ODkzTDExLjA3NzEgMTIuMjU1OUMxMS40MDI1IDEyLjU4MTQgMTEuOTMwMiAxMi41ODE0IDEyLjI1NTYgMTIuMjU1OUMxMi41ODEgMTEuOTMwNSAxMi41ODEgMTEuNDAyOCAxMi4yNTU2IDExLjA3NzRMMTIuMDExNSAxMC44MzMzTDE0Ljk5OTcgMTAuODMzM1oiIGZpbGw9IiMyNzJEMzIiLz4KPC9zdmc+Cg==";
+    const imgSideExpandIcon   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0Ljg0MzEgMy4yNTUyOEMxNi43NTQ5IDMuMjU1MjggMTguMzMyOCA0LjczNjk1IDE4LjMzMjcgNi41ODg2MVYxMy4yNTUzQzE4LjMzMjcgMTUuMTA2OSAxNi43NTQ5IDE2LjU4ODYgMTQuODQzMSAxNi41ODg2SDcuNDk5MzVINS4xNTU2QzMuMjQzNzcgMTYuNTg4NiAxLjY2NTkzIDE1LjEwNjkgMS42NjYwMiAxMy4yNTUzVjYuNTg4NjFDMS42NjYwMiA0LjczNjk1IDMuMjQzNzcgMy4yNTUyOCA1LjE1NTYgMy4yNTUyOEg3LjQ5OTM1SDE0Ljg0MzFaTTE0Ljg0MzEgNC45MjE5NUg4LjMzMjY4VjE0LjkyMTlIMTQuODQzMUMxNS44NTUxIDE0LjkyMTkgMTYuNjY2IDE0LjE2NDQgMTYuNjY2IDEzLjI1NTNWNi41ODg2MUMxNi42NjYgNS42Nzk0NCAxNS44NTUxIDQuOTIxOTUgMTQuODQzMSA0LjkyMTk1Wk02LjY2NjAyIDQuOTIxOTVINS4xNTU2QzQuMTQzNiA0LjkyMTk1IDMuMzMyNjggNS42Nzk0NCAzLjMzMjY4IDYuNTg4NjFWMTMuMjU1M0MzLjMzMjY4IDE0LjE2NDQgNC4xNDM2IDE0LjkyMTkgNS4xNTU2IDE0LjkyMTlINi42NjYwMlY0LjkyMTk1WiIgZmlsbD0iIzI3MkQzMiIvPgo8L3N2Zz4K";
+    const imgSideRegSearch    = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkuOTk5NjcgMS42NjY2NkM3LjY5ODQ5IDEuNjY2NjYgNS44MzMwMSAzLjUzMjE0IDUuODMzMDEgNS44MzMzMkM1LjgzMzAxIDguMTM0NTEgNy42OTg0OSA5Ljk5OTk5IDkuOTk5NjcgOS45OTk5OUMxMi4zMDA5IDkuOTk5OTkgMTQuMTY2MyA4LjEzNDUxIDE0LjE2NjMgNS44MzMzMkMxNC4xNjYzIDMuNTMyMTQgMTIuMzAwOSAxLjY2NjY2IDkuOTk5NjcgMS42NjY2NloiIGZpbGw9IiMyNzJEMzIiLz4KPHBhdGggZD0iTTExLjg1MjUgMTEuNjY3QzEwLjcxMTggMTIuNzU5MiAxMCAxNC4yOTU5IDEwIDE2VjE4LjMzM0g1LjgzMzAxQzQuNDUyNDUgMTguMzMyOCAzLjMzMzAxIDE3LjIxMzYgMy4zMzMwMSAxNS44MzNDMy4zMzMxOCAxMy41MzIgNS4xOTg5MiAxMS42NjcgNy41IDExLjY2N0gxMS44NTI1WiIgZmlsbD0iIzI3MkQzMiIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE0Ljk5NTEgMTQuMTY2N0MxNC41MzQ5IDE0LjE2NjcgMTQuMTYxOCAxNC41Mzk4IDE0LjE2MTggMTVDMTQuMTYxOCAxNS40NjAyIDE0LjUzNDkgMTUuODMzMyAxNC45OTUxIDE1LjgzMzNDMTUuNDU1NCAxNS44MzMzIDE1LjgyODUgMTUuNDYwMiAxNS44Mjg1IDE1QzE1LjgyODUgMTQuNTM5OCAxNS40NTU0IDE0LjE2NjcgMTQuOTk1MSAxNC4xNjY3Wk0xMi40OTUxIDE1QzEyLjQ5NTEgMTMuNjE5MyAxMy42MTQ0IDEyLjUgMTQuOTk1MSAxMi41QzE2LjM3NTggMTIuNSAxNy40OTUxIDEzLjYxOTMgMTcuNDk1MSAxNUMxNy40OTUxIDE1LjM4NiAxNy40MDc3IDE1Ljc1MTUgMTcuMjUxNSAxNi4wNzc4TDE4LjA4NDQgMTYuOTEwN0MxOC40MDk4IDE3LjIzNjIgMTguNDA5OCAxNy43NjM4IDE4LjA4NDQgMTguMDg5M0MxNy43NTg5IDE4LjQxNDcgMTcuMjMxMyAxOC40MTQ3IDE2LjkwNTkgMTguMDg5M0wxNi4wNzMgMTcuMjU2NEMxNS43NDY2IDE3LjQxMjUgMTUuMzgxMSAxNy41IDE0Ljk5NTEgMTcuNUMxMy42MTQ0IDE3LjUgMTIuNDk1MSAxNi4zODA3IDEyLjQ5NTEgMTVaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=";
+    const imgSidePublicSearch = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTguMzMzMDEgMi41QzExLjU1NDYgMi41IDE0LjE2NjggNS4xMTE1IDE0LjE2NyA4LjMzMzAxQzE0LjE2NyA5LjY0MzIgMTMuNzM0MSAxMC44NTI0IDEzLjAwNDkgMTEuODI2MkwxNy4yNTU5IDE2LjA3NzFDMTcuNTgxMyAxNi40MDI2IDE3LjU4MTMgMTYuOTMwNCAxNy4yNTU5IDE3LjI1NTlDMTYuOTMwNCAxNy41ODEzIDE2LjQwMjYgMTcuNTgxMyAxNi4wNzcxIDE3LjI1NTlMMTEuODI2MiAxMy4wMDQ5QzEwLjg1MjQgMTMuNzM0MSA5LjY0MzIgMTQuMTY3IDguMzMzMDEgMTQuMTY3QzUuMTExNSAxNC4xNjY4IDIuNSAxMS41NTQ2IDIuNSA4LjMzMzAxQzIuNTAwMTggNS4xMTE2IDUuMTExNiAyLjUwMDE4IDguMzMzMDEgMi41Wk04LjMzMzAxIDQuMTY2OTlDNi4wMzIwOCA0LjE2NzE3IDQuMTY3MTcgNi4wMzIwOCA0LjE2Njk5IDguMzMzMDFDNC4xNjY5OSAxMC42MzQxIDYuMDMxOTcgMTIuNDk5OCA4LjMzMzAxIDEyLjVDMTAuNjM0MiAxMi41IDEyLjUgMTAuNjM0MiAxMi41IDguMzMzMDFDMTIuNDk5OCA2LjAzMTk3IDEwLjYzNDEgNC4xNjY5OSA4LjMzMzAxIDQuMTY2OTlaIiBmaWxsPSIjMTYyNTQwIi8+Cjwvc3ZnPgo=";
+    const imgSideBatchAppend  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwLjE2NyAxLjY2Njk5QzEwLjM5OTggMS42NjY5OSAxMC41MTY0IDEuNjY2NyAxMC42MDU1IDEuNzExOTFDMTAuNjgzOSAxLjc1MTg2IDEwLjc0ODEgMS44MTYxMyAxMC43ODgxIDEuODk0NTNDMTAuODMzMyAxLjk4MzU3IDEwLjgzMyAyLjEwMDE4IDEwLjgzMyAyLjMzMzAxVjQuMTY2OTlDMTAuODMzMiA2LjAwNzc5IDEyLjMyNjIgNy41IDE0LjE2NyA3LjVIMTZDMTYuMjMzNCA3LjUgMTYuMzUwMyA3LjUwMDQ4IDE2LjQzOTUgNy41NDU5QzE2LjUxNzYgNy41ODU4NSAxNi41ODEyIDcuNjQ5MyAxNi42MjExIDcuNzI3NTRDMTYuNjY2NSA3LjgxNjY3IDE2LjY2NyA3LjkzMzY0IDE2LjY2NyA4LjE2Njk5VjE0LjMzM0MxNi42NjcgMTUuNzMzMSAxNi42NjcgMTYuNDM0IDE2LjM5NDUgMTYuOTY4OEMxNi4xNTQ5IDE3LjQzOSAxNS43NzIgMTcuODIwOSAxNS4zMDE4IDE4LjA2MDVDMTQuNzY3IDE4LjMzMyAxNC4wNjY5IDE4LjMzMyAxMi42NjcgMTguMzMzSDcuMzMzMDFDNS45MzMwOSAxOC4zMzMgNS4yMzI5OCAxOC4zMzMgNC42OTgyNCAxOC4wNjA1QzQuMjI4IDE3LjgyMDkgMy44NDUxMiAxNy40MzkgMy42MDU0NyAxNi45Njg4QzMuMzMyOTkgMTYuNDM0IDMuMzMzMDEgMTUuNzMzMSAzLjMzMzAxIDE0LjMzM1Y1LjY2Njk5QzMuMzMzMDEgNC4yNjY4NiAzLjMzMjk5IDMuNTY2MDMgMy42MDU0NyAzLjAzMTI1QzMuODQ1MTIgMi41NjEwMSA0LjIyOCAyLjE3OTExIDQuNjk4MjQgMS45Mzk0NUM1LjIzMjk4IDEuNjY2OTkgNS45MzMwOSAxLjY2Njk5IDcuMzMzMDEgMS42NjY5OUgxMC4xNjdaTTEwLjU4ODkgOC41NzcxNUMxMC4yNjM1IDguMjUyMTUgOS43MzY0OSA4LjI1MjE1IDkuNDExMTMgOC41NzcxNUw3Ljc0NDE0IDEwLjI0NDFDNy40MTg3IDEwLjU2OTYgNy40MTg3IDExLjA5NzQgNy43NDQxNCAxMS40MjI5QzguMDY5NTkgMTEuNzQ4MSA4LjU5NzQ3IDExLjc0ODIgOC45MjI4NSAxMS40MjI5TDkuMTY2OTkgMTEuMTc4N1YxNC4xNjdDOS4xNjcxNyAxNC42MjcxIDkuNTM5ODcgMTUgMTAgMTVDMTAuNDYwMSAxNSAxMC44MzI4IDE0LjYyNzEgMTAuODMzIDE0LjE2N1YxMS4xNzg3TDExLjA3NzEgMTEuNDIyOUMxMS40MDI1IDExLjc0ODIgMTEuOTMwNCAxMS43NDgxIDEyLjI1NTkgMTEuNDIyOUMxMi41ODEzIDExLjA5NzQgMTIuNTgxMyAxMC41Njk2IDEyLjI1NTkgMTAuMjQ0MUwxMC41ODg5IDguNTc3MTVaTTEzLjA4ODkgMS42NjY5OUMxMy4yNDUgMS42NjY5OSAxMy4zOTU0IDEuNzI4NSAxMy41MDU5IDEuODM4ODdMMTYuNDk0MSA0LjgyNzE1QzE2LjYwNDYgNC45Mzc2NiAxNi42NjcgNS4wODc4NiAxNi42NjcgNS4yNDQxNEMxNi42NjcgNS41Njk1NSAxNi40MDI2IDUuODMzMDEgMTYuMDc3MSA1LjgzMzAxSDE0LjE2N0MxMy4yNDY2IDUuODMzMDEgMTIuNTAwMiA1LjA4NzMyIDEyLjUgNC4xNjY5OVYyLjI1NTg2QzEyLjUgMS45MzA1OCAxMi43NjM2IDEuNjY3MiAxMy4wODg5IDEuNjY2OTlaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=";
+    const imgSideListBuilding = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwLjE2NyAxLjY2Njk5QzEwLjM5OTggMS42NjY5OSAxMC41MTY0IDEuNjY2NyAxMC42MDU1IDEuNzExOTFDMTAuNjgzOSAxLjc1MTg2IDEwLjc0ODEgMS44MTYxMyAxMC43ODgxIDEuODk0NTNDMTAuODMzMyAxLjk4MzU3IDEwLjgzMyAyLjEwMDE4IDEwLjgzMyAyLjMzMzAxVjQuMTY2OTlDMTAuODMzMiA2LjAwNzc5IDEyLjMyNjIgNy41IDE0LjE2NyA3LjVIMTZDMTYuMjMzNCA3LjUgMTYuMzUwMyA3LjUwMDQ4IDE2LjQzOTUgNy41NDU5QzE2LjUxNzYgNy41ODU4NSAxNi41ODEyIDcuNjQ5MyAxNi42MjExIDcuNzI3NTRDMTYuNjY2NSA3LjgxNjY3IDE2LjY2NyA3LjkzMzY0IDE2LjY2NyA4LjE2Njk5VjE0LjMzM0MxNi42NjcgMTUuNzMzMSAxNi42NjcgMTYuNDM0IDE2LjM5NDUgMTYuOTY4OEMxNi4xNTQ5IDE3LjQzOSAxNS43NzIgMTcuODIwOSAxNS4zMDE4IDE4LjA2MDVDMTQuNzY3IDE4LjMzMyAxNC4wNjY5IDE4LjMzMyAxMi42NjcgMTguMzMzSDcuMzMzMDFDNS45MzMwOSAxOC4zMzMgNS4yMzI5OCAxOC4zMzMgNC42OTgyNCAxOC4wNjA1QzQuMjI4IDE3LjgyMDkgMy44NDUxMiAxNy40MzkgMy42MDU0NyAxNi45Njg4QzMuMzMyOTkgMTYuNDM0IDMuMzMzMDEgMTUuNzMzMSAzLjMzMzAxIDE0LjMzM1Y1LjY2Njk5QzMuMzMzMDEgNC4yNjY4NiAzLjMzMjk5IDMuNTY2MDMgMy42MDU0NyAzLjAzMTI1QzMuODQ1MTIgMi41NjEwMSA0LjIyOCAyLjE3OTExIDQuNjk4MjQgMS45Mzk0NUM1LjIzMjk4IDEuNjY2OTkgNS45MzMwOSAxLjY2Njk5IDcuMzMzMDEgMS42NjY5OUgxMC4xNjdaTTcuNSAxMy4zMzNDNy4wMzk3NiAxMy4zMzMgNi42NjY5OSAxMy43MDY4IDYuNjY2OTkgMTQuMTY3QzYuNjY3MTcgMTQuNjI3MSA3LjAzOTg3IDE1IDcuNSAxNUM3Ljk2MDEzIDE1IDguMzMyODMgMTQuNjI3MSA4LjMzMzAxIDE0LjE2N0M4LjMzMzAxIDEzLjcwNjggNy45NjAyNCAxMy4zMzMgNy41IDEzLjMzM1pNMTAuODMzIDEzLjMzM0MxMC4zNzI5IDEzLjMzMzIgMTAgMTMuNzA2OSAxMCAxNC4xNjdDMTAuMDAwMiAxNC42MjcgMTAuMzczIDE0Ljk5OTggMTAuODMzIDE1SDEyLjVDMTIuOTYwMSAxNSAxMy4zMzI4IDE0LjYyNzEgMTMuMzMzIDE0LjE2N0MxMy4zMzMgMTMuNzA2OCAxMi45NjAyIDEzLjMzMyAxMi41IDEzLjMzM0gxMC44MzNaTTcuNSAxMEM3LjAzOTg3IDEwIDYuNjY3MTcgMTAuMzcyOSA2LjY2Njk5IDEwLjgzM0M2LjY2Njk5IDExLjI5MzIgNy4wMzk3NiAxMS42NjcgNy41IDExLjY2N0M3Ljk2MDI0IDExLjY2NyA4LjMzMzAxIDExLjI5MzIgOC4zMzMwMSAxMC44MzNDOC4zMzI4MyAxMC4zNzI5IDcuOTYwMTMgMTAgNy41IDEwWk0xMC44MzMgMTBDMTAuMzczIDEwLjAwMDIgMTAuMDAwMiAxMC4zNzMgMTAgMTAuODMzQzEwIDExLjI5MzEgMTAuMzcyOSAxMS42NjY4IDEwLjgzMyAxMS42NjdIMTIuNUMxMi45NjAyIDExLjY2NyAxMy4zMzMgMTEuMjkzMiAxMy4zMzMgMTAuODMzQzEzLjMzMjggMTAuMzcyOSAxMi45NjAxIDEwIDEyLjUgMTBIMTAuODMzWk0xMy4wODg5IDEuNjY2OTlDMTMuMjQ1IDEuNjY2OTkgMTMuMzk1NCAxLjcyODUgMTMuNTA1OSAxLjgzODg3TDE2LjQ5NDEgNC44MjcxNUMxNi42MDQ2IDQuOTM3NjYgMTYuNjY3IDUuMDg3ODYgMTYuNjY3IDUuMjQ0MTRDMTYuNjY3IDUuNTY5NTUgMTYuNDAyNiA1LjgzMzAxIDE2LjA3NzEgNS44MzMwMUgxNC4xNjdDMTMuMjQ2NiA1LjgzMzAxIDEyLjUwMDIgNS4wODczMiAxMi41IDQuMTY2OTlWMi4yNTU4NkMxMi41IDEuOTMwNTggMTIuNzYzNiAxLjY2NzIgMTMuMDg4OSAxLjY2Njk5WiIgZmlsbD0iIzI3MkQzMiIvPgo8L3N2Zz4K";
+    const imgSideArrowUp      = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTcuMDQ4OCAxMi4yNTU4QzYuNzIzMTcgMTIuNTgxNCA2LjE5NDczIDEyLjU4MTQgNS44NjkxMSAxMi4yNTU4QzUuNTQzNTMgMTEuOTMwMiA1LjU0MzU1IDExLjQwMTcgNS44NjkxMSAxMS4wNzYxTDkuNDA3MiA3LjUzOTAxQzkuNTcwODUgNy4zNzUzNiA5Ljc4NTQ4IDcuMjk1IDkuOTk5OTcgNy4yOTU4NEMxMC4yMTQ1IDcuMjk1MDEgMTAuNDI5MSA3LjM3NTM2IDEwLjU5MjcgNy41MzkwMUwxNC4xMzA4IDExLjA3NjFDMTQuNDU2NCAxMS40MDE4IDE0LjQ1NjQgMTEuOTMwMiAxNC4xMzA4IDEyLjI1NThDMTMuODA1MiAxMi41ODE0IDEzLjI3NjggMTIuNTgxMyAxMi45NTExIDEyLjI1NThMOS45OTk5NyA5LjMwNDYzTDcuMDQ4OCAxMi4yNTU4WiIgZmlsbD0iIzE2MjU0MCIvPgo8L3N2Zz4K";
 
     // ── Logo ─────────────────────────────────────────────────────────────────
     function LogoBusiness() {
-      const pct = (t,r,b,l) => ({ position:"absolute", top:`${t}%`, right:`${r}%`, bottom:`${b}%`, left:`${l}%` });
       return (
-        <div style={{ height:25, position:"relative", width:195.601, flexShrink:0 }}>
-          <div style={pct(18.09,22.17,72.39,76.61)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV0} /></div>
-          <div style={pct(18.79,35.48,18.79,59.08)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV1} /></div>
-          <div style={pct(37.35,29.44,18.09,65.78)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV2} /></div>
-          <div style={pct(36.64,24.39,18.09,71.75)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV3} /></div>
-          <div style={pct(37.35,22.4, 18.79,76.85)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV4} /></div>
-          <div style={pct(36.64,15.9, 18.79,79.3)} ><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV5} /></div>
-          <div style={pct(36.64,9.15, 18.09,85.33)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV6} /></div>
-          <div style={pct(36.64,4.57, 18.09,91.57)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV7} /></div>
-          <div style={pct(36.64,0,    18.09,96.14)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV8} /></div>
-          <div style={pct(18.12,65.58,18.13,26.58)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV9} /></div>
-          <div style={pct(18.13,80.22,18.12,14.75)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV10} /></div>
-          <div style={pct(18.83,74.04,18.83,20.99)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV11} /></div>
-          <div style={pct(18.83,58.01,18.82,35.69)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV12} /></div>
-          <div style={pct(18.83,52.61,18.82,42.84)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV13} /></div>
-          <div style={pct(18.12,43.88,18.13,48.28)}><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoV14} /></div>
-          <div style={pct(0,87.26,0,0)}             ><img alt="" style={{ position:"absolute", display:"block", maxWidth:"none", width:"100%", height:"100%" }} src={imgLogoSym} /></div>
+        <div style={{ height:25, flexShrink:0, width:196 }}>
+          <img alt="Spokeo Business" style={{ display:"block", width:"100%", height:"100%" }} src={imgLogo} />
         </div>
       );
     }
@@ -279,7 +242,7 @@
         }}>
           <LogoBusiness />
           <div style={{ display:"flex", gap:16, height:40, alignItems:"center" }}>
-            <button style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", cursor:"pointer", background:"transparent", border:0, padding:0 }}>
+            <button style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", cursor:"pointer", background:"transparent", border:0, padding:0, fontFamily:"'Inter', sans-serif" }}>
               Get Help
             </button>
             <InitialMenuIcon />
@@ -294,22 +257,7 @@
 
       const itemPad = "8px";
 
-      // Icon helpers using Figma asset slices
-      const iconRegSearch = (head, body, mag) => (
-        <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:20, height:20 }}>
-          <div style={{ position:"absolute", top:"8.33%", left:"29.17%", right:"29.17%", bottom:"50%" }}>
-            <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={head} />
-          </div>
-          <div style={{ position:"absolute", top:"58.33%", right:"40.74%", bottom:"8.33%", left:"16.67%" }}>
-            <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={body} />
-          </div>
-          <div style={{ position:"absolute", top:"58.33%", right:"8.33%", bottom:"8.33%", left:"58.33%" }}>
-            <div style={{ position:"absolute", top:"12.5%", right:"0.08%", bottom:0, left:"12.42%" }}>
-              <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={mag} />
-            </div>
-          </div>
-        </div>
-      );
+      // Icon helpers
       const iconSimple = (src, inset) => (
         <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:20, height:20 }}>
           <div style={{ position:"absolute", top:inset, right:inset, bottom:inset, left:inset }}>
@@ -317,22 +265,9 @@
           </div>
         </div>
       );
-      const iconFile = (src) => (
-        <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:20, height:20 }}>
-          <div style={{ position:"absolute", top:"8.33%", right:"16.67%", bottom:"8.33%", left:"16.67%" }}>
-            <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={src} />
-          </div>
-        </div>
-      );
       const arrowUpIcon = (src) => (
         <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:16, height:16 }}>
-          <div style={{ position:"absolute", top:"36.48%", right:"28.12%", bottom:"37.5%", left:"28.13%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <div style={{ flexShrink:0, height:6.246, width:10.5, transform:"rotate(180deg)" }}>
-              <div style={{ position:"relative", width:"100%", height:"100%" }}>
-                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={src} />
-              </div>
-            </div>
-          </div>
+          <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={src} />
         </div>
       );
 
@@ -348,7 +283,7 @@
             <div style={{ padding:"0 8px" }}>
               <button onClick={() => setCollapsed(false)} style={{ display:"flex", alignItems:"center", justifyContent:"center", borderRadius:8, width:40, height:40, cursor:"pointer", background:"transparent", border:0 }}>
                 <div style={{ position:"relative", flexShrink:0, width:20, height:20 }}>
-                  <div style={{ position:"absolute", top:"16.28%", right:"8.34%", bottom:"17.06%", left:"8.33%" }}>
+                  <div style={{ position:"absolute", top:"0%", right:"0%", bottom:"0%", left:"0%" }}>
                     <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSideExpandIcon} />
                   </div>
                 </div>
@@ -357,17 +292,17 @@
             {/* Icon-only nav */}
             <div style={{ display:"flex", flexDirection:"column", gap:4, alignItems:"flex-start", width:"100%", padding:"0 8px" }}>
               <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconRegSearch(imgSideRegHeadC, imgSideRegBodyC, imgSideRegMagC)}
+                {iconSimple(imgSideRegSearch, "0%")}
               </div>
               <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconSimple(imgSidePublicSearchC, "12.5%")}
+                {iconSimple(imgSidePublicSearch, "0%")}
               </div>
               <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconFile(imgSideBatchAppendC)}
+                {iconSimple(imgSideBatchAppend, "0%")}
               </div>
               {/* List Building (active) */}
               <div style={{ background:"#dfe3e5", display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconFile(imgSideListBuildingC)}
+                {iconSimple(imgSideListBuilding, "0%")}
               </div>
             </div>
           </aside>
@@ -385,7 +320,7 @@
           <div style={{ padding:"0 8px" }}>
             <button onClick={() => setCollapsed(true)} style={{ display:"flex", alignItems:"center", justifyContent:"center", borderRadius:8, width:40, height:40, cursor:"pointer", background:"transparent", border:0 }}>
               <div style={{ position:"relative", flexShrink:0, width:20, height:20 }}>
-                <div style={{ position:"absolute", top:"16.28%", right:"8.34%", bottom:"17.06%", left:"8.33%" }}>
+                <div style={{ position:"absolute", top:"0%", right:"0%", bottom:"0%", left:"0%" }}>
                   <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSideCollapseIcon} />
                 </div>
               </div>
@@ -396,26 +331,26 @@
           <div style={{ display:"flex", flexDirection:"column", gap:4, alignItems:"flex-start", width:"100%", flex:1, minHeight:0, padding:"0 8px" }}>
             {/* Regulated Search */}
             <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
-              {iconRegSearch(imgSideRegHead, imgSideRegBody, imgSideRegMag)}
+              {iconSimple(imgSideRegSearch, "0%")}
               <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Regulated Search</span>
             </div>
 
             {/* Public Search */}
             <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
-              {iconSimple(imgSidePublicSearch, "12.5%")}
+              {iconSimple(imgSidePublicSearch, "0%")}
               <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Public Search</span>
             </div>
 
             {/* Batch Append */}
             <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
-              {iconFile(imgSideBatchAppend)}
+              {iconSimple(imgSideBatchAppend, "0%")}
               <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Batch Append</span>
             </div>
 
             {/* List Building */}
             <div style={{ display:"flex", flexDirection:"column", gap:8, alignItems:"flex-start", width:"100%" }}>
               <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
-                {iconFile(imgSideListBuilding)}
+                {iconSimple(imgSideListBuilding, "0%")}
                 <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>List Building</span>
                 <Badge />
                 {arrowUpIcon(imgSideArrowUp)}
@@ -428,10 +363,10 @@
                 </div>
                 <div style={{ display:"flex", flex:1, flexDirection:"column", gap:4, minWidth:0 }}>
                   <div style={{ background:"#dfe3e5", display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
-                    <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>Find Properties</span>
+                    <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Find Properties</span>
                   </div>
                   <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
-                    <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>Find Contacts</span>
+                    <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Find Contacts</span>
                   </div>
                 </div>
               </div>
@@ -447,18 +382,12 @@
     }
 
     // ── Filter control components ──────────────────────────────────────────────
-    const imgArrowDown = "https://www.figma.com/api/mcp/asset/3ba1e838-8f5e-4ee3-a6b6-e176968e745e";
+    const imgArrowDown = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjk1MTIgNy43NDQxNEMxMy4yNzY4IDcuNDE4NTcgMTMuODA1MiA3LjQxODUzIDE0LjEzMDkgNy43NDQxNEMxNC40NTY0IDguMDY5NzYgMTQuNDU2NCA4LjU5ODIgMTQuMTMwOSA4LjkyMzgzTDEwLjU5MjggMTIuNDYwOUMxMC40MjkxIDEyLjYyNDYgMTAuMjE0NSAxMi43MDQ5IDEwIDEyLjcwNDFDOS43ODU1MiAxMi43MDQ5IDkuNTcwODcgMTIuNjI0NiA5LjQwNzIzIDEyLjQ2MDlMNS44NjkxNCA4LjkyMzgzQzUuNTQzNjIgOC41OTgxOSA1LjU0MzU1IDguMDY5NzQgNS44NjkxNCA3Ljc0NDE0QzYuMTk0NzQgNy40MTg1NCA2LjcyMzE5IDcuNDE4NjEgNy4wNDg4MyA3Ljc0NDE0TDEwIDEwLjY5NTNMMTIuOTUxMiA3Ljc0NDE0WiIgZmlsbD0iIzE2MjU0MCIvPgo8L3N2Zz4K";
 
-    function FilterArrow({ up = false }) {
+    function FilterArrow({ up = false, blue = false }) {
       return (
         <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:20, height:20 }}>
-          <div style={{ position:"absolute", display:"flex", top:"36.48%", right:"28.12%", bottom:"37.5%", left:"28.12%", alignItems:"center", justifyContent:"center" }}>
-            <div style={{ flexShrink:0, width:10.5, height:6.246, transform: up ? "rotate(180deg)" : "none" }}>
-              <div style={{ position:"relative", width:"100%", height:"100%" }}>
-                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgArrowDown} />
-              </div>
-            </div>
-          </div>
+          <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none", filter: blue ? "brightness(0) saturate(100%) invert(25%) sepia(97%) saturate(1200%) hue-rotate(202deg) brightness(97%) contrast(102%)" : "none" }} src={up ? imgSideArrowUp : imgArrowDown} />
         </div>
       );
     }
@@ -829,12 +758,12 @@
       );
     }
 
-    function FilterSection({ title, children }) {
-      const [open, setOpen] = useState(true);
+    function FilterSection({ title, children, defaultOpen = false }) {
+      const [open, setOpen] = useState(defaultOpen);
       const [hovered, setHovered] = useState(false);
       const [count, setCount] = useState(0);
       const [resetKey, setResetKey] = useState(0);
-      const headerBg = open ? "#eff1f2" : hovered ? "#f7f8f8" : "white";
+      const headerBg = open ? "#edf5ff" : hovered ? "#f5f9ff" : "white";
       const globalCtx = useContext(GlobalFilterContext);
 
       const register = useCallback((delta) => {
@@ -859,19 +788,16 @@
               onMouseLeave={() => setHovered(false)}
               style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", cursor:"pointer", userSelect:"none", background:headerBg, position:"relative" }}
             >
-              {open && (
-                <div style={{ position:"absolute", left:0, top:"50%", transform:"translateY(-50%)", width:4, height:28, background:"#a0aab0", borderRadius:"0 8px 8px 0" }} />
-              )}
-              <span style={{ flex:1, fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{title}</span>
+              <span style={{ flex:1, fontWeight:500, fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#0e0f10", fontFamily:"'Inter', sans-serif" }}>{title}</span>
               {count > 0 && (
                 <div style={{ display:"flex", alignItems:"center", gap:4 }}>
-                  <div style={{ background:"#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ background: open ? "#0056ce" : "#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
                     <span style={{ fontSize:12, fontWeight:700, color:"white", lineHeight:"16px" }}>{count}</span>
                   </div>
-                  <span onClick={handleClear} style={{ fontSize:14, lineHeight:"20px", color:"#4e5a63", cursor:"pointer" }}>Clear</span>
+                  <span onClick={handleClear} style={{ fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#4e5a63", cursor:"pointer" }}>Clear</span>
                 </div>
               )}
-              <FilterArrow up={open} />
+              <FilterArrow up={open} blue={open} />
             </div>
             {open && (
               <div style={{ display:"flex", flexDirection:"column", gap:16, padding:"20px 16px", width:"100%" }}>
@@ -929,77 +855,13 @@
     const _sliderHaloActive = "https://www.figma.com/api/mcp/asset/d5fbc70f-2ffc-48ad-97a4-0cb6b29320de";
 
     function RadiusSlider() {
-      const [radius, setRadius] = React.useState(50);
-      const [dragging, setDragging] = React.useState(false);
-      const [hovering, setHovering] = React.useState(false);
-      const trackRef = React.useRef(null);
-      const min = 1, max = 50;
-      const pct = ((radius - min) / (max - min)) * 100;
-
-      const calcValue = React.useCallback((clientX) => {
-        const rect = trackRef.current.getBoundingClientRect();
-        const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-        return Math.round(min + (x / rect.width) * (max - min));
-      }, []);
-
-      React.useEffect(() => {
-        if (!dragging) return;
-        const onMove = (e) => setRadius(calcValue(e.clientX));
-        const onUp   = () => setDragging(false);
-        window.addEventListener("mousemove", onMove);
-        window.addEventListener("mouseup", onUp);
-        return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-      }, [dragging, calcValue]);
-
-      const showTooltip = dragging || hovering;
-      const thumbImg  = dragging ? _sliderImgActive : hovering ? _sliderImgHover : _sliderImgDefault;
-      const haloImg   = dragging ? _sliderHaloActive : _sliderHaloHover;
-
       return (
-        <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>Radius (miles)</span>
-          <div>
-            <div
-              ref={trackRef}
-              style={{ position:"relative", height:20, display:"flex", alignItems:"center", cursor:"pointer", userSelect:"none" }}
-              onMouseDown={(e) => { setDragging(true); setRadius(calcValue(e.clientX)); }}
-            >
-              {/* Inactive track background */}
-              <div style={{ position:"absolute", left:0, right:0, height:4, borderRadius:9999, background:"rgba(0,86,206,0.3)" }} />
-              {/* Active track */}
-              <div style={{ position:"absolute", left:0, width:`${pct}%`, height:4, background:"#0056ce", borderRadius:"9999px 0 0 9999px" }} />
-              {/* Thumb */}
-              <div
-                style={{ position:"absolute", left:`${pct}%`, transform:"translateX(-50%)", width:20, height:20, zIndex:2, cursor:"pointer" }}
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => { if (!dragging) setHovering(false); }}
-              >
-                {/* Tooltip */}
-                {showTooltip && (
-                  <div className="radius-tooltip" style={{ position:"absolute", bottom:"calc(100% + 10px)", left:"50%", transform:"translateX(-50%)", display:"flex", flexDirection:"column", alignItems:"center" }}>
-                    <div style={{ background:"#0056ce", borderRadius:4, padding:"8px", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                      <span style={{ color:"white", fontSize:14, fontWeight:600, lineHeight:"20px", whiteSpace:"nowrap" }}>{radius}</span>
-                    </div>
-                    <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", height:4, width:16 }}>
-                      <div style={{ width:8, height:8, background:"#0056ce", transform:"rotate(45deg)", marginTop:-4, flexShrink:0 }} />
-                    </div>
-                  </div>
-                )}
-                {/* Halo */}
-                {(hovering || dragging) && (
-                  <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", width:48, height:48, pointerEvents:"none" }}>
-                    <img alt="" style={{ display:"block", width:"100%", height:"100%" }} src={haloImg} />
-                  </div>
-                )}
-                {/* Thumb image */}
-                <img alt="" style={{ position:"absolute", top:0, left:0, width:20, height:20, display:"block", pointerEvents:"none" }} src={thumbImg} />
-              </div>
-            </div>
-          </div>
-          <div style={{ display:"flex", justifyContent:"space-between" }}>
-            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>1 mi</span>
-            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>50 mi</span>
-          </div>
+        <div style={{ background:"white", border:"1px solid #c0c6cb", borderRadius:8, display:"flex", height:36, alignItems:"center", padding:"0 16px", width:"100%" }}>
+          <input
+            type="text"
+            placeholder="Radius in miles (optional)"
+            style={{ flex:1, background:"none", border:"none", fontSize:14, lineHeight:"20px", color:"#0e0f10", outline:"none", fontFamily:"Helvetica, sans-serif", minWidth:0 }}
+          />
         </div>
       );
     }
@@ -1026,14 +888,14 @@
       useEffect(() => {
         globalCtx?.registerData("who:showUnlocked", showUnlocked ? { label: "Show unlocked properties", tags: [] } : null);
       }, [showUnlocked]);
-      const imgInfoIcon = "https://www.figma.com/api/mcp/asset/a89c5821-4d72-4a4c-ba29-038dbd8a3d07";
-      const imgAnyIcon      = "https://www.figma.com/api/mcp/asset/016fa824-a7cd-484b-8b4c-c1a5015e0863";
-      const imgOwnersIcon   = "https://www.figma.com/api/mcp/asset/38c29850-bbec-4abf-b56c-0832baca8efe";
-      const imgResidentsIcon = "https://www.figma.com/api/mcp/asset/91073caa-da42-44cf-81a9-780689475028";
+      const imgInfoIcon = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkgMS41QzEzLjE0MjEgMS41IDE2LjUgNC44NTc4NiAxNi41IDlDMTYuNSAxMy4xNDIxIDEzLjE0MjEgMTYuNSA5IDE2LjVDNC44NTc4NiAxNi41IDEuNSAxMy4xNDIxIDEuNSA5QzEuNSA0Ljg1Nzg2IDQuODU3ODYgMS41IDkgMS41Wk05IDNDNS42ODYyOSAzIDMgNS42ODYyOSAzIDlDMyAxMi4zMTM3IDUuNjg2MjkgMTUgOSAxNUMxMi4zMTM3IDE1IDE1IDEyLjMxMzcgMTUgOUMxNSA1LjY4NjI5IDEyLjMxMzcgMyA5IDNaTTkgOC4yNUM5LjQxNDIxIDguMjUgOS43NSA4LjU4NTc5IDkuNzUgOVYxMkM5Ljc1IDEyLjQxNDIgOS40MTQyMSAxMi43NSA5IDEyLjc1QzguNTg1NzkgMTIuNzUgOC4yNSAxMi40MTQyIDguMjUgMTJWOUM4LjI1IDguNTg1NzkgOC41ODU3OSA4LjI1IDkgOC4yNVpNOSA1LjI1QzkuNDE0MjEgNS4yNSA5Ljc1IDUuNTg1NzkgOS43NSA2QzkuNzUgNi40MTQyMSA5LjQxNDIxIDYuNzUgOSA2Ljc1QzguNTg1NzkgNi43NSA4LjI1IDYuNDE0MjEgOC4yNSA2QzguMjUgNS41ODU3OSA4LjU4NTc5IDUuMjUgOSA1LjI1WiIgZmlsbD0iIzRFNUE2MyIvPgo8L3N2Zz4K";
+      const imgAnyIcon      = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTYuNTI4MzMgMTIuODE4MkM3LjUwMTkgMTIuODYyMiA4LjQzOTQyIDEzLjIwMTggOS4yMTU4MyAxMy43OTA4QzkuMjc2NjkgMTMuODM0IDkuMzQ5MiAxMy44NTgzIDkuNDIzODQgMTMuODYwMkgxMS43MzYzQzExLjkyMDMgMTMuODYwMiAxMi4wOTY0IDEzLjkzMzMgMTIuMjI2NiAxNC4wNjMzQzEyLjM1NjggMTQuMTkzNSAxMi40MzA3IDE0LjM3MDMgMTIuNDMwNyAxNC41NTQ1QzEyLjQzMDYgMTQuNzM4NiAxMi4zNTY3IDE0LjkxNTUgMTIuMjI2NiAxNS4wNDU3QzEyLjA5NjUgMTUuMTc1NiAxMS45MjAyIDE1LjI0ODcgMTEuNzM2MyAxNS4yNDg4SDguOTU4OTlDOC44NjY5MSAxNS4yNDg4IDguNzc4MDEgMTUuMjg1MyA4LjcxMjkgMTUuMzUwNEM4LjY0NzkzIDE1LjQxNTQgOC42MTE0MiAxNS41MDM2IDguNjExMzQgMTUuNTk1NUM4LjYxMTM0IDE1LjY4NzYgOC42NDc3OSAxNS43NzY1IDguNzEyOSAxNS44NDE2QzguNzc4IDE1LjkwNjcgOC44NjY5NSAxNS45NDMyIDguOTU4OTkgMTUuOTQzMkgxMS43MzYzQzExLjk5NTMgMTUuOTQyMyAxMi4yNDkyIDE1Ljg2ODYgMTIuNDY4OCAxNS43MzEyQzEyLjY4ODMgMTUuNTkzOCAxMi44NjQ2IDE1LjM5NzQgMTIuOTc4NSAxNS4xNjQ4QzEyLjk5ODQgMTUuMTIzNyAxMy4wMjY5IDE1LjA4NzIgMTMuMDYxNSAxNS4wNTc0QzEzLjA5NjIgMTUuMDI3NiAxMy4xMzcgMTUuMDA1NiAxMy4xODA3IDE0Ljk5MkwxNS41NTQ3IDE0LjIwNjhDMTUuODM4MyAxNC4xMTAxIDE2LjE0MjcgMTQuMDkwNyAxNi40MzY1IDE0LjE0OTJDMTYuNzMwNCAxNC4yMDc3IDE3LjAwMzYgMTQuMzQyOCAxNy4yMjg1IDE0LjU0MDhDMTcuMjc2IDE0LjU3NzIgMTcuMzEzOSAxNC42MjQ3IDE3LjMzNzkgMTQuNjc5NUMxNy4zNjE5IDE0LjczNDQgMTcuMzcxOCAxNC43OTQ2IDE3LjM2NjIgMTQuODU0M0MxNy4zNjA3IDE0LjkxMzkgMTcuMzM5MyAxNC45NzA4IDE3LjMwNTcgMTUuMDIwM0MxNy4yNzIgMTUuMDY5OCAxNy4yMjYzIDE1LjExMDUgMTcuMTcyOSAxNS4xMzc1QzkuMzA1NzEgMTkuMTE2MiAxMS43MjE5IDE5LjA3NSA0LjU5NzY2IDE2LjY4NjNDNC41NDk3MSAxNi42Njk1IDQuNDk4NzEgMTYuNjYzNyA0LjQ0ODI1IDE2LjY2OTdDNC4zOTc4NSAxNi42NzU3IDQuMzQ5MjkgMTYuNjkzIDQuMzA2NjUgMTYuNzIwNUwxLjkzMTY1IDE4LjIxMzdDMS45MDU4MSAxOC4yMzA0IDEuODc1NTIgMTguMjM5MSAxLjg0NDc0IDE4LjIzOTFDMS44MTM5NCAxOC4yMzkxIDEuNzgzNjggMTguMjMwNCAxLjc1NzgyIDE4LjIxMzdDMS43MzA1MyAxOC4yMDA1IDEuNzA3MzkgMTguMTc5OSAxLjY5MTQxIDE4LjE1NDFDMS42NzU0OSAxOC4xMjg0IDEuNjY3NjcgMTguMDk4NCAxLjY2Nzk4IDE4LjA2ODJWMTQuMzE4MkMxLjY2NzczIDE0LjI4NjEgMS42NzYxNSAxNC4yNTQ0IDEuNjkzMzcgMTQuMjI3M0MxLjcxMDU2IDE0LjIwMDMgMS43MzU1OCAxNC4xNzkyIDEuNzY0NjYgMTQuMTY1OEwzLjg2MjMxIDEzLjExMDJDNC4yNDU0MyAxMi45MTcgNC42Njg2IDEyLjgxNjYgNS4wOTc2NiAxMi44MTgySDYuNTI4MzNaTTEzLjQwMzMgMy43ODc4OUMxMy42MjEzIDMuNjc2NzQgMTMuODc5NyAzLjY3NjcxIDE0LjA5NzcgMy43ODc4OUwxNi44OTg0IDUuMjE1NjJDMTcuMTU0MSA1LjM0NjA2IDE3LjMxNTMgNS42MDkyOCAxNy4zMTU0IDUuODk2MjlWOS4zMDU0N0MxNy4zMTU0IDEwLjE0OTIgMTYuNjMwOCAxMC44MzI4IDE1Ljc4NzEgMTAuODMyOEgxNS4zNDg2QzE1LjAyODMgMTAuODMyNiAxNC43Njg2IDEwLjU3MzEgMTQuNzY4NiAxMC4yNTI3VjguNzk1N0MxNC43NjgzIDguMjMzNCAxNC4zMTI0IDcuNzc3MTYgMTMuNzUgNy43NzcxNUMxMy4xODc3IDcuNzc3MjQgMTIuNzMxNyA4LjIzMzQ1IDEyLjczMTUgOC43OTU3VjEwLjI1MjdDMTIuNzMxNSAxMC41NzMyIDEyLjQ3MTkgMTAuODMyOCAxMi4xNTE0IDEwLjgzMjhIMTEuNzEyOUMxMC44NjkzIDEwLjgzMjcgMTAuMTg1NiAxMC4xNDkxIDEwLjE4NTYgOS4zMDU0N1Y1Ljg5NjI5QzEwLjE4NTcgNS42MDkyNCAxMC4zNDY4IDUuMzQ2MDQgMTAuNjAyNSA1LjIxNTYyTDEzLjQwMzMgMy43ODc4OVpNMTMuNTIyNSAxLjcyMDUxQzEzLjY2NTggMS42NDg4MyAxMy44MzUyIDEuNjQ4ODIgMTMuOTc4NSAxLjcyMDUxTDE4LjA1MTggMy43NTc2MkMxOC4zMDMyIDMuODgzMzIgMTguNDA1NyA0LjE4ODc3IDE4LjI4MDMgNC40NDAyM0MxOC4xNTQ1IDQuNjkxNzEgMTcuODQ4MiA0Ljc5NDM0IDE3LjU5NjcgNC42Njg3NUwxMy43NSAyLjc0NDkyTDkuOTA0MzEgNC42Njg3NUM5LjY1Mjc1IDQuNzk0NTMgOS4zNDY1IDQuNjkxNzkgOS4yMjA3MSA0LjQ0MDIzQzkuMDk1MjEgNC4xODg4MyA5LjE5NyAzLjg4MzQ0IDkuNDQ4MjUgMy43NTc2MkwxMy41MjI1IDEuNzIwNTFaIiBmaWxsPSIjNjE3MTdDIi8+Cjwvc3ZnPgo=";
+      const imgOwnersIcon   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjUgMTEuNjY3QzE0LjgwMTEgMTEuNjY3IDE2LjY2NjggMTMuNTMyIDE2LjY2NyAxNS44MzNDMTYuNjY3IDE3LjIxMzYgMTUuNTQ3NiAxOC4zMzI4IDE0LjE2NyAxOC4zMzNINS44MzMwMUM0LjQ1MjQ1IDE4LjMzMjggMy4zMzMwMSAxNy4yMTM2IDMuMzMzMDEgMTUuODMzQzMuMzMzMTggMTMuNTMyIDUuMTk4OTIgMTEuNjY3IDcuNSAxMS42NjdIMTIuNVpNMTAgMS42NjY5OUMxMi4zMDExIDEuNjY2OTkgMTQuMTY2OCAzLjUzMTk3IDE0LjE2NyA1LjgzMzAxQzE0LjE2NyA4LjEzNDE5IDEyLjMwMTIgMTAgMTAgMTBDNy42OTg4MSAxMCA1LjgzMzAxIDguMTM0MTkgNS44MzMwMSA1LjgzMzAxQzUuODMzMTggMy41MzE5NyA3LjY5ODkyIDEuNjY2OTkgMTAgMS42NjY5OVoiIGZpbGw9IiM2MTcxN0MiLz4KPC9zdmc+Cg==";
+      const imgResidentsIcon = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExLjgwMTggMTIuMDgzQzEzLjU1MSAxMi4wODMgMTQuOTY5NSAxMy41MTc1IDE0Ljk2OTcgMTUuMjg3MUMxNC45Njk3IDE2LjM0OSAxNC4xMTggMTcuMjEgMTMuMDY4NCAxNy4yMUg2LjczMzRDNS43OTIwNCAxNy4yMDk3IDUuMDEyMjMgMTYuNTE2NSA0Ljg2MTMzIDE1LjYwNzRINC44NDc2NkM0LjgzMDM4IDE1LjUwMzIgNC44MTkzNCAxNS4zOTYzIDQuODE5MzQgMTUuMjg3MUM0LjgxOTUgMTMuNTE3NSA2LjIzNzE1IDEyLjA4MzEgNy45ODYzMyAxMi4wODNIMTEuODAxOFpNNi43NTU4NiAxMC40ODA1QzYuOTQyODUgMTAuNjg4MiA3LjE0ODMyIDEwLjg3ODYgNy4zNzIwNyAxMS4wNDU5QzUuMzIzNjEgMTEuMzQ3IDMuNzUwMTUgMTMuMTMxMiAzLjc1IDE1LjI4NzFDMy43NSAxNS4zOTUyIDMuNzU2NTcgMTUuNTAyMiAzLjc2NzU4IDE1LjYwNzRIMy41NjM0OEMyLjUxNDA2IDE1LjYwNzIgMS42NjMwOSAxNC43NDYzIDEuNjYzMDkgMTMuNjg0NkMxLjY2MzQxIDExLjkxNSAzLjA4MTkgMTAuNDgwNSA0LjgzMTA1IDEwLjQ4MDVINi43NTU4NlpNMTUuMTY2IDEwLjQ4MDVDMTYuOTE1MiAxMC40ODA1IDE4LjMzMjcgMTEuOTE1MSAxOC4zMzMgMTMuNjg0NkMxOC4zMzMgMTQuNzQ2NCAxNy40ODIyIDE1LjYwNzQgMTYuNDMyNiAxNS42MDc0SDE2LjAwNjhDMTYuMDE3OCAxNS41MDIzIDE2LjAyMzQgMTUuMzk1MiAxNi4wMjM0IDE1LjI4NzFDMTYuMDIzMyAxMy4xMzE0IDE0LjQ1MDYgMTEuMzQ3MiAxMi40MDIzIDExLjA0NTlDMTIuNjI2MSAxMC44Nzg2IDEyLjgzMTUgMTAuNjg4MiAxMy4wMTg2IDEwLjQ4MDVIMTUuMTY2Wk05LjkwMTM3IDQuMzkyNThDMTEuNjUwNyA0LjM5MjU4IDEzLjA2OTMgNS44MjY4OCAxMy4wNjkzIDcuNTk2NjhDMTMuMDY5MyA5LjM2NjQ0IDExLjY1MDcgMTAuODAwOCA5LjkwMTM3IDEwLjgwMDhDOS44OTg3NiAxMC44MDA4IDkuODk2MTYgMTAuNzk5OCA5Ljg5MzU1IDEwLjc5OThDOS44OTE2IDEwLjc5OTggOS44ODk2NSAxMC44MDA4IDkuODg3NyAxMC44MDA4QzkuODQzODUgMTAuODAwOCA5LjgwMDI2IDEwLjc5ODcgOS43NTY4NCAxMC43OTY5QzkuNzUwMzIgMTAuNzk2NiA5Ljc0MzgxIDEwLjc5NjIgOS43MzczIDEwLjc5NTlDOS4yOTY4IDEwLjc3NTIgOC44NzkzMyAxMC42NjUxIDguNTAzOTEgMTAuNDgwNUg4LjUyMDUxQzcuOTM5ODMgMTAuMTk1MyA3LjQ1OTcxIDkuNzM1MzMgNy4xNDM1NSA5LjE2ODk1QzcuMTM4OTUgOS4xNjk1NSA3LjEzNDQ5IDkuMTcxMjkgNy4xMjk4OCA5LjE3MTg4QzYuODY5NjIgOC43MDY1OSA2LjcxOTc3IDguMTY5NDUgNi43MTk3MyA3LjU5NjY4QzYuNzE5ODEgNi4wMDczOSA3Ljg2NDExIDQuNjkxODcgOS4zNjQyNiA0LjQzOTQ1QzkuMzg0NzQgNC40MzU5MSA5LjQwNTE3IDQuNDMxODYgOS40MjU3OCA0LjQyODcxQzkuNDQ2MzMgNC40MjU2NyA5LjQ2NjYzIDQuNDIwNiA5LjQ4NzMgNC40MTc5N0w5LjQ4ODI4IDQuNDE5OTJDOS42MjM1IDQuNDAyMDggOS43NjEzNSA0LjM5MjYxIDkuOTAxMzcgNC4zOTI1OFpNMTMuMjY1NiAyLjc5MDA0QzE1LjAxNDkgMi43OTAwNCAxNi40MzM1IDQuMjI0NDQgMTYuNDMzNiA1Ljk5NDE0QzE2LjQzMzYgNy41NjY1OSAxNS4zMTM2IDguODcyNDYgMTMuODM2OSA5LjE0NDUzQzE0LjAyMDkgOC42NjQyOCAxNC4xMjQgOC4xNDI2OSAxNC4xMjQgNy41OTY2OEMxNC4xMjM5IDUuNzA3MjcgMTIuOTE0OSA0LjEwMzUyIDExLjIzNzMgMy41MzMyQzExLjc4NjYgMy4wNjkyNSAxMi40OTQgMi43OTAxNiAxMy4yNjU2IDIuNzkwMDRaTTYuNzMxNDUgMi43OTAwNEM3LjQ3MzcgMi43OTAwNCA4LjE1NTI1IDMuMDQ5OSA4LjY5NTMxIDMuNDgyNDJDNi45MzU5MiA0LjAwMzI5IDUuNjUwNDcgNS42NDgzMiA1LjY1MDM5IDcuNTk2NjhDNS42NTA0MiA4LjEyMTc2IDUuNzQ0MjIgOC42MjQ5MyA1LjkxNTA0IDkuMDg5ODRDNC41NjE2NSA4LjcyNTUgMy41NjQ0NSA3LjQ3ODIgMy41NjQ0NSA1Ljk5NDE0QzMuNTY0NTcgNC4yMjQ0OCA0Ljk4MjIyIDIuNzkwMSA2LjczMTQ1IDIuNzkwMDRaIiBmaWxsPSIjMDAzOTg3Ii8+Cjwvc3ZnPgo=";
       const tags = [
-        { label:"Any",       count:"5,506", icon: imgAnyIcon,       inset:"13.95% 8.33% 13.95% 8.32%" },
-        { label:"Owners",    count:"4,011", icon: imgOwnersIcon,    inset:"8.33% 8.33% 8.33% 8.34%" },
-        { label:"Residents", count:"2,506", icon: imgResidentsIcon, inset:"8.33% 16.67% 8.33% 16.67%" },
+        { label:"Any",       count:"5,506", icon: imgResidentsIcon, inset:"0%" },
+        { label:"Owners",    count:"4,011", icon: imgAnyIcon,       inset:"0%" },
+        { label:"Residents", count:"2,506", icon: imgOwnersIcon,    inset:"0%" },
       ];
 
       const whoCount = (selected !== "Any" ? 1 : 0) + (hasContact ? 1 : 0) + (showUnlocked ? 1 : 0);
@@ -1047,11 +909,10 @@
               onClick={() => setOpen(o => !o)}
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
-              style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", background: open ? "#eff1f2" : hovered ? "#f7f8f8" : "white", position:"relative", cursor:"pointer", userSelect:"none" }}
+              style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", background: open ? "#edf5ff" : hovered ? "#f5f9ff" : "white", position:"relative", cursor:"pointer", userSelect:"none" }}
             >
-              {open && <div style={{ position:"absolute", left:0, top:"50%", transform:"translateY(-50%)", width:4, height:28, background:"#a0aab0", borderRadius:"0 8px 8px 0" }} />}
               <div style={{ display:"flex", flex:1, gap:4, alignItems:"center", minWidth:0 }}>
-                <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap" }}>Who to contact</span>
+                <span style={{ fontWeight:500, fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Who to contact</span>
                 {open && (
                   <div
                     style={{ position:"relative", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center" }}
@@ -1077,22 +938,20 @@
                     )}
                     {/* Info icon image */}
                     <div style={{ overflow:"hidden", position:"relative", flexShrink:0, width:18, height:18, cursor:"default" }}>
-                      <div style={{ position:"absolute", top:"8.33%", right:"8.33%", bottom:"8.33%", left:"8.33%" }}>
-                        <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgInfoIcon} />
-                      </div>
+                      <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none", filter: open ? "brightness(0) saturate(100%) invert(25%) sepia(97%) saturate(1200%) hue-rotate(202deg) brightness(97%) contrast(102%)" : "none" }} src={imgInfoIcon} />
                     </div>
                   </div>
                 )}
               </div>
               {whoCount > 0 && (
                 <div style={{ display:"flex", alignItems:"center", gap:4 }} onClick={e => e.stopPropagation()}>
-                  <div style={{ background:"#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div style={{ background: open ? "#0056ce" : "#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
                     <span style={{ fontSize:12, fontWeight:700, color:"white", lineHeight:"16px" }}>{whoCount}</span>
                   </div>
-                  <span onClick={() => { setSelected("Any"); setHasContact(false); setShowUnlocked(false); }} style={{ fontSize:14, lineHeight:"20px", color:"#4e5a63", cursor:"pointer" }}>Clear</span>
+                  <span onClick={() => { setSelected("Any"); setHasContact(false); setShowUnlocked(false); }} style={{ fontSize:14, lineHeight:"20px", color: open ? "#0056ce" : "#4e5a63", cursor:"pointer" }}>Clear</span>
                 </div>
               )}
-              <FilterArrow up={open} />
+              <FilterArrow up={open} blue={open} />
             </div>
             {/* Collapsible content */}
             {open && (
@@ -1363,18 +1222,16 @@
           <div style={{ display:"flex", gap:16, alignItems:"center", padding:"20px 20px 16px", width:"100%", flexShrink:0, height:68, boxSizing:"border-box" }}>
             <div style={{ display:"flex", flex:1, gap:6, alignItems:"center", minWidth:0 }}>
               <div style={{ position:"relative", flexShrink:0, width:20, height:20 }}>
-                <div style={{ position:"absolute", top:"16.68%", right:"8.37%", bottom:"20%", left:"8.33%" }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="https://www.figma.com/api/mcp/asset/46318a62-1a87-4f36-ad39-10f22aea82f3" />
-                </div>
+                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjczOTMgOS4wMjA3NUMxNS4wNjAzIDguODYwMjQgMTUuNDM5OCA4Ljg2MDE5IDE1Ljc2MDggOS4wMjA3NUwxOS44ODU4IDExLjA4NDJDMjAuMjYyNSAxMS4yNzI3IDIwLjUgMTEuNjUyOCAyMC41IDEyLjA2NzZWMTYuOTkyNEMyMC41IDE4LjIxMTUgMTkuNDkyNiAxOS4xOTk0IDE4LjI1IDE5LjE5OTVIMTcuNjA0NUMxNy4xMzI2IDE5LjE5OTQgMTYuNzUwMSAxOC44MjQ2IDE2Ljc1IDE4LjM2MTZWMTYuMjU3MUMxNi43NSAxNS40NDQ0IDE2LjA3ODQgMTQuNzg1NCAxNS4yNSAxNC43ODU0QzE0LjQyMTYgMTQuNzg1NCAxMy43NSAxNS40NDQ0IDEzLjc1IDE2LjI1NzFWMTguMzYxNkMxMy43NSAxOC44MjQ1IDEzLjM2NzQgMTkuMTk5MyAxMi44OTU1IDE5LjE5OTVIMTIuMjVDMTEuMDA3NCAxOS4xOTk1IDEwIDE4LjIxMTUgMTAgMTYuOTkyNFYxMi4wNjc2QzEwIDExLjY1MjggMTAuMjM3NiAxMS4yNzI3IDEwLjYxNDMgMTEuMDg0MkwxNC43MzkzIDkuMDIwNzVaTTguMjM5MjggNy4xMjAzNkM4LjUxMjI4IDYuOTgzOSA4LjgyNzU5IDYuOTY0MDcgOS4xMTMzMSA3LjA1OTgyQzkuMTM0NzMgNy4wNjkxNCA5LjE1Njc2IDcuMDc3NCA5LjE3Nzc2IDcuMDg4MTRMOS43MzM0MiA3LjM3MDM2TDguNTg0OTkgNy45NDA2OEM3LjY3NDE1IDguMzkyNjEgNy4yOTY3OCA5LjUxMTE0IDcuNzU1ODggMTAuNDIyMUM4LjAzMDAxIDEwLjk3IDguNTQxMzYgMTEuMzE3NiA5LjEzMzgxIDExLjQwNjVDOS4wNjcxNyAxMS42MTM4IDkuMDM3MTUgMTEuODIyIDkuMDM3MTMgMTIuMDQ0MlYxMi45MTI0QzguOTQ0MjEgMTIuODk0NyA4Ljg0ODIyIDEyLjg4NSA4Ljc1MDAyIDEyLjg4NUM3LjkyMTY3IDEyLjg4NSA3LjI1MDE0IDEzLjU0NDEgNy4yNTAwMiAxNC4zNTY3VjE2LjQ2MTJDNy4yNTAwMiAxNi45MjQyIDYuODY3NDMgMTcuMjk5OSA2LjM5NTUzIDE3LjMwMDFINS43NTAwMkM0LjUwNzM4IDE3LjMwMDEgMy41MDAwMiAxNi4zMTExIDMuNTAwMDIgMTUuMDkyVjEwLjE2NzJDMy41MDAxIDkuNzUyNDQgMy43Mzc2MiA5LjM3MjI5IDQuMTE0MjggOS4xODM4NEw4LjIzOTI4IDcuMTIwMzZaTTE1LjAwNjkgNS45Njk5N0MxNS4yMTQzIDUuODY2MjcgMTUuNDU5NiA1Ljg2NjI3IDE1LjY2NyA1Ljk2OTk3TDIxLjU5MjggOC45MzI4NkgyMS41NzgxQzIxLjk0ODQgOS4xMTgxIDIyLjA5NjMgOS41NjMxMiAyMS45MTEyIDkuOTI2MDNDMjEuNzI2IDEwLjI5NjQgMjEuMjgwOSAxMC40NDQyIDIwLjkxOCAxMC4yNTlMMTUuMzI2MiA3LjQ1OTIzTDkuNzMzNDIgMTAuMjU5QzkuMzcwNDYgMTAuNDM2OCA4LjkyNTQ0IDEwLjI4OSA4Ljc0MDI2IDkuOTI2MDNDOC41NjI1NCA5LjU2MzA4IDguNzExMzEgOS4xMTgwMyA5LjA3NDI0IDguOTMyODZMMTUuMDA2OSA1Ljk2OTk3Wk04LjM0MDg0IDQuMDgxM0M4LjU0ODIxIDMuOTc3NjkgOC43OTI2OCAzLjk3NzYzIDkuMDAwMDIgNC4wODEzTDEyLjY1MTQgNS45MDM1N0wxMC45OTIyIDYuNzMzNjRIMTAuOTg1NEw4LjY1OTIgNS41NzA1NkwzLjA2NjQzIDguMzcwMzZDMi43MDM2MiA4LjU0Nzk3IDIuMjU5NTIgOC4zOTk5OSAyLjA3NDI0IDguMDM3MzVDMS44OTY0NyA3LjY3NDM5IDIuMDQ0MjkgNy4yMjkzOCAyLjQwNzI1IDcuMDQ0MTlMOC4zNDA4NCA0LjA4MTNaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=" />
               </div>
-              <span style={{ fontWeight:600, fontSize:16, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap" }}>Find Properties</span>
+              <span style={{ fontWeight:600, fontSize:16, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Find Properties</span>
             </div>
           </div>
 
           {/* Location Section */}
-          <FilterSection title="Location">
+          <FilterSection title="Location" defaultOpen={true}>
+            <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
             <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%", position:"relative" }}>
-              <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>Search Area</span>
               <div style={{ background:"white", border:"1px solid #c0c6cb", borderRadius:8, display:"flex", height:36, alignItems:"center", padding:"0 8px 0 16px", gap:8 }}>
                 <input
                   value={locVal}
@@ -1423,6 +1280,7 @@
               )}
             </div>
             <RadiusSlider />
+            </div>
           </FilterSection>
 
           {/* Who is contact */}
@@ -1500,6 +1358,7 @@
             <FilterLabeledText label="School District" placeholder="Example: C2, I3, R5" />
             <FilterLabeledText label="School Type" placeholder="Example: C2, I3, R5" />
           </FilterSection>
+          <HRule />
         </div>
         {/* Sticky bottom bar */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 16px", borderTop:"1px solid #dfe3e5", background:"white", flexShrink:0, width:"100%", boxSizing:"border-box", height:52 }}>
@@ -1513,7 +1372,7 @@
               </div>
             )}
           </div>
-          <button onClick={() => setShowSaveModal(true)} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", background:"white", border:"1px solid #818d96", borderRadius:8, fontSize:14, fontWeight:600, lineHeight:"20px", color:"#0e0f10", cursor:"pointer", fontFamily:"Inter, inherit", whiteSpace:"nowrap" }}>
+          <button onClick={() => setShowSaveModal(true)} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", background:"white", border:"1px solid #818d96", borderRadius:8, fontSize:14, fontWeight:600, lineHeight:"20px", color:"#0e0f10", cursor:"pointer", fontFamily:"'Inter', sans-serif", whiteSpace:"nowrap" }}>
             <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
               <div style={{ position:"absolute", top:"12.5%", right:"20.83%", bottom:"12.5%", left:"20.83%" }}>
                 <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="https://www.figma.com/api/mcp/asset/0ec96b75-a172-4347-b6e2-8a41b076063d" />
@@ -1815,10 +1674,10 @@
     }
 
     // ── Table image assets (Figma) ────────────────────────────────────────────
-    const imgTblFilter   = "https://www.figma.com/api/mcp/asset/e2d89c04-3513-43af-ab23-c2f04537f3e4";
-    const imgTblColumns  = "https://www.figma.com/api/mcp/asset/f16e6ed5-6226-4b56-9e41-2b4facfb5cf3";
-    const imgTblDownload = "https://www.figma.com/api/mcp/asset/4b2307f4-19d5-454e-a8ab-4f3891661e3e";
-    const imgTblUser     = "https://www.figma.com/api/mcp/asset/3f25fbe8-bd73-4145-a50d-f6284c16be88";
+    const imgTblFilter   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTYuNTc5OTMgMy43NUM1LjcwMzA1IDMuNzUgNC45OTgwNSA0LjQ1NSA0Ljk5ODA1IDUuMzMxMjVWNS4zNTA2M0M0Ljk5ODA1IDYuMzAxODggNS40Njc0MiA3LjA0OTM3IDYuNjM4NjcgOC4yMTk5OUM2LjU2NDMgOC4xNDU2MiA2Ljg4NjggOC40NDQ5OSA2Ljk3MDU1IDguNTMyNDlDNy4xMDQ5MyA4LjY3MTI0IDcuMjExMTcgOC44MiA3LjMyMjQyIDguOTYxODdDNy44MzE3OSA5LjYxMzEyIDguMTIzMDUgMTAuMzM3NSA4LjEyMzA1IDExLjI0NTZDOC4xMjMwNSAxMS44MiA4LjEyMzA1IDE0LjgxODEgOC4xMjMwNSAxNS42MTgxQzguMTIzMDUgMTYuMTMyNSA4LjcwNjc5IDE2LjQzNDQgOS4xMTkyOSAxNi4xMjU2QzkuNDMxNzkgMTUuODkxMiAxMS4zMDY4IDE0LjQ4NTYgMTEuNjE5MyAxNC4yNTEyQzExLjc3NjggMTQuMTMzNyAxMS44NzMgMTMuOTQwNiAxMS44NzMgMTMuNzQzN0MxMS44NzMgMTMuNjY2MiAxMS44NzMgMTIuNDk1IDExLjg3MyAxMS4yNDU2QzExLjg3MyAxMC4zMzgxIDEyLjE2NDkgOS42MTMxMiAxMi42NzM3IDguOTYxODdDMTIuNzg0OSA4LjgxOTM3IDEyLjg5MTIgOC42NzE4NyAxMy4wMjU1IDguNTMyNDlDMTMuMTA5MyA4LjQ0NDk5IDEzLjQzMjQgOC4xNDQ5OSAxMy4zNTc0IDguMjE5OTlDMTQuNTI5MyA3LjA0ODc0IDE0Ljk5OCA2LjMwMjUgMTQuOTk4IDUuMzUwNjNWNS4zMzEyNUMxNC45OTggNC40NTUgMTQuMjkzIDMuNzUgMTMuNDE2MiAzLjc1SDYuNTc5OTNaTTYuNTc5OTMgNC45OTkzN0gxMy40MTYyQzEzLjYwMjQgNC45OTkzNyAxMy43NDggNS4xNDUgMTMuNzQ4IDUuMzMxMjVWNS4zNTA2M0MxMy43NDggNS44NzMxMyAxMy40MzI0IDYuMzg4MTIgMTIuNDc4NyA3LjM0MTg3QzEyLjU2NDkgNy4yNTU2MiAxMi4yMjM3IDcuNTczMTIgMTIuMTI2OCA3LjY3Mzc1QzExLjk2NDkgNy44NDE4NyAxMS44MTc0IDguMDAxODcgMTEuNjc4IDguMTgxMjRDMTEuMDA2OCA5LjAzOTM3IDEwLjYyMyAxMC4wMzgxIDEwLjYyMyAxMS4yNDU2QzEwLjYyMyAxMi4zMzg3IDEwLjYyMyAxMy4xMzgxIDEwLjYyMyAxMy40MzE5QzEwLjMyMyAxMy42NTY5IDkuOTAzNjcgMTMuOTcxMiA5LjM3MzA1IDE0LjM2ODdDOS4zNzMwNSAxMy4xNjk0IDkuMzczMDUgMTEuNjU2MiA5LjM3MzA1IDExLjI0NTZDOS4zNzMwNSAxMC4wMzc1IDguOTg5MjkgOS4wMzkzNyA4LjMxODA0IDguMTgxMjRDOC4xNzg2NyA4LjAwMjQ5IDguMDMxMTcgNy44NDE4NyA3Ljg2OTI5IDcuNjczNzVDNy43NzI0MiA3LjU3MzEyIDcuNDMxOCA3LjI1NjI0IDcuNTE3NDMgNy4zNDE4N0M2LjU2MzY4IDYuMzg4NzQgNi4yNDgwNSA1Ljg3MjUgNi4yNDgwNSA1LjM1MDYzVjUuMzMxMjVDNi4yNDgwNSA1LjE0NSA2LjM5MzY4IDQuOTk5MzcgNi41Nzk5MyA0Ljk5OTM3WiIgZmlsbD0iIzBFMEYxMCIvPgo8L3N2Zz4K";
+    const imgTblColumns  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUuNTU1NjkgOS45OTk5N0M2Ljc4Mjk5IDkuOTk5OTcgNy43NzgzNSAxMC45OTUzIDcuNzc4MzUgMTIuMjIyNlYxNC40NDQzQzcuNzc4MzUgMTUuNjcxNiA2Ljc4Mjk5IDE2LjY2NyA1LjU1NTY5IDE2LjY2N0M0LjMyODQgMTYuNjY3IDMuMzMzMDQgMTUuNjcxNiAzLjMzMzA0IDE0LjQ0NDNWMTIuMjIyNkMzLjMzMzA0IDEwLjk5NTMgNC4zMjg0IDkuOTk5OTcgNS41NTU2OSA5Ljk5OTk3Wk0xMy41ODQgOS45OTk5N0MxMy45NzQ1IDkuOTk5OTUgMTQuMzExNCA5Ljk5OTc2IDE0LjU4ODkgMTAuMDIyNEMxNC44ODE3IDEwLjA0NjQgMTUuMTcyOSAxMC4wOTk0IDE1LjQ1MzIgMTAuMjQyMkMxNS44NzEyIDEwLjQ1NTIgMTYuMjExOCAxMC43OTQ4IDE2LjQyNDggMTEuMjEyOUMxNi41Njc2IDExLjQ5MzEgMTYuNjE5NyAxMS43ODUyIDE2LjY0MzYgMTIuMDc4MUMxNi42NjYyIDEyLjM1NTUgMTYuNjY3IDEyLjY5MjcgMTYuNjY3IDEzLjA4M1YxMy41ODRDMTYuNjY3IDEzLjk3NDQgMTYuNjY2MyAxNC4zMTE0IDE2LjY0MzYgMTQuNTg4OEMxNi42MTk3IDE0Ljg4MTYgMTYuNTY3NSAxNS4xNzI5IDE2LjQyNDggMTUuNDUzMUMxNi4yMTE4IDE1Ljg3MTIgMTUuODcxMyAxNi4yMTE3IDE1LjQ1MzIgMTYuNDI0OEMxNS4xNzMgMTYuNTY3NSAxNC44ODE2IDE2LjYxOTYgMTQuNTg4OSAxNi42NDM1QzE0LjMxMTQgMTYuNjY2MiAxMy45NzQ1IDE2LjY2NyAxMy41ODQgMTYuNjY3SDEyLjM0MThDMTEuOTUxMyAxNi42NjcgMTEuNjE0NCAxNi42NjYyIDExLjMzNjkgMTYuNjQzNUMxMS4wNDQyIDE2LjYxOTYgMTAuNzUyOSAxNi41Njc1IDEwLjQ3MjcgMTYuNDI0OEMxMC4wNTQ1IDE2LjIxMTcgOS43MTQwNiAxNS44NzEyIDkuNTAxIDE1LjQ1MzFDOS4zNTgzMiAxNS4xNzI5IDkuMzA2MTcgMTQuODgxNiA5LjI4MjI1IDE0LjU4ODhDOS4yNTk1OSAxNC4zMTE0IDkuMjU4OCAxMy45NzQ0IDkuMjU4ODIgMTMuNTg0VjEzLjA4M0M5LjI1ODggMTIuNjkyNyA5LjI1OTYxIDEyLjM1NTUgOS4yODIyNSAxMi4wNzgxQzkuMzA2MTggMTEuNzg1MiA5LjM1ODE5IDExLjQ5MzEgOS41MDEgMTEuMjEyOUM5LjcxNDA2IDEwLjc5NDggMTAuMDU0NiAxMC40NTUyIDEwLjQ3MjcgMTAuMjQyMkMxMC43NTI5IDEwLjA5OTQgMTEuMDQ0MSAxMC4wNDY0IDExLjMzNjkgMTAuMDIyNEMxMS42MTQ0IDkuOTk5NzYgMTEuOTUxMyA5Ljk5OTk1IDEyLjM0MTggOS45OTk5N0gxMy41ODRaTTUuNTU1NjkgMTEuNDgxNEM1LjE0NjU5IDExLjQ4MTQgNC44MTQ0OCAxMS44MTM1IDQuODE0NDggMTIuMjIyNlYxNC40NDQzQzQuODE0NDggMTQuODUzNCA1LjE0NjU5IDE1LjE4NTUgNS41NTU2OSAxNS4xODU1QzUuOTY0NzkgMTUuMTg1NSA2LjI5NjkgMTQuODUzNCA2LjI5NjkgMTQuNDQ0M1YxMi4yMjI2QzYuMjk2OSAxMS44MTM1IDUuOTY0NzkgMTEuNDgxNCA1LjU1NTY5IDExLjQ4MTRaTTEyLjM3MDEgMTEuNDgxNEMxMS45NDM1IDExLjQ4MTQgMTEuNjY3OCAxMS40ODE5IDExLjQ1OCAxMS40OTlDMTEuMjU3MSAxMS41MTU0IDExLjE4MjIgMTEuNTQzOCAxMS4xNDU1IDExLjU2MjVDMTEuMDA2MiAxMS42MzM1IDEwLjg5MjMgMTEuNzQ2NCAxMC44MjEzIDExLjg4NTdDMTAuODAyNyAxMS45MjIzIDEwLjc3NTMgMTEuOTk3MSAxMC43NTg4IDEyLjE5ODJDMTAuNzQxNyAxMi40MDgxIDEwLjc0MTIgMTIuNjg0MiAxMC43NDEyIDEzLjExMTNWMTMuNTU1NkMxMC43NDEyIDEzLjk4MjMgMTAuNzQxNyAxNC4yNTc5IDEwLjc1ODggMTQuNDY3N0MxMC43NzUyIDE0LjY2ODIgMTAuODAyNyAxNC43NDM1IDEwLjgyMTMgMTQuNzgwMkMxMC44OTIzIDE0LjkxOTYgMTEuMDA2MiAxNS4wMzM0IDExLjE0NTUgMTUuMTA0NUMxMS4xODIzIDE1LjEyMzEgMTEuMjU3MyAxNS4xNTA2IDExLjQ1OCAxNS4xNjdDMTEuNjY3OCAxNS4xODQxIDExLjk0MzQgMTUuMTg1NSAxMi4zNzAxIDE1LjE4NTVIMTMuNTU1N0MxMy45ODI0IDE1LjE4NTUgMTQuMjU4IDE1LjE4NDEgMTQuNDY3OCAxNS4xNjdDMTQuNjY4MyAxNS4xNTA2IDE0Ljc0MzUgMTUuMTIzMSAxNC43ODAzIDE1LjEwNDVDMTQuOTE5NyAxNS4wMzM0IDE1LjAzMzUgMTQuOTE5NiAxNS4xMDQ1IDE0Ljc4MDJDMTUuMTIzMiAxNC43NDM1IDE1LjE1MDYgMTQuNjY4MyAxNS4xNjcgMTQuNDY3N0MxNS4xODQxIDE0LjI1NzkgMTUuMTg1NiAxMy45ODIzIDE1LjE4NTYgMTMuNTU1NlYxMy4xMTEzQzE1LjE4NTYgMTIuNjg0MiAxNS4xODQyIDEyLjQwODEgMTUuMTY3IDEyLjE5ODJDMTUuMTUwNiAxMS45OTcxIDE1LjEyMzIgMTEuOTIyMyAxNS4xMDQ1IDExLjg4NTdDMTUuMDMzNSAxMS43NDY0IDE0LjkxOTYgMTEuNjMzNSAxNC43ODAzIDExLjU2MjVDMTQuNzQzNiAxMS41NDM4IDE0LjY2ODYgMTEuNTE1NCAxNC40Njc4IDExLjQ5OUMxNC4yNTggMTEuNDgxOSAxMy45ODI0IDExLjQ4MTQgMTMuNTU1NyAxMS40ODE0SDEyLjM3MDFaTTE0LjEzNjcgMy4zMzI5OEMxNC40MTg1IDMuMzMyNzUgMTQuNjYxMiAzLjMzMjg0IDE0Ljg3OCAzLjM3NTk0QzE1Ljc1OTUgMy41NTEyOSAxNi40NDg3IDQuMjQwNTEgMTYuNjI0MSA1LjEyMjA0QzE2LjY2NzIgNS4zMzg5NSAxNi42NjcyIDUuNTgyMjYgMTYuNjY3IDUuODY0MjNWNS45ODgyNUMxNi42NjcyIDYuMjcwMDEgMTYuNjY3MSA2LjUxMjY3IDE2LjYyNDEgNi43Mjk0NkMxNi40NDg3IDcuNjEwOTkgMTUuNzU5NSA4LjMwMDIxIDE0Ljg3OCA4LjQ3NTU1QzE0LjY2MTIgOC41MTg2NyAxNC40MTg1IDguNTE4NzUgMTQuMTM2NyA4LjUxODUySDUuODY0MjlDNS41ODIyOSA4LjUxODc1IDUuMzM5MDMgOC41MTg3IDUuMTIyMSA4LjQ3NTU1QzQuMjQwNjEgOC4zMDAxOCAzLjU1MTM1IDcuNjEwOTYgMy4zNzYgNi43Mjk0NkMzLjMzMjk0IDYuNTEyNjggMy4zMzI4MSA2LjI3IDMuMzMzMDQgNS45ODgyNVY1Ljg2NDIzQzMuMzMyODEgNS41ODIyNiAzLjMzMjg3IDUuMzM4OTUgMy4zNzYgNS4xMjIwNEMzLjU1MTM1IDQuMjQwNTIgNC4yNDA1OSAzLjU1MTMgNS4xMjIxIDMuMzc1OTRDNS4zMzkwMyAzLjMzMjc5IDUuNTgyMjkgMy4zMzI3NSA1Ljg2NDI5IDMuMzMyOThIMTQuMTM2N1pNNS45MjU4MSA0LjgxNDQyQzUuNTQ2MzMgNC44MTQ0MiA1LjQ2NDY3IDQuODE4NDMgNS40MTExNiA0LjgyOTA3QzUuMTE3MzMgNC44ODc1MyA0Ljg4NzU4IDUuMTE3MjYgNC44MjkxMyA1LjQxMTFDNC44MTg1IDUuNDY0NjEgNC44MTQ0OCA1LjU0NjQgNC44MTQ0OCA1LjkyNTc1QzQuODE0NDggNi4zMDQ1NiA0LjgxODU0IDYuMzg2ODcgNC44MjkxMyA2LjQ0MDRDNC44ODc1NyA2LjczNDIyIDUuMTE3MzUgNi45NjM5NSA1LjQxMTE2IDcuMDIyNDNDNS40NjQ2NyA3LjAzMzA3IDUuNTQ2MzMgNy4wMzcwOCA1LjkyNTgxIDcuMDM3MDhIMTQuMDc0MkMxNC40NTM3IDcuMDM3MDggMTQuNTM1NCA3LjAzMzA2IDE0LjU4ODkgNy4wMjI0M0MxNC44ODI3IDYuOTYzOTggMTUuMTEyNSA2LjczNDI0IDE1LjE3MDkgNi40NDA0QzE1LjE4MTUgNi4zODY4NyAxNS4xODU2IDYuMzA0NjUgMTUuMTg1NiA1LjkyNTc1QzE1LjE4NTYgNS41NDYzMiAxNS4xODE2IDUuNDY0NjEgMTUuMTcwOSA1LjQxMTFDMTUuMTEyNSA1LjExNzI2IDE0Ljg4MjcgNC44ODc1MiAxNC41ODg5IDQuODI5MDdDMTQuNTM1NCA0LjgxODQ1IDE0LjQ1MzUgNC44MTQ0MiAxNC4wNzQyIDQuODE0NDJINS45MjU4MVoiIGZpbGw9IiMwRTBGMTAiLz4KPC9zdmc+Cg==";
+    const imgTblDownload = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE2LjY2NyA5LjE2Njk5QzE3LjEyNzEgOS4xNjcxNyAxNy41IDkuNTM5ODcgMTcuNSAxMFYxMi43MDEyQzE3LjUgMTMuMzcxOSAxNy40OTk3IDEzLjkyNiAxNy40NjI5IDE0LjM3N0MxNy40MjQ2IDE0Ljg0NTEgMTcuMzQyNiAxNS4yNzU0IDE3LjEzNjcgMTUuNjc5N0MxNi44MTcxIDE2LjMwNjkgMTYuMzA2OSAxNi44MTcxIDE1LjY3OTcgMTcuMTM2N0MxNS4yNzU0IDE3LjM0MjYgMTQuODQ1MSAxNy40MjQ2IDE0LjM3NyAxNy40NjI5QzEzLjkyNiAxNy40OTk3IDEzLjM3MTkgMTcuNSAxMi43MDEyIDE3LjVINy4yOTg4M0M2LjYyODA2IDE3LjUgNi4wNzQwMiAxNy40OTk3IDUuNjIzMDUgMTcuNDYyOUM1LjE1NDkgMTcuNDI0NiA0LjcyNDU2IDE3LjM0MjYgNC4zMjAzMSAxNy4xMzY3QzMuNjkzMTEgMTYuODE3MSAzLjE4Mjg2IDE2LjMwNjkgMi44NjMyOCAxNS42Nzk3QzIuNjU3MzYgMTUuMjc1NCAyLjU3NTM5IDE0Ljg0NTEgMi41MzcxMSAxNC4zNzdDMi41MDAyNiAxMy45MjYgMi40OTk5OSAxMy4zNzE5IDIuNSAxMi43MDEyVjEwQzIuNSA5LjUzOTg3IDIuODcyOTIgOS4xNjcxNyAzLjMzMzAxIDkuMTY2OTlDMy43OTMyNCA5LjE2Njk5IDQuMTY2OTkgOS41Mzk3NiA0LjE2Njk5IDEwVjEyLjY2N0M0LjE2Njk5IDEzLjM4MDYgNC4xNjc2IDEzLjg2NjIgNC4xOTgyNCAxNC4yNDEyQzQuMjI4MDggMTQuNjA2IDQuMjgyMzEgMTQuNzkyNiA0LjM0ODYzIDE0LjkyMjlDNC41MDg0MiAxNS4yMzY1IDQuNzYzNTUgMTUuNDkxNiA1LjA3NzE1IDE1LjY1MTRDNS4yMDc0MiAxNS43MTc3IDUuMzkzOTUgMTUuNzcxOSA1Ljc1ODc5IDE1LjgwMThDNi4xMzM4MSAxNS44MzI0IDYuNjE5MzcgMTUuODMzIDcuMzMzMDEgMTUuODMzSDEyLjY2N0MxMy4zODA2IDE1LjgzMyAxMy44NjYyIDE1LjgzMjQgMTQuMjQxMiAxNS44MDE4QzE0LjYwNiAxNS43NzE5IDE0Ljc5MjYgMTUuNzE3NyAxNC45MjI5IDE1LjY1MTRDMTUuMjM2NSAxNS40OTE2IDE1LjQ5MTYgMTUuMjM2NSAxNS42NTE0IDE0LjkyMjlDMTUuNzE3NyAxNC43OTI2IDE1Ljc3MTkgMTQuNjA2IDE1LjgwMTggMTQuMjQxMkMxNS44MzI0IDEzLjg2NjIgMTUuODMzIDEzLjM4MDYgMTUuODMzIDEyLjY2N1YxMEMxNS44MzMgOS41Mzk3NiAxNi4yMDY4IDkuMTY2OTkgMTYuNjY3IDkuMTY2OTlaTTEwIDIuNUMxMC40NjAxIDIuNSAxMC44MzI4IDIuODcyOTIgMTAuODMzIDMuMzMzMDFWMTAuNDg4M0wxMS45MTExIDkuNDExMTNDMTIuMjM2NiA5LjA4NTcgMTIuNzYzNCA5LjA4NTcgMTMuMDg4OSA5LjQxMTEzQzEzLjQxNDMgOS43MzY1NyAxMy40MTQzIDEwLjI2MzQgMTMuMDg4OSAxMC41ODg5TDEwLjU4ODkgMTMuMDg4OUMxMC4yNjM0IDEzLjQxNDMgOS43MzY1NyAxMy40MTQzIDkuNDExMTMgMTMuMDg4OUw2LjkxMTEzIDEwLjU4ODlDNi41ODU3IDEwLjI2MzQgNi41ODU3IDkuNzM2NTcgNi45MTExMyA5LjQxMTEzQzcuMjM2NTcgOS4wODU3IDcuNzYzNDMgOS4wODU3IDguMDg4ODcgOS40MTExM0w5LjE2Njk5IDEwLjQ4ODNWMy4zMzMwMUM5LjE2NzE3IDIuODcyOTIgOS41Mzk4NyAyLjUgMTAgMi41WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==";
+    const imgTblUser     = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjUgMTEuNjY3QzE0LjgwMTEgMTEuNjY3IDE2LjY2NjggMTMuNTMyIDE2LjY2NyAxNS44MzNDMTYuNjY3IDE3LjIxMzYgMTUuNTQ3NiAxOC4zMzI4IDE0LjE2NyAxOC4zMzNINS44MzMwMUM0LjQ1MjQ1IDE4LjMzMjggMy4zMzMwMSAxNy4yMTM2IDMuMzMzMDEgMTUuODMzQzMuMzMzMTggMTMuNTMyIDUuMTk4OTIgMTEuNjY3IDcuNSAxMS42NjdIMTIuNVpNMTAgMS42NjY5OUMxMi4zMDExIDEuNjY2OTkgMTQuMTY2OCAzLjUzMTk3IDE0LjE2NyA1LjgzMzAxQzE0LjE2NyA4LjEzNDE5IDEyLjMwMTIgMTAgMTAgMTBDNy42OTg4MSAxMCA1LjgzMzAxIDguMTM0MTkgNS44MzMwMSA1LjgzMzAxQzUuODMzMTggMy41MzE5NyA3LjY5ODkyIDEuNjY2OTkgMTAgMS42NjY5OVoiIGZpbGw9IiM2MTcxN0MiLz4KPC9zdmc+Cg==";
     const imgEditColReset  = "https://www.figma.com/api/mcp/asset/869c3858-9d6a-4c83-b847-7946233532ab";
     const imgEditColSearch = "https://www.figma.com/api/mcp/asset/219be5b9-37c4-4ff0-926e-c5473c18d486";
     const imgEditColDrag   = "https://www.figma.com/api/mcp/asset/872996d3-e55c-488f-b269-a876bb605a79";
@@ -1830,12 +1689,24 @@
     const imgEditColReset2  = "https://www.figma.com/api/mcp/asset/d5512929-18f2-4464-a8fc-5b086b5e5d85";
     const imgEditColSearch2 = "https://www.figma.com/api/mcp/asset/fde21a93-7186-46ac-ae06-29044400c9d4";
 
-    function ColumnItem({ col, checked, onChange }) {
+    function ColumnItem({ col, checked, onChange, showDrag, onDragStart, onDragEnd }) {
+      const [dragHandleHovered, setDragHandleHovered] = React.useState(false);
       return (
-        <div style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 16px", cursor:"pointer" }}
-          onClick={() => onChange(col.key, !checked)}>
-          {/* Checkbox */}
-          <div style={{ position:"relative", width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+        <div
+          draggable={showDrag}
+          style={{ display:"flex", alignItems:"center", gap:8, padding:"10px 16px",
+            cursor: showDrag ? "grab" : "pointer",
+            boxSizing:"border-box", background:"transparent" }}
+          onClick={showDrag ? undefined : () => onChange(col.key, !checked)}
+          onMouseEnter={e => e.currentTarget.style.background = "#f7f8f8"}
+          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+          onMouseDown={e => e.currentTarget.style.background = "#eff1f2"}
+          onMouseUp={e => e.currentTarget.style.background = "#f7f8f8"}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}>
+          {/* Checkbox — only clicking the checkbox icon toggles selection */}
+          <div style={{ position:"relative", width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, cursor:"pointer" }}
+            onClick={e => { e.stopPropagation(); onChange(col.key, !checked); }}>
             {checked ? (
               <>
                 <div style={{ position:"absolute", left:"50%", top:"50%", transform:"translate(-50%,-50%)", width:12, height:12, overflow:"hidden", zIndex:2 }}>
@@ -1851,12 +1722,30 @@
           </div>
           {/* Label */}
           <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{col.label}</span>
-          {/* Drag handle — only on default columns */}
-          {col.default && (
-            <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
-              <div style={{ position:"absolute", top:"12.5%", right:"27.08%", bottom:"12.5%", left:"12.5%", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <div style={{ transform:"rotate(-90deg)", width:18, height:11, position:"relative", flexShrink:0 }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColDots2} />
+          {/* Drag handle — only on selected (checked) items */}
+          {showDrag && (
+            <div style={{ position:"relative", flexShrink:0 }}
+              onMouseEnter={e => { e.stopPropagation(); setDragHandleHovered(true); }}
+              onMouseLeave={e => { e.stopPropagation(); setDragHandleHovered(false); }}>
+              {/* Tooltip */}
+              {dragHandleHovered && (
+                <div style={{ position:"absolute", bottom:"calc(100% + 8px)", right:"-4px", zIndex:300, width:188, display:"flex", flexDirection:"column", alignItems:"flex-end", pointerEvents:"none" }}>
+                  <div style={{ background:"#4e5a63", borderRadius:4, padding:"8px", width:"100%", boxSizing:"border-box" }}>
+                    <p style={{ color:"white", fontSize:12, lineHeight:"16px", fontFamily:"Helvetica, sans-serif", margin:0 }}>Click or drag to move column up or down</p>
+                  </div>
+                  <div style={{ width:16, height:4, display:"flex", alignItems:"flex-end", justifyContent:"flex-end", paddingRight:5, flexShrink:0 }}>
+                    <div style={{ width:11.314, height:11.314, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                      <div style={{ width:8, height:8, background:"#4e5a63", transform:"rotate(-45deg)", flexShrink:0 }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* Icon */}
+              <div draggable={false} style={{ position:"relative", overflow:"hidden", width:20, height:20 }}>
+                <div draggable={false} style={{ position:"absolute", top:"12.5%", right:"27.08%", bottom:"12.5%", left:"12.5%", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  <div draggable={false} style={{ transform:"rotate(-90deg)", width:18, height:11, position:"relative", flexShrink:0 }}>
+                    <img draggable={false} alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none", userSelect:"none" }} src={imgEditColDots2} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1865,24 +1754,89 @@
       );
     }
 
-    function EditColumnsDropdown({ visibleCols, onChange, onReset }) {
+    function EditColumnsDropdown({ visibleCols, colOrder, onChange, onReset, onReorder }) {
       const [search, setSearch] = React.useState("");
+      const [dragKey, setDragKey] = React.useState(null);
+      const [dropIndex, setDropIndex] = React.useState(null);
+      const selectedListRef = React.useRef(null);
       const query = search.trim().toLowerCase();
-      const defaultCols = ALL_COLUMNS.filter(c => c.default);
-      const sectionOrder = [];
+
+      // Build section map from ALL_COLUMNS
       const sectionMap = new Map();
-      ALL_COLUMNS.filter(c => !c.default).forEach(c => {
-        if (!sectionMap.has(c.section)) { sectionMap.set(c.section, []); sectionOrder.push(c.section); }
-        sectionMap.get(c.section).push(c);
+      ALL_COLUMNS.forEach(col => {
+        const s = col.section || "";
+        if (!sectionMap.has(s)) sectionMap.set(s, []);
+        sectionMap.get(s).push(col);
       });
+
       const filterCols = cols => query ? cols.filter(c => c.label.toLowerCase().includes(query)) : cols;
-      const filteredDefault = filterCols(defaultCols);
-      const filteredSections = sectionOrder.map(s => ({ section:s, cols:filterCols(sectionMap.get(s)) })).filter(s => s.cols.length > 0);
+
+      // Selected items — ordered by colOrder (user-dragged order)
+      const filteredSelected = filterCols(
+        colOrder.map(k => ALL_COLUMNS.find(c => c.key === k)).filter(Boolean)
+      );
+
+      // Unselected items grouped by section — section hidden if all its items are selected
+      const filteredUnselectedSections = SECTION_ORDER
+        .map(s => ({ section:s, cols: filterCols((sectionMap.get(s) || []).filter(c => !visibleCols.has(c.key))) }))
+        .filter(s => s.cols.length > 0);
+
+      const hasSelected   = filteredSelected.length > 0;
+      const hasUnselected = filteredUnselectedSections.length > 0;
+      const noResults     = !hasSelected && !hasUnselected;
+
+      // dragIdx: position of dragged item in the current list
+      const dragIdx = dragKey ? filteredSelected.findIndex(c => c.key === dragKey) : -1;
+
+      const handleDragStart = (e, key) => {
+        e.dataTransfer.effectAllowed = "move";
+        // Delay hiding the original so browser captures ghost image first
+        setTimeout(() => { setDragKey(key); setDropIndex(null); }, 0);
+      };
+      const handleDragEnd = () => { setDragKey(null); setDropIndex(null); };
+
+      // Per-item dragOver: gap position from cursor Y vs midpoint
+      const handleItemDragOver = (e, i) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        const rect = e.currentTarget.getBoundingClientRect();
+        const newIdx = e.clientY < rect.top + rect.height / 2 ? i : i + 1;
+        if (newIdx !== dropIndex) setDropIndex(newIdx);
+      };
+      // Only clear when cursor leaves the entire selected list
+      const handleItemDragLeave = (e) => {
+        if (selectedListRef.current && !selectedListRef.current.contains(e.relatedTarget)) {
+          setDropIndex(null);
+        }
+      };
+      const handleItemDrop = (e) => {
+        e.preventDefault();
+        if (!dragKey || dropIndex === null) { setDragKey(null); setDropIndex(null); return; }
+        // Map dropIndex (in filteredSelected space) to insert position excluding the dragged item
+        const withoutDragged = filteredSelected.filter(c => c.key !== dragKey);
+        const adjustedIdx = dropIndex > dragIdx ? dropIndex - 1 : dropIndex;
+        const insertBeforeKey = withoutDragged[adjustedIdx]?.key;
+        const newOrder = colOrder.filter(k => k !== dragKey);
+        if (insertBeforeKey) {
+          newOrder.splice(newOrder.indexOf(insertBeforeKey), 0, dragKey);
+        } else {
+          newOrder.push(dragKey);
+        }
+        onReorder(newOrder);
+        setDragKey(null);
+        setDropIndex(null);
+      };
+
       return (
         <div style={{ position:"absolute", top:"calc(100% + 4px)", left:0, width:318, background:"white", borderRadius:8,
           boxShadow:"0 12px 24px 0 rgba(0,0,0,0.12), 0 0 2px 0 rgba(0,0,0,0.12)", zIndex:200, paddingTop:8, paddingBottom:8 }}>
-          {/* Reset to Default — left-aligned menu item */}
-          <div style={{ display:"flex", alignItems:"center", gap:4, padding:"10px 16px", cursor:"pointer" }} onClick={onReset}>
+          {/* Reset to Default */}
+          <div style={{ display:"flex", alignItems:"center", gap:4, padding:"10px 16px", cursor:"pointer" }}
+            onClick={onReset}
+            onMouseEnter={e => e.currentTarget.style.background = "#f7f8f8"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+            onMouseDown={e => e.currentTarget.style.background = "#eff1f2"}
+            onMouseUp={e => e.currentTarget.style.background = "#f7f8f8"}>
             <div style={{ position:"relative", width:20, height:20, flexShrink:0 }}>
               <div style={{ position:"absolute", top:"8.33%", right:"12.5%", bottom:"8.33%", left:"8.33%" }}>
                 <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgEditColReset2} />
@@ -1892,7 +1846,7 @@
           </div>
           {/* Divider */}
           <div style={{ padding:"8px 0" }}><div style={{ height:1, background:"#dfe3e5" }} /></div>
-          {/* Search bar — icon trailing on right */}
+          {/* Search bar */}
           <div style={{ padding:"8px 16px" }}>
             <div style={{ display:"flex", alignItems:"center", gap:8, height:36, border:"1px solid #c0c6cb", borderRadius:8, padding:"0 16px", background:"white" }}>
               <input value={search} onChange={e => setSearch(e.target.value)}
@@ -1906,20 +1860,48 @@
             </div>
           </div>
           {/* Column list */}
-          <div style={{ maxHeight:340, overflowY:"auto" }}>
-            {filteredDefault.map(col => (
-              <ColumnItem key={col.key} col={col} checked={visibleCols.has(col.key)} onChange={onChange} />
-            ))}
-            {filteredSections.map(({ section, cols }) => (
+          <div style={{ maxHeight:495, overflowY:"auto" }}>
+            {/* Selected items — item stays in DOM while dragging (opacity faded), box-shadow blue line */}
+            <div ref={selectedListRef}>
+              {filteredSelected.map((col, i) => {
+                const isDragging = col.key === dragKey;
+                const isLast = i === filteredSelected.length - 1;
+                // Don't show indicator at dragged item's own gap (no-op drop)
+                const validDrop = dropIndex !== dragIdx && dropIndex !== dragIdx + 1;
+                const shadow = (validDrop && dropIndex === i)
+                  ? "inset 0 2px 0 #0056ce"
+                  : (validDrop && isLast && dropIndex === filteredSelected.length)
+                    ? "inset 0 -2px 0 #0056ce"
+                    : "none";
+                return (
+                  <div key={col.key}
+                    style={{ opacity: isDragging ? 0 : 1, boxShadow: shadow }}
+                    onDragOver={e => handleItemDragOver(e, i)}
+                    onDragLeave={handleItemDragLeave}
+                    onDrop={handleItemDrop}>
+                    <ColumnItem col={col} checked={true} onChange={onChange} showDrag={true}
+                      onDragStart={e => handleDragStart(e, col.key)}
+                      onDragEnd={handleDragEnd}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            {/* Divider between selected and unselected groups */}
+            {hasSelected && hasUnselected && (
+              <div style={{ padding:"8px 0" }}><div style={{ height:1, background:"#dfe3e5" }} /></div>
+            )}
+            {/* Unselected items by section — section title hidden if fully selected */}
+            {filteredUnselectedSections.map(({ section, cols }, i) => (
               <div key={section}>
-                <div style={{ padding:"8px 0" }}><div style={{ height:1, background:"#dfe3e5" }} /></div>
+                {i > 0 && <div style={{ padding:"8px 0" }}><div style={{ height:1, background:"#dfe3e5" }} /></div>}
                 <div style={{ padding:"8px 16px 4px", fontSize:12, fontWeight:500, color:"#4e5a63", letterSpacing:"0.24px", fontFamily:"Inter, sans-serif" }}>{section}</div>
                 {cols.map(col => (
-                  <ColumnItem key={col.key} col={col} checked={visibleCols.has(col.key)} onChange={onChange} />
+                  <ColumnItem key={col.key} col={col} checked={false} onChange={onChange} showDrag={false} />
                 ))}
               </div>
             ))}
-            {filteredDefault.length === 0 && filteredSections.length === 0 && (
+            {noResults && (
               <div style={{ padding:"16px", textAlign:"center", fontSize:14, color:"#818d96" }}>No columns found</div>
             )}
           </div>
@@ -1935,6 +1917,7 @@
       const [currentPage, setCurrentPage] = React.useState(1);
       const [pageDropOpen, setPageDropOpen] = React.useState(false);
       const [visibleCols, setVisibleCols] = React.useState(new Set(DEFAULT_COL_KEYS));
+      const [colOrder, setColOrder] = React.useState(DEFAULT_COL_ORDER);
       const [showEditCols, setShowEditCols] = React.useState(false);
       const editColsRef = React.useRef(null);
       const PAGE_SIZE = 25;
@@ -1952,9 +1935,13 @@
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
       }, [showEditCols]);
-      const activeCols = ALL_COLUMNS.filter(c => visibleCols.has(c.key));
-      const handleColChange = (key, checked) => setVisibleCols(prev => { const next = new Set(prev); checked ? next.add(key) : next.delete(key); return next; });
-      const handleColReset = () => setVisibleCols(new Set(DEFAULT_COL_KEYS));
+      const activeCols = colOrder.map(k => ALL_COLUMNS.find(c => c.key === k)).filter(Boolean);
+      const handleColChange = (key, checked) => {
+        setVisibleCols(prev => { const next = new Set(prev); checked ? next.add(key) : next.delete(key); return next; });
+        setColOrder(prev => checked ? [...prev, key] : prev.filter(k => k !== key));
+      };
+      const handleColReset = () => { setVisibleCols(new Set(DEFAULT_COL_KEYS)); setColOrder(DEFAULT_COL_ORDER); };
+      const handleColReorder = (newOrder) => setColOrder(newOrder);
       const toggleRow = (ri) => { setAllSelected(false); setSelectedRows(prev => {
         const next = new Set(prev);
         next.has(ri) ? next.delete(ri) : next.add(ri);
@@ -1973,11 +1960,9 @@
               {/* Hide/Show Filters */}
               <button onClick={onToggleFilters} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", borderRadius:8, border:"1px solid #818d96", background:"white", cursor:"pointer", fontFamily:"inherit", flexShrink:0 }}>
                 <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
-                  <div style={{ position:"absolute", top:"18.75%", right:"25.01%", bottom:"18.75%", left:"24.99%" }}>
-                    <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblFilter} />
-                  </div>
+                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblFilter} />
                 </div>
-                <span style={{ fontSize:14, fontWeight:600, color:"#0e0f10", whiteSpace:"nowrap" }}>{filtersCollapsed ? "Show Filters" : "Hide Filters"}</span>
+                <span style={{ fontSize:14, fontWeight:600, color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>{filtersCollapsed ? "Show Filters" : "Hide Filters"}</span>
                 {false && (
                   <div style={{ background:"#dfe3e5", borderRadius:9999, minWidth:20, width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                     <span style={{ fontSize:14, fontWeight:700, color:"#4e5a63", lineHeight:"20px" }}>1</span>
@@ -1989,17 +1974,17 @@
                 <button onClick={() => setShowEditCols(v => !v)}
                   style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", borderRadius:8, border:"1px solid #818d96", background: showEditCols ? "#f7f8f8" : "white", cursor:"pointer", fontFamily:"inherit" }}>
                   <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
-                    <div style={{ position:"absolute", top:"16.66%", right:"16.67%", bottom:"16.67%", left:"16.66%" }}>
-                      <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblColumns} />
-                    </div>
+                    <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblColumns} />
                   </div>
-                  <span style={{ fontSize:14, fontWeight:600, color:"#0e0f10", whiteSpace:"nowrap" }}>Edit Columns</span>
+                  <span style={{ fontSize:14, fontWeight:600, color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Edit Columns</span>
                 </button>
                 {showEditCols && (
                   <EditColumnsDropdown
                     visibleCols={visibleCols}
+                    colOrder={colOrder}
                     onChange={handleColChange}
                     onReset={handleColReset}
+                    onReorder={handleColReorder}
                   />
                 )}
               </div>
@@ -2041,11 +2026,9 @@
               {/* Export */}
               <button style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, height:36, padding:"0 10px", width:120, borderRadius:8, border:"none", background:"#0056ce", cursor:"pointer", opacity: anySelected ? 1 : 0.5, fontFamily:"inherit", flexShrink:0 }}>
                 <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
-                  <div style={{ position:"absolute", top:"12.5%", right:"12.5%", bottom:"12.5%", left:"12.5%" }}>
-                    <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblDownload} />
-                  </div>
+                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblDownload} />
                 </div>
-                <span style={{ fontSize:14, fontWeight:600, color:"white", whiteSpace:"nowrap" }}>Export</span>
+                <span style={{ fontSize:14, fontWeight:600, color:"white", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Export</span>
               </button>
             </div>
 
@@ -2082,7 +2065,7 @@
                       </div>
                       {activeCols.map(col => (
                         <div key={col.key} style={{ ...colStyle, width:col.width }}>
-                          <span style={{ fontSize:12, fontWeight:600, color:"#0e0f10", letterSpacing:"0.24px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{col.label}</span>
+                          <span style={{ fontSize:12, fontWeight:600, color:"#0e0f10", letterSpacing:"0.24px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>{col.label}</span>
                         </div>
                       ))}
                     </div>
@@ -2132,9 +2115,7 @@
                                       <div className="count-tag-tooltip">Export to view full contact details</div>
                                       <div style={{ background:"#dfe3e5", borderRadius:9999, height:20, minWidth:20, display:"flex", alignItems:"center", gap:4, padding:"0 8px", flexShrink:0 }}>
                                         <div style={{ position:"relative", overflow:"hidden", width:12, height:12, flexShrink:0 }}>
-                                          <div style={{ position:"absolute", top:"8.33%", right:"16.67%", bottom:"8.33%", left:"8.33%" }}>
-                                            <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblUser} />
-                                          </div>
+                                          <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblUser} />
                                         </div>
                                         <span style={{ fontSize:12, fontWeight:600, color:"#4e5a63", letterSpacing:"0.24px" }}>{count}</span>
                                       </div>
@@ -2158,14 +2139,14 @@
             <div style={{ display:"flex", alignItems:"center", gap:16, padding:"8px 24px", height:52, flexShrink:0, borderTop:"1px solid #dfe3e5", background:"white" }}>
               {/* Prev */}
               <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} style={{ display:"flex", alignItems:"center", gap:8, background:"none", border:"none", cursor: currentPage === 1 ? "default" : "pointer", padding:0, fontFamily:"inherit", opacity: currentPage === 1 ? 0.35 : 1 }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0e0f10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                <span style={{ fontSize:16, fontWeight:600, color:"#0e0f10", whiteSpace:"nowrap" }}>Prev</span>
+                <img alt="" width="24" height="24" style={{ display:"block", flexShrink:0 }} src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjcwNyA4LjQ1ODAxQzE1LjA5NzQgOC4wNjcyMiAxNS4wOTc3IDcuNDMzNjEgMTQuNzA3IDcuMDQyOTdDMTQuMzE2NCA2LjY1MjM3IDEzLjY4MjggNi42NTI1OCAxMy4yOTIgNy4wNDI5N0w5LjA0Njg3IDExLjI4ODFDOC44MzU1NiAxMS40OTk0IDguNzM5NiAxMS43ODIxIDguNzU2ODQgMTIuMDU4NkM4Ljc2OTY4IDEyLjI5NjMgOC44NjUzMiAxMi41MzA0IDkuMDQ2ODcgMTIuNzExOUwxMy4yOTIgMTYuOTU3QzEzLjY4MjggMTcuMzQ3NyAxNC4zMTYzIDE3LjM0NzcgMTQuNzA3IDE2Ljk1N0MxNS4wOTc2IDE2LjU2NjMgMTUuMDk3NiAxNS45MzI3IDE0LjcwNyAxNS41NDJMMTEuMTY1IDEyTDE0LjcwNyA4LjQ1ODAxWiIgZmlsbD0iIzBFMEYxMCIvPgo8L3N2Zz4K" />
+                <span style={{ fontSize:14, fontWeight:500, color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Prev</span>
               </button>
               {/* Page selector */}
               <div ref={pageRef} style={{ position:"relative" }}>
                 <div onClick={() => setPageDropOpen(o => !o)} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", borderRadius:8, border:"1px solid #818d96", background:"white", cursor:"pointer", minWidth:68 }}>
                   <span style={{ flex:1, fontSize:14, fontWeight:600, color:"#0e0f10" }}>{currentPage}</span>
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d={pageDropOpen ? "M5 12.5l5-5 5 5" : "M5 7.5l5 5 5-5"} stroke="#0e0f10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <img alt="" width="20" height="20" style={{ display:"block", flexShrink:0 }} src={pageDropOpen ? imgSideArrowUp : imgArrowDown} />
                 </div>
                 {pageDropOpen && (
                   <div style={{ position:"absolute", bottom:"calc(100% + 4px)", left:0, background:"white", border:"1px solid #c0c6cb", borderRadius:8, boxShadow:"0 4px 12px rgba(0,0,0,0.12)", zIndex:50, maxHeight:200, overflowY:"auto", minWidth:"100%" }}>
@@ -2182,8 +2163,8 @@
               </div>
               {/* Next */}
               <button onClick={() => setCurrentPage(p => Math.min(p + 1, TOTAL_PAGES))} style={{ display:"flex", alignItems:"center", gap:8, background:"none", border:"none", cursor:"pointer", padding:0, fontFamily:"inherit" }}>
-                <span style={{ fontSize:16, fontWeight:600, color:"#0e0f10", whiteSpace:"nowrap" }}>Next</span>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#0e0f10" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span style={{ fontSize:14, fontWeight:500, color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Next</span>
+                <img alt="" width="24" height="24" style={{ display:"block", flexShrink:0 }} src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkuMjkyOTcgOC40NTgwMUM4LjkwMjU3IDguMDY3MjIgOC45MDIzMyA3LjQzMzYxIDkuMjkyOTcgNy4wNDI5N0M5LjY4MzYxIDYuNjUyMzcgMTAuMzE3MiA2LjY1MjU4IDEwLjcwOCA3LjA0Mjk3TDE0Ljk1MzEgMTEuMjg4MUMxNS4xNjQ0IDExLjQ5OTQgMTUuMjYwNCAxMS43ODIxIDE1LjI0MzIgMTIuMDU4NkMxNS4yMzAzIDEyLjI5NjMgMTUuMTM0NyAxMi41MzA0IDE0Ljk1MzEgMTIuNzExOUwxMC43MDggMTYuOTU3QzEwLjMxNzIgMTcuMzQ3NyA5LjY4MzY4IDE3LjM0NzcgOS4yOTI5NyAxNi45NTdDOC45MDI0MyAxNi41NjYzIDguOTAyNCAxNS45MzI3IDkuMjkyOTcgMTUuNTQyTDEyLjgzNSAxMkw5LjI5Mjk3IDguNDU4MDFaIiBmaWxsPSIjMEUwRjEwIi8+Cjwvc3ZnPgo=" />
               </button>
               {/* Count */}
               <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap" }}>{((currentPage-1)*PAGE_SIZE+1).toLocaleString()} - {Math.min(currentPage*PAGE_SIZE, TOTAL_RECORDS).toLocaleString()} of {TOTAL_RECORDS.toLocaleString()}</span>
@@ -2208,7 +2189,7 @@
       { id:2, title:"Pasadena property list", results:"2,428 results" },
       { id:3, title:"Pasadena property list", results:"2,428 results" },
     ];
-    const imgSavedBookmark = "https://www.figma.com/api/mcp/asset/f9100f9b-3ac0-4535-9404-f76317abcd99";
+    const imgSavedBookmark = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik00LjE2Njk5IDYuMjUwOTRDNC4xNjY5OSA0LjE3OTM1IDUuNzk5MjkgMi41IDcuODEyODQgMi41SDEyLjE4NzhDMTQuMjAxNCAyLjUgMTUuODMzNyA0LjE3OTM1IDE1LjgzMzcgNi4yNTA5NFYxNS4yNDUxQzE1LjgzMzcgMTcuMTYwOSAxMy42NTU0IDE4LjIwMDYgMTIuMjMzNiAxNi45NjM1TDEwLjQ3MTIgMTUuNDMwMUMxMC4xOTk0IDE1LjE5MzYgOS44MDEzIDE1LjE5MzYgOS41Mjk0OCAxNS40MzAxTDcuNzY3MDggMTYuOTYzNUM2LjM0NTI3IDE4LjIwMDYgNC4xNjY5OSAxNy4xNjA5IDQuMTY2OTkgMTUuMjQ1MVY2LjI1MDk0Wk03LjgxMjg0IDQuMDAwMzhDNi42MDQ3MSA0LjAwMDM4IDUuNjI1MzMgNS4wMDc5OSA1LjYyNTMzIDYuMjUwOTRWMTUuMjQ1MUM1LjYyNTMzIDE1Ljg4MzcgNi4zNTE0MiAxNi4yMzAzIDYuODI1MzYgMTUuODE3OUw4LjU4Nzc3IDE0LjI4NDVDOS40MDMyMyAxMy41NzQ5IDEwLjU5NzUgMTMuNTc0OSAxMS40MTI5IDE0LjI4NDVMMTMuMTc1MyAxNS44MTc5QzEzLjY0OTIgMTYuMjMwMyAxNC4zNzUzIDE1Ljg4MzcgMTQuMzc1MyAxNS4yNDUxVjYuMjUwOTRDMTQuMzc1MyA1LjAwNzk5IDEzLjM5NTkgNC4wMDAzOCAxMi4xODc4IDQuMDAwMzhINy44MTI4NFoiIGZpbGw9IiMxNjI1NDAiLz4KPC9zdmc+Cg==";
 
     function FilterPillsRow() {
       return (
@@ -2287,9 +2268,7 @@
               </svg>
             ) : (
               <div style={{ overflow:"hidden", position:"relative", width:16, height:16, flexShrink:0 }}>
-                <div style={{ position:"absolute", top:"12.5%", right:"20.83%", bottom:"12.5%", left:"20.83%" }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSavedBookmark} />
-                </div>
+                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSavedBookmark} />
               </div>
             )}
           </div>
