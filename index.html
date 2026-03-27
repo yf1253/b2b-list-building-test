@@ -1996,6 +1996,9 @@
       const [creditsUsed, setCreditsUsed] = React.useState(250);
       const [unlockedRows, setUnlockedRows] = React.useState(new Set());
       const [hoveredTag, setHoveredTag] = React.useState(null);
+      const hoverTagTimeout = React.useRef(null);
+      const showTag = (key) => { clearTimeout(hoverTagTimeout.current); setHoveredTag(key); };
+      const hideTag = () => { hoverTagTimeout.current = setTimeout(() => setHoveredTag(null), 180); };
       const [currentPage, setCurrentPage] = React.useState(1);
       const [pageDropOpen, setPageDropOpen] = React.useState(false);
       const [visibleCols, setVisibleCols] = React.useState(new Set(DEFAULT_COL_KEYS));
@@ -2174,9 +2177,10 @@
                         style={{ display:"flex", height:52, borderBottom:"1px solid #eff1f2", background:rowBg, cursor:"pointer" }}
                         onMouseEnter={() => setHoveredRow(ri)}
                         onMouseLeave={() => setHoveredRow(null)}
-                        onClick={() => toggleRow(ri)}>
-                        {/* Checkbox */}
-                        <div style={{ ...cellStyle, width:44, borderRight:"1px solid #eff1f2", background:"transparent" }}>
+                        onClick={() => !unlockedRows.has(ri) && toggleRow(ri)}>
+                        {/* Checkbox — always clickable; for unlocked rows it's the only trigger */}
+                        <div style={{ ...cellStyle, width:44, borderRight:"1px solid #eff1f2", background:"transparent" }}
+                          onClick={(e) => { e.stopPropagation(); toggleRow(ri); }}>
                           {isSelected
                             ? <img alt="" src={imgEditColCheck2} style={{ width:20, height:20, display:"block", flexShrink:0 }} />
                             : <div style={{ width:16, height:16, border:"2px solid #a0aab0", borderRadius:3, background:"white", flexShrink:0 }} />
@@ -2216,16 +2220,16 @@
                                         <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0056ce", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nameStr}</span>
                                         {count > 0 && (
                                           <div style={{ position:"relative", flexShrink:0 }}
-                                            onMouseEnter={() => setHoveredTag(tagKey)}
-                                            onMouseLeave={() => setHoveredTag(null)}>
+                                            onMouseEnter={() => showTag(tagKey)}
+                                            onMouseLeave={hideTag}>
                                             <div style={{ background:"#d6e9ff", borderRadius:9999, height:20, minWidth:20, display:"flex", alignItems:"center", gap:4, padding:"0 8px", cursor:"pointer" }}>
                                               <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}><path d="M12.5 11.667C14.8011 11.667 16.6668 13.532 16.667 15.833C16.667 17.2136 15.5476 18.3328 14.167 18.333H5.83301C4.45245 18.3328 3.33301 17.2136 3.33301 15.833C3.33318 13.532 5.19892 11.667 7.5 11.667H12.5ZM10 1.6699C12.3011 1.6699 14.1668 3.53197 14.167 5.83301C14.167 8.13419 12.3012 10 10 10C7.69881 10 5.83301 8.13419 5.83301 5.83301C5.83318 3.53197 7.69892 1.6699 10 1.6699Z" fill="#0056CE"/></svg>
                                               <span style={{ fontSize:12, fontWeight:600, color:"#0056ce", letterSpacing:"0.24px", fontFamily:"Inter,sans-serif" }}>{count}</span>
                                             </div>
                                             {hoveredTag === tagKey && (
                                               <div style={{ position:"absolute", top:28, left:0, width:421, background:"white", borderRadius:12, padding:24, boxShadow:"0 12px 24px rgba(0,0,0,0.12), 0 0 2px rgba(0,0,0,0.12)", zIndex:200, display:"flex", flexDirection:"column", gap:16 }}
-                                                onMouseEnter={() => setHoveredTag(tagKey)}
-                                                onMouseLeave={() => setHoveredTag(null)}>
+                                                onMouseEnter={() => showTag(tagKey)}
+                                                onMouseLeave={hideTag}>
                                                 <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>
                                                   {isOwners ? "Current Owners" : "Residents"} ({count})
                                                 </span>
@@ -2253,7 +2257,7 @@
                                                           </div>
                                                           <div style={{ display:"flex", gap:4, alignItems:"center", minWidth:0 }}>
                                                             <span style={{ width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }} dangerouslySetInnerHTML={{__html: iconEmail}} />
-                                                            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1, minWidth:0 }}>{email}</span>
+                                                            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", minWidth:0, flexShrink:1 }}>{email}</span>
                                                             {ni===0 && <><span style={{ flexShrink:0 }} dangerouslySetInnerHTML={{__html: iconVerified}} /><span style={{ flexShrink:0 }} dangerouslySetInnerHTML={{__html: iconCopy}} /></>}
                                                           </div>
                                                         </div>
