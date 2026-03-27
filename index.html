@@ -1045,8 +1045,8 @@
           <div style={{ flex:1, display:"flex", alignItems:"center", gap:4 }}>
             <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", fontWeight:400 }}>{label}</span>
             {badge && (
-              <div style={{ display:"flex", alignItems:"center", height:20, padding:"0 6px", background:"#d6e9ff", borderRadius:2, flexShrink:0 }}>
-                <span style={{ fontSize:12, fontWeight:600, color:"#0056ce", fontFamily:"Inter,sans-serif", lineHeight:"16px", letterSpacing:"0.24px", whiteSpace:"nowrap" }}>{badge}</span>
+              <div style={{ display:"flex", alignItems:"center", height:20, padding:"0 8px", background:"rgba(214,233,255,0.5)", borderRadius:99, flexShrink:0 }}>
+                <span style={{ fontSize:12, fontWeight:500, color:"#0056ce", fontFamily:"Inter,sans-serif", lineHeight:"16px", letterSpacing:"0.24px", whiteSpace:"nowrap" }}>{badge}</span>
               </div>
             )}
           </div>
@@ -1097,18 +1097,29 @@
               <img src={iconClose} alt="Close" style={{ width:20, height:20, display:"block" }} />
             </button>
 
-            {/* Body — px-32 py-24 gap-24 */}
-            <div style={{ padding:"24px 32px", display:"flex", flexDirection:"column", gap:24 }}>
+            {/* Body — px-32 py-24 gap-24, items-center */}
+            <div style={{ padding:"24px 32px", display:"flex", flexDirection:"column", alignItems:"center", gap:24, width:"100%", boxSizing:"border-box" }}>
+
+              {/* Hero — 48px blue circle + title */}
+              <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, width:"100%" }}>
+                <div style={{ width:48, height:48, borderRadius:9999, background:"#edf5ff", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <div style={{ position:"relative", overflow:"hidden", width:24, height:24 }}>
+                    <div style={{ position:"absolute", inset:"12.5%" }}>
+                      <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblDownload} />
+                    </div>
+                  </div>
+                </div>
+                <span style={{ fontWeight:600, fontSize:16, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif", whiteSpace:"nowrap" }}>{selectedCount} Property Records Selected</span>
+              </div>
 
               {/* Order Details */}
-              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+              <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
                 <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>Order Details</span>
                 <div style={{ background:"#f7f8f8", borderRadius:8, padding:16, display:"flex", flexDirection:"column", gap:16 }}>
-                  {/* Items — gap-8 between rows */}
+                  {/* Items — gap-8, no "Selected Records" row */}
                   <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                    {detailRow("Selected Records", null, selectedCount)}
-                    {detailRow("Owner Matched Records", "1 credit / match", ownerMatched)}
-                    {detailRow("Resident Matched Records", "1 credit / match", residentMatched)}
+                    {detailRow("Owner Matched Records",   "1 credit / match", `${ownerMatched} x 1`)}
+                    {detailRow("Resident Matched Records","1 credit / match", `${residentMatched} x 1`)}
                   </div>
                   {/* Divider */}
                   <div style={{ height:1, background:"#dfe3e5" }} />
@@ -1124,7 +1135,7 @@
               </div>
 
               {/* File Format */}
-              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+              <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
                 <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>File Format</span>
                 <div style={{ display:"flex", gap:12 }}>
                   {formatOption("csv",  "CSV",   iconCsv)}
@@ -1133,20 +1144,20 @@
               </div>
 
               {/* Checkboxes */}
-              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+              <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
                 {checkRow(agreed,  setAgreed,  "I understand that I will be invoiced based on the final number of matched input rows at [$0.02] per match. I acknowledge that this file will be available to download for 60 days after it's ready.")}
                 {checkRow(emailMe, setEmailMe, "Email me a copy of the download link")}
               </div>
 
-              {/* CTA — right-aligned, max-w-200 min-w-120 */}
-              <div style={{ display:"flex", justifyContent:"flex-end" }}>
+              {/* CTA — right-aligned, max-w-200 min-w-120, "Export N records" */}
+              <div style={{ display:"flex", justifyContent:"flex-end", width:"100%" }}>
                 <button disabled={!agreed} onClick={onClose} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, padding:10, minWidth:120, maxWidth:200, borderRadius:8, border:"none", background: agreed ? "#0056ce" : "#a0aab0", cursor: agreed ? "pointer" : "not-allowed" }}>
                   <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
                     <div style={{ position:"absolute", inset:"12.5%" }}>
                       <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblDownload} />
                     </div>
                   </div>
-                  <span style={{ fontSize:14, fontWeight:600, lineHeight:"20px", color:"white", fontFamily:"Inter,sans-serif", whiteSpace:"nowrap" }}>Download {selectedCount} records</span>
+                  <span style={{ fontSize:14, fontWeight:600, lineHeight:"20px", color:"white", fontFamily:"Inter,sans-serif", whiteSpace:"nowrap" }}>Export {selectedCount} records</span>
                 </button>
               </div>
 
