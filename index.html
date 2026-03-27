@@ -760,7 +760,7 @@
       );
     }
 
-    function FilterSection({ title, children, defaultOpen = false }) {
+    function FilterSection({ title, children, defaultOpen = false, required = false }) {
       const [open, setOpen] = useState(defaultOpen);
       const [hovered, setHovered] = useState(false);
       const [count, setCount] = useState(0);
@@ -790,7 +790,9 @@
               onMouseLeave={() => setHovered(false)}
               style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", cursor:"pointer", userSelect:"none", background:headerBg, position:"relative" }}
             >
-              <span style={{ flex:1, fontWeight:500, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"'Inter', sans-serif" }}>{title}</span>
+              <span style={{ flex:1, fontWeight:500, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"'Inter', sans-serif" }}>
+                {title}{required && <span style={{ color:"#e53935", marginLeft:2 }}>*</span>}
+              </span>
               {count > 0 && (
                 <div style={{ display:"flex", alignItems:"center", gap:4 }}>
                   <div style={{ background:"#4e5a63", borderRadius:9999, minWidth:16, width:16, height:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
@@ -1022,6 +1024,138 @@
     const _imgCloseX = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNCA0TDEyIDEyTTEyIDRMNCAxMiIgc3Ryb2tlPSIjMjcyRDMyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+";
     const imgWhiteCheck = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiByeD0iMyIgZmlsbD0iIzAwNTZDRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEzLjcwNzEgNy4yOTI4OUMxNC4wOTc2IDcuNjgzNDIgMTQuMDk3NiA4LjMxNjU4IDEzLjcwNzEgOC43MDcxMUw5LjcwNzExIDEyLjcwNzFDOS4zMTY1OCAxMy4wOTc2IDguNjgzNDIgMTMuMDk3NiA4LjI5Mjg5IDEyLjcwNzFMNi4yOTI4OSAxMC43MDcxQzUuOTAyMzcgMTAuMzE2NiA1LjkwMjM3IDkuNjgzNDIgNi4yOTI4OSA5LjI5Mjg5QzYuNjgzNDIgOC45MDIzNyA3LjMxNjU4IDguOTAyMzcgNy43MDcxMSA5LjI5Mjg5TDkgMTAuNTg1OEwxMi4yOTI5IDcuMjkyODlDMTIuNjgzNCA2LjkwMjM3IDEzLjMxNjYgNi45MDIzNyAxMy43MDcxIDcuMjkyODlaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K";
 
+    function ExportModal({ selectedCount, onClose }) {
+      const [fileFormat, setFileFormat] = React.useState("csv");
+      const [agreed, setAgreed] = React.useState(false);
+      const [emailMe, setEmailMe] = React.useState(false);
+
+      const ownerMatched = Math.round(selectedCount * 2);
+      const residentMatched = Math.round(selectedCount * 2.8);
+      const totalCredits = ownerMatched + residentMatched;
+
+      // Embedded SVG icons as base64 data URIs (permanent, no expiry)
+      const iconClose = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik00LjQ1MTc1IDQuNDUxNTFDNC44MzE0MyA0LjA3MTgzIDUuNDQ3IDQuMDcxODMgNS44MjY2OCA0LjQ1MTUxTDEwLjAwMDMgOC42MjUxNUwxNC4xNzQgNC40NTE1MUMxNC41NTM2IDQuMDcxODMgMTUuMTY5MiA0LjA3MTgzIDE1LjU0ODkgNC40NTE1MUMxNS45Mjg2IDQuODMxMTggMTUuOTI4NiA1LjQ0Njc2IDE1LjU0ODkgNS44MjY0NEwxMS4zNzUzIDEwLjAwMDFMMTUuNTQ4OSAxNC4xNzM3QzE1LjkyODYgMTQuNTUzNCAxNS45Mjg2IDE1LjE2OSAxNS41NDg5IDE1LjU0ODdDMTUuMTY5MiAxNS45MjgzIDE0LjU1MzYgMTUuOTI4MyAxNC4xNzQgMTUuNTQ4N0wxMC4wMDAzIDExLjM3NUw1LjgyNjY4IDE1LjU0ODdDNS40NDcgMTUuOTI4MyA0LjgzMTQzIDE1LjkyODMgNC40NTE3NSAxNS41NDg3QzQuMDcyMDcgMTUuMTY5IDQuMDcyMDcgMTQuNTUzNCA0LjQ1MTc1IDE0LjE3MzdMOC42MjU0IDEwLjAwMDFMNC40NTE3NSA1LjgyNjQ0QzQuMDcyMDcgNS40NDY3NiA0LjA3MjA3IDQuODMxMTggNC40NTE3NSA0LjQ1MTUxWiIgZmlsbD0iIzI3MkQzMiIvPgo8L3N2Zz4K";
+      const iconCoin  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzLjMzMzcgMy44MDk1NVY0Ljk1MjRDMTMuMzMzNyA2LjAwNDc5IDEwLjk0NTYgNi44NTcxNyA4LjAwMDMzIDYuODU3MTdDNS4wNTUwOSA2Ljg1NzE3IDIuNjY2OTkgNi4wMDQ3OSAyLjY2Njk5IDQuOTUyNFYzLjgwOTU1QzIuNjY2OTkgMi43NTcxNyA1LjA1NTA5IDEuOTA0NzkgOC4wMDAzMyAxLjkwNDc5QzEwLjk0NTYgMS45MDQ3OSAxMy4zMzM3IDIuNzU3MTcgMTMuMzMzNyAzLjgwOTU1Wk0xMi4wMjg5IDcuMDE2NjlDMTIuNTI0MSA2Ljg0MDUgMTIuOTc4OSA2LjYxNDMxIDEzLjMzMzcgNi4zMzU3NFY4Ljc2MTkzQzEzLjMzMzcgOS44MTQzMSAxMC45NDU2IDEwLjY2NjcgOC4wMDAzMyAxMC42NjY3QzUuMDU1MDkgMTAuNjY2NyAyLjY2Njk5IDkuODE0MzEgMi42NjY5OSA4Ljc2MTkzVjYuMzM1NzRDMy4wMjE3NSA2LjYxNjY5IDMuNDc2NTIgNi44NDA1IDMuOTcxNzUgNy4wMTY2OUM1LjA0MDggNy4zOTc2NCA2LjQ2NDYxIDcuNjE5MDcgOC4wMDAzMyA3LjYxOTA3QzkuNTM2MDQgNy42MTkwNyAxMC45NTk4IDcuMzk3NjQgMTIuMDI4OSA3LjAxNjY5Wk0yLjY2Njk5IDEwLjE0NTNDMy4wMjE3NSAxMC40MjYyIDMuNDc2NTIgMTAuNjUgMy45NzE3NSAxMC44MjYyQzUuMDQwOCAxMS4yMDcyIDYuNDY0NjEgMTEuNDI4NiA4LjAwMDMzIDExLjQyODZDOS41MzYwNCAxMS40Mjg2IDEwLjk1OTggMTEuMjA3MiAxMi4wMjg5IDEwLjgyNjJDMTIuNTI0MSAxMC42NSAxMi45Nzg5IDEwLjQyMzggMTMuMzMzNyAxMC4xNDUzVjEyLjE5MDVDMTMuMzMzNyAxMy4yNDI5IDEwLjk0NTYgMTQuMDk1MyA4LjAwMDMzIDE0LjA5NTNDNS4wNTUwOSAxNC4wOTUzIDIuNjY2OTkgMTMuMjQyOSAyLjY2Njk5IDEyLjE5MDVWMTAuMTQ1M1oiIGZpbGw9IiMwMDU2Q0UiLz4KPC9zdmc+Cg==";
+      const iconCsv   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwLjU3MDYgNS40NjI0NFYyMC4wNTcxQzIwLjU3MDYgMjEuNjAzNSAxOS4zMTcgMjIuODU3MSAxNy43NzA2IDIyLjg1NzFINy4wODUxNkM1LjUzODc2IDIyLjg1NzEgNC4yODUxNiAyMS42MDM1IDQuMjg1MTYgMjAuMDU3MVYzLjk0MjgyQzQuMjg1MTYgMi4zOTY0MiA1LjUzODc2IDEuMTQyODIgNy4wODUxNiAxLjE0MjgySDE1Ljg2NzhMMjAuNTcwNiA1LjQ2MjQ0WiIgZmlsbD0iIzBDODY3MSIvPjxnIGZpbHRlcj0idXJsKCNmaWx0ZXIwX2RfNTkyMV8xMTc0NjMpIj48cGF0aCBkPSJNMjAuNTY5IDUuNDYyNDRIMTYuNTY2MkMxNi4xNzk2IDUuNDYyNDQgMTUuODY2MiA1LjE0OTA0IDE1Ljg2NjIgNC43NjI0NFYxLjE0MjgyTDIwLjU2OSA1LjQ2MjQ0WiIgZmlsbD0iI0JCRjdFQyIvPjwvZz48cGF0aCBkPSJNNyAxNy4zMzY1QzcgMTYuOTE3OCA3LjA3NTcxIDE2LjU0NTMgNy4yMjcxNCAxNi4yMTkxQzcuMzc4NTYgMTUuODg4OSA3LjU4ODg3IDE1LjYzMzIgNy44NTgwNyAxNS40NTJDOC4xMzA2MyAxNS4yNjY4IDguNDM4NTMgMTUuMTc0MiA4Ljc4MTc2IDE1LjE3NDJDOS4yMDIzOCAxNS4xNzQyIDkuNTYyNDMgMTUuMzA3MSA5Ljg2MTkyIDE1LjU3MjhDMTAuMTYxNCAxNS44Mzg2IDEwLjM2MTYgMTYuMjAxIDEwLjQ2MjYgMTYuNjYwMUg5LjUxMzY0QzkuNDQyOTggMTYuNDgyOSA5LjM0MjAzIDE2LjM0OCA5LjIxMDc5IDE2LjI1NTRDOS4wODI5MiAxNi4xNjI4IDguOTM2NTUgMTYuMTE2NCA4Ljc3MTY2IDE2LjExNjRDOC41MDU4MyAxNi4xMTY0IDguMjkwNDcgMTYuMjI3MiA4LjEyNTU5IDE2LjQ0ODdDNy45NjA3IDE2LjY3MDEgNy44NzgyNiAxNi45NjYxIDcuODc4MjYgMTcuMzM2NUM3Ljg3ODI2IDE3LjcwNyA3Ljk2MDcgMTguMDAzIDguMTI1NTkgMTguMjI0NEM4LjI5MDQ3IDE4LjQ0NTkgOC41MDU4MyAxOC41NTY2IDguNzcxNjYgMTguNTU2NkM4LjkzNjU1IDE4LjU1NjYgOS4wODI5MiAxOC41MTAzIDkuMjEwNzkgMTguNDE3N0M5LjM0MjAzIDE4LjMyNTEgOS40NDI5OCAxOC4xOTAyIDkuNTEzNjQgMTguMDEzSDEwLjQ2MjZDMTAuMzYxNiAxOC40NzIxIDEwLjE2MTQgMTguODM0NSA5Ljg2MTkyIDE5LjEwMDNDOS41NjI0MyAxOS4zNjIgOS4yMDIzOCAxOS40OTI5IDguNzgxNzYgMTkuNDkyOUM4LjQzODUzIDE5LjQ5MjkgOC4xMzA2MyAxOS40MDIzIDcuODU4MDcgMTkuMjIxMUM3LjU4ODg3IDE5LjAzNTggNy4zNzg1NiAxOC43ODAxIDcuMjI3MTQgMTguNDU0QzcuMDc1NzEgMTguMTI3OCA3IDE3Ljc1NTMgNyAxNy4zMzY1WiIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTIuMjczMiAxOS41MDQ5QzEyLjAxNDEgMTkuNTA0OSAxMS43ODE5IDE5LjQ1NDYgMTEuNTc2NiAxOS4zNTM5QzExLjM3MTQgMTkuMjUzMyAxMS4yMDY1IDE5LjEwNDMgMTEuMDgyIDE4LjkwN0MxMC45NjA4IDE4LjcwOTcgMTAuODk2OSAxOC40NzIxIDEwLjg5MDIgMTguMTk0MkgxMS44MDg4QzExLjgyMjMgMTguMzUxMyAxMS44Njc3IDE4LjQ3MjEgMTEuOTQ1MSAxOC41NTY2QzEyLjAyMjUgMTguNjM3MiAxMi4xMjM0IDE4LjY3NzQgMTIuMjQ4IDE4LjY3NzRDMTIuMzc1OCAxOC42Nzc0IDEyLjQ3NjggMTguNjQzMiAxMi41NTA4IDE4LjU3NDhDMTIuNjI0OCAxOC41MDIzIDEyLjY2MTggMTguNDAzNiAxMi42NjE4IDE4LjI3ODhDMTIuNjYxOCAxOC4xNzQxIDEyLjYzMTYgMTguMDg3NSAxMi41NzEgMTguMDE5MUMxMi41MTM4IDE3Ljk1MDYgMTIuNDQxNCAxNy44OTQyIDEyLjM1NCAxNy44NUMxMi4yNjk4IDE3LjgwNTcgMTIuMTQ4NyAxNy43NTUzIDExLjk5MDUgMTcuNjk5QzExLjc2MTcgMTcuNjE0NCAxMS41NzUgMTcuNTI5OCAxMS40MzAzIDE3LjQ0NTNDMTEuMjg1NiAxNy4zNjA3IDExLjE2MTEgMTcuMjM1OSAxMS4wNTY3IDE3LjA3MDhDMTAuOTUyNCAxNi45MDU3IDEwLjkwMDMgMTYuNjkwMyAxMC45MDAzIDE2LjQyNDVDMTAuOTAwMyAxNi4wMjk5IDExLjAxOTcgMTUuNzIxOCAxMS4yNTg2IDE1LjUwMDRDMTEuNDk3NiAxNS4yNzQ5IDExLjgwODggMTUuMTYyMSAxMi4xOTI0IDE1LjE2MjFDMTIuNTgyOCAxNS4xNjIxIDEyLjg5NzQgMTUuMjc0OSAxMy4xMzYzIDE1LjUwMDRDMTMuMzc1MiAxNS43MjE4IDEzLjUwMzEgMTYuMDMxOSAxMy41MTk5IDE2LjQzMDVIMTIuNTg2MUMxMi41Nzk0IDE2LjI5MzYgMTIuNTM3MyAxNi4xODY5IDEyLjQ1OTkgMTYuMTEwNEMxMi4zODI2IDE2LjAyOTkgMTIuMjgzMyAxNS45ODk2IDEyLjE2MjEgMTUuOTg5NkMxMi4wNTc4IDE1Ljk4OTYgMTEuOTczNyAxNi4wMjM4IDExLjkwOTggMTYuMDkyM0MxMS44NDU4IDE2LjE1NjcgMTEuODEzOSAxNi4yNTEzIDExLjgxMzkgMTYuMzc2MkMxMS44MTM5IDE2LjUxMzEgMTEuODY3NyAxNi42MTk4IDExLjk3NTQgMTYuNjk2M0MxMi4wODMxIDE2Ljc3MjggMTIuMjUxMyAxNi44NTU0IDEyLjQ4MDEgMTYuOTQzOUMxMi43MDkgMTcuMDM2NiAxMi44OTQgMTcuMTI1MSAxMy4wMzU0IDE3LjIwOTdDMTMuMTgwMSAxNy4yOTQzIDEzLjMwNDYgMTcuNDE3MSAxMy40MDg5IDE3LjU3ODFDMTMuNTEzMiAxNy43MzkyIDEzLjU2NTMgMTcuOTQ2NiAxMy41NjUzIDE4LjIwMDNDMTMuNTY1MyAxOC40NDE5IDEzLjUxMzIgMTguNjYxMyAxMy40MDg5IDE4Ljg1ODdDMTMuMzA3OSAxOS4wNTYgMTMuMTU5OSAxOS4yMTMgMTIuOTY0NyAxOS4zMjk4QzEyLjc2OTUgMTkuNDQ2NiAxMi41MzkgMTkuNTA0OSAxMi4yNzMyIDE5LjUwNDlaIiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0xNy40MjI4IDE1LjIyMjVMMTYuMTY2IDE5LjQ2MjdIMTUuMDg1OEwxMy44MjkgMTUuMjIyNUgxNC43NDc2TDE1LjYyNTkgMTguNDIzOEwxNi41MDkyIDE1LjIyMjVIMTcuNDIyOFoiIGZpbGw9IndoaXRlIi8+PGRlZnM+PGZpbHRlciBpZD0iZmlsdGVyMF9kXzU5MjFfMTE3NDYzIiB4PSIxMy43NjYyIiB5PSIwLjQ0MjgyMiIgd2lkdGg9IjcuNTAzMTIiIGhlaWdodD0iNy4xMTk1OCIgZmlsdGVyVW5pdHM9InVzZXJTcGFjZU9uVXNlIiBjb2xvci1pbnRlcnBvbGF0aW9uLWZpbHRlcnM9InNSR0IiPjxmZUZsb29kIGZsb29kLW9wYWNpdHk9IjAiIHJlc3VsdD0iQmFja2dyb3VuZEltYWdlRml4Ii8+PGZlQ29sb3JNYXRyaXggaW49IlNvdXJjZUFscGhhIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMTI3IDAiIHJlc3VsdD0iaGFyZEFscGhhIi8+PGZlT2Zmc2V0IGR4PSItMC43IiBkeT0iMC43Ii8+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMC43Ii8+PGZlQ29tcG9zaXRlIGluMj0iaGFyZEFscGhhIiBvcGVyYXRvcj0ib3V0Ii8+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAuMiAwIi8+PGZlQmxlbmQgbW9kZT0ibm9ybWFsIiBpbjI9IkJhY2tncm91bmRJbWFnZUZpeCIgcmVzdWx0PSJlZmZlY3QxX2Ryb3BTaGFkb3dfNTkyMV8xMTc0NjMiLz48ZmVCbGVuZCBtb2RlPSJub3JtYWwiIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImVmZmVjdDFfZHJvcFNoYWRvd181OTIxXzExNzQ2MyIgcmVzdWx0PSJzaGFwZSIvPjwvZmlsdGVyPjwvZGVmcz48L3N2Zz4K";
+      const iconXls   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIwLjU3MDYgNS40NjI0NFYyMC4wNTcxQzIwLjU3MDYgMjEuNjAzNSAxOS4zMTcgMjIuODU3MSAxNy43NzA2IDIyLjg1NzFINy4wODUxNkM1LjUzODc2IDIyLjg1NzEgNC4yODUxNiAyMS42MDM1IDQuMjg1MTYgMjAuMDU3MVYzLjk0MjgyQzQuMjg1MTYgMi4zOTY0MiA1LjUzODc2IDEuMTQyODIgNy4wODUxNiAxLjE0MjgySDE1Ljg2NzhMMjAuNTcwNiA1LjQ2MjQ0WiIgZmlsbD0iIzgxOEQ5NiIvPjxnIGZpbHRlcj0idXJsKCNmaWx0ZXIwX2RfNTkyMV8xMTc0NjcpIj48cGF0aCBkPSJNMjAuNTY5IDUuNDYyNDRIMTYuNTY2MkMxNi4xNzk2IDUuNDYyNDQgMTUuODY2MiA1LjE0OTA0IDE1Ljg2NjIgNC43NjI0NFYxLjE0MjgyTDIwLjU2OSA1LjQ2MjQ0WiIgZmlsbD0iI0RGRTNFNSIvPjwvZz48cGF0aCBkPSJNMTAuMTcyIDE5LjE5ODFMOS4zNjg3IDE3Ljg3TDguNjYwODggMTkuMTk4MUg3LjU3MTA2TDguODM1MDMgMTYuOTkyOEw3LjU0Mjk3IDE0Ljg2MTZIOS41MTM2NEw5LjQ1Mjk3IDE2LjE3MTJMOC42NjA4OCAxOS4xOTgxSDEwLjE3MlpNMTAuMTcyIDE5LjE5ODFMOSI+PC9wYXRoPjxwYXRoIGQ9Ik0xMC4xNzIgMTkuMTk4MUw5LjM2ODcgMTcuODdMOC42NjA4OCAxOS4xOTgxSDcuNTcxMDZMOC44MzUwMyAxNi45OTI4TDcuNTQyOTcgMTQuODYxNkg4LjY2MDg4TDkuNDUyOTcgMTYuMTcxMkwxMC4xNDk2IDE0Ljg2MTZIMTGUMC4yMzk0TDkuOTg2NjUgMTcuMDQ4NEwxMS4yODk5IDE5LjE5ODFIMTAUMDQ3MlpNMTIuNzMyOCAxOC4zODI3SDEzLjk5MTJWMTkuMTk4MUgxMS43NzIyVjE0Ljg2MTZIMC43MzI4VjE4LjM4MjdaTTE1Ljg3NjIgMTkuMjQxM0MxNS41ODc5IDE5LjI0MTMgMTUuMzI5NCAxOS4xODk5IDE1LjEwMSAxOS4wODY5QzE0Ljg3MjUgMTguOTgzOSAxNC42ODkgMTguODMxNiAxNC41NTA1IDE4LjYyOThDMTQuNDE1NiAxOC40MjggMTQuMzQ0NSAxOC4xODUgMTQuMzM3IDE3LjkwMDhIMTUuMzU5NEMxNS4zNzQ0IDE4LjA2MTUgMTUuNDI0OSAxOC4xODUgMTUuNTExMSAxOC4yNzE1QzE1LjU5NzIgMTguMzUzOSAxNS43MDk2IDE4LjM5NSAxNS44NDgxIDE4LjM5NUMxNS45OTA0IDE4LjM5NSAxNi4xMDI4IDE4LjM2IDE2LjE4NTIgMTguMjlDMTYuMjY3NiAxOC4yMTU5IDE2LjMwODggMTguMTE1IDE2LjMwODggMTcuOTg3M0MxNi4zMDg4IDE3Ljg4MDMgMTYuMjc1MSAxNy43OTE3IDE2LjIwNzcgMTcuNzIxN0MxNi4xNDQgMTcuNjUxNyAxNi4wNjM1IDE3LjU5NCAxNS45NjYxIDE3LjU0ODdDMTUuODcyNSAxNy41MDM0IDE1LjczNzcgMTcuNDUyIDE1LjU2MTYgMTcuMzk0M0MxNS4zMDcgMTcuMzA3OCAxNS4wOTkxIDE3LjIyMTMgMTQuOTM4MSAxNy4xMzQ5QzE0Ljc3NyAxNy4wNDg0IDE0LjYzODUgMTYuOTIwNyAxNC41MjI0IDE2Ljc1MTlDMTQuNDA2MyAxNi41ODMgMTQuMzQ4MiAxNi4zNjI3IDE0LjM0ODIgMTYuMDkwOUMxNC4zNDgyIDE1LjY4NzMgMTQuNDgxMiAxNS4zNzIyIDE0Ljc0NzEgMTUuMTQ1N0MxNS4wMTMgMTQuOTE1MSAxNS4zNTk0IDE0Ljc5OTggMTUuNzg2MyAxNC43OTk4QzE2LjIyMDggMTQuNzk5OCAxNi41NzA5IDE0LjkxNTEgMTYuODM2OCAxNS4xNDU3QzE3LjEwMjcgMTUuMzcyMiAxNy4yNDUxIDE1LjY4OTMgMTcuMjYzOCAxNi4wOTcxSDE2LjIyNDVDMTYuMjE3IDE1Ljk1NyAxNi4xNzAyIDE1Ljg0NzkgMTYuMDg0MSAxNS43Njk3QzE1Ljk5NzkgMTUuNjg3MyAxNS44ODc1IDE1LjY0NjEgMTUuNzUyNiAxNS42NDYxQzE1LjYzNjUgMTUuNjQ2MSAxNS41NDI5IDE1LjY4MTEgMTUuNDcxOCAxNS43NTExQzE1LjQwMDYgMTUuODE3IDE1LjM2NSAxNS45MTM4IDE1LjM2NSAxNi4wNDE1QzE1LjM2NSAxNi4xODE1IDE1LjQyNDkgMTYuMjkwNiAxNS41NDQ4IDE2LjM2ODlDMTUuNjY0NiAxNi40NDcxIDE1Ljg1MTkgMTYuNTMxNSAxNi4xMDY1IDE2LjYyMjFDMTYuMzYxMiAxNi43MTY5IDE2LjU2NzIgMTYuODA3NSAxNi43MjQ1IDE2Ljg5MzlDMTYuODg1NSAxNi45ODA0IDE3LjAyNDEgMTcuMTA2IDE3LjE0MDIgMTcuMjcwOEMxNy4yNTYzIDE3LjQzNTUgMTcuMzE0MyAxNy42NDc2IDE3LjMxNDMgMTcuOTA3QzE3LjMxNDMgMTguMTU0MSAxNy4yNTYzIDE4LjM3ODYgMTcuMTQwMiAxOC41ODA0QzE3LjAyNzggMTguNzgyMiAxNi44NjMxIDE4Ljk0MjggMTYuNjQ1OCAxOS4wNjIyQzE2LjQyODYgMTkuMTgxNiAxNi4xNzIxIDE5LjI0MTMgMTUuODc2MiAxOS4yNDEzWiIgZmlsbD0id2hpdGUiLz48ZGVmcz48ZmlsdGVyIGlkPSJmaWx0ZXIwX2RfNTkyMV8xMTc0NjciIHg9IjEzLjc2NjIiIHk9IjAuNDQyODIyIiB3aWR0aD0iNy41MDMxMiIgaGVpZ2h0PSI3LjExOTU4IiBmaWx0ZXJVbml0cz0idXNlclNwYWNlT25Vc2UiIGNvbG9yLWludGVycG9sYXRpb24tZmlsdGVycz0ic1JHQiI+PGZlRmxvb2QgZmxvb2Qtb3BhY2l0eT0iMCIgcmVzdWx0PSJCYWNrZ3JvdW5kSW1hZ2VGaXgiLz48ZmVDb2xvck1hdHJpeCBpbj0iU291cmNlQWxwaGEiIHR5cGU9Im1hdHJpeCIgdmFsdWVzPSIwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAxMjcgMCIgcmVzdWx0PSJoYXJkQWxwaGEiLz48ZmVPZmZzZXQgZHg9Ii0wLjciIGR5PSIwLjciLz48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIwLjciLz48ZmVDb21wb3NpdGUgaW4yPSJoYXJkQWxwaGEiIG9wZXJhdG9yPSJvdXQiLz48ZmVDb2xvck1hdHJpeCB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMC4yIDAiLz48ZmVCbGVuZCBtb2RlPSJub3JtYWwiIGluMj0iQmFja2dyb3VuZEltYWdlRml4IiByZXN1bHQ9ImVmZmVjdDFfZHJvcFNoYWRvd181OTIxXzExNzQ2NyIvPjxmZUJsZW5kIG1vZGU9Im5vcm1hbCIgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iZWZmZWN0MV9kcm9wU2hhZG93XzU5MjFfMTE3NDY3IiByZXN1bHQ9InNoYXBlIi8+PC9maWx0ZXI+PC9kZWZzPjwvc3ZnPgo=";
+
+      // Order Details row helper — no borders, just gap between rows
+      const detailRow = (label, badge, value) => (
+        <div style={{ display:"flex", alignItems:"center", height:20 }}>
+          <div style={{ flex:1, display:"flex", alignItems:"center", gap:4 }}>
+            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", fontWeight:400 }}>{label}</span>
+            {badge && (
+              <div style={{ display:"flex", alignItems:"center", height:20, padding:"0 6px", background:"#d6e9ff", borderRadius:2, flexShrink:0 }}>
+                <span style={{ fontSize:12, fontWeight:600, color:"#0056ce", fontFamily:"Inter,sans-serif", lineHeight:"16px", letterSpacing:"0.24px", whiteSpace:"nowrap" }}>{badge}</span>
+              </div>
+            )}
+          </div>
+          <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", fontWeight:400, flexShrink:0 }}>{value}</span>
+        </div>
+      );
+
+      // File format radio option
+      const formatOption = (id, label, iconSrc) => {
+        const sel = fileFormat === id;
+        return (
+          <div onClick={() => setFileFormat(id)} style={{ flex:1, display:"flex", alignItems:"center", gap:4, padding:16, border:`1px solid ${sel ? "#1370f3" : "#c0c6cb"}`, borderRadius:8, cursor:"pointer", background: sel ? "#edf5ff" : "white" }}>
+            <img src={iconSrc} alt="" style={{ width:24, height:24, flexShrink:0 }} />
+            <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", fontWeight: sel ? 700 : 400 }}>{label}</span>
+            {/* Radio button — 20x20 container with 2px padding, inner 16x16 circle */}
+            <div style={{ width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+              <div style={{ width:16, height:16, borderRadius:"50%", border:`2px solid ${sel ? "#0056ce" : "#a0aab0"}`, background:"white", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                {sel && <div style={{ width:8, height:8, borderRadius:"50%", background:"#0056ce" }} />}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Checkbox row inside grey card
+      const checkRow = (checked, onChange, label) => (
+        <div onClick={() => onChange(!checked)} style={{ display:"flex", alignItems:"flex-start", gap:4, padding:8, background:"#f7f8f8", borderRadius:8, cursor:"pointer" }}>
+          {/* 20x20 wrapper with 2px padding → 16x16 box */}
+          <div style={{ width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+            <div style={{ width:16, height:16, borderRadius:3, border:`2px solid ${checked ? "#0056ce" : "#a0aab0"}`, background: checked ? "#0056ce" : "white", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+              {checked && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+            </div>
+          </div>
+          <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif", fontWeight:400 }}>{label}</span>
+        </div>
+      );
+
+      return (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }} onClick={onClose}>
+          <div style={{ background:"white", borderRadius:12, width:582, maxHeight:"90vh", overflowY:"auto", boxShadow:"0 12px 24px rgba(0,0,0,0.12), 0 0 2px rgba(0,0,0,0.12)", position:"relative" }} onClick={e => e.stopPropagation()}>
+
+            {/* Header — pl-32 pr-16 py-16 */}
+            <div style={{ display:"flex", alignItems:"center", paddingTop:16, paddingBottom:16, paddingLeft:32, paddingRight:16, borderBottom:"1px solid #dfe3e5", borderRadius:"12px 12px 0 0" }}>
+              <span style={{ flex:1, fontWeight:600, fontSize:18, lineHeight:"24px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>Export Selected Records</span>
+            </div>
+            {/* Close button — absolute top-8 right-8, 40×40 */}
+            <button onClick={onClose} style={{ position:"absolute", top:8, right:8, width:40, height:40, borderRadius:8, border:"none", background:"white", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
+              <img src={iconClose} alt="Close" style={{ width:20, height:20, display:"block" }} />
+            </button>
+
+            {/* Body — px-32 py-24 gap-24 */}
+            <div style={{ padding:"24px 32px", display:"flex", flexDirection:"column", gap:24 }}>
+
+              {/* Order Details */}
+              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>Order Details</span>
+                <div style={{ background:"#f7f8f8", borderRadius:8, padding:16, display:"flex", flexDirection:"column", gap:16 }}>
+                  {/* Items — gap-8 between rows */}
+                  <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                    {detailRow("Selected Records", null, selectedCount)}
+                    {detailRow("Owner Matched Records", "1 credit / match", ownerMatched)}
+                    {detailRow("Resident Matched Records", "1 credit / match", residentMatched)}
+                  </div>
+                  {/* Divider */}
+                  <div style={{ height:1, background:"#dfe3e5" }} />
+                  {/* Total Credits */}
+                  <div style={{ display:"flex", alignItems:"center" }}>
+                    <span style={{ flex:1, fontWeight:600, fontSize:16, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>Total Credits</span>
+                    <div style={{ display:"flex", alignItems:"center", gap:4 }}>
+                      <img src={iconCoin} alt="" style={{ width:16, height:16, display:"block", flexShrink:0 }} />
+                      <span style={{ fontWeight:700, fontSize:16, lineHeight:"20px", color:"#0056ce", fontFamily:"Inter,sans-serif", letterSpacing:"0.16px" }}>{totalCredits}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* File Format */}
+              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>File Format</span>
+                <div style={{ display:"flex", gap:12 }}>
+                  {formatOption("csv",  "CSV",   iconCsv)}
+                  {formatOption("xlsx", "Excel", iconXls)}
+                </div>
+              </div>
+
+              {/* Checkboxes */}
+              <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                {checkRow(agreed,  setAgreed,  "I understand that I will be invoiced based on the final number of matched input rows at [$0.02] per match. I acknowledge that this file will be available to download for 60 days after it's ready.")}
+                {checkRow(emailMe, setEmailMe, "Email me a copy of the download link")}
+              </div>
+
+              {/* CTA — right-aligned, max-w-200 min-w-120 */}
+              <div style={{ display:"flex", justifyContent:"flex-end" }}>
+                <button disabled={!agreed} onClick={onClose} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, padding:10, minWidth:120, maxWidth:200, borderRadius:8, border:"none", background: agreed ? "#0056ce" : "#a0aab0", cursor: agreed ? "pointer" : "not-allowed" }}>
+                  <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
+                    <div style={{ position:"absolute", inset:"12.5%" }}>
+                      <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblDownload} />
+                    </div>
+                  </div>
+                  <span style={{ fontSize:14, fontWeight:600, lineHeight:"20px", color:"white", fontFamily:"Inter,sans-serif", whiteSpace:"nowrap" }}>Download {selectedCount} records</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function SaveFiltersModal({ locVal, filterItems, onClose, onSave }) {
       const buildTitle = () => {
         const parts = filterItems.flatMap(f =>
@@ -1222,7 +1356,7 @@
           </div>
 
           {/* Location Section */}
-          <FilterSection title="Location" defaultOpen={true}>
+          <FilterSection title="Location" defaultOpen={true} required={true}>
             <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
             <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%", position:"relative" }}>
               <div style={{ background:"white", border:"1px solid #c0c6cb", borderRadius:8, display:"flex", height:36, alignItems:"center", padding:"0 8px 0 16px", gap:8 }}>
@@ -1861,6 +1995,7 @@
       const [currentPage, setCurrentPage] = React.useState(1);
       const [pageDropOpen, setPageDropOpen] = React.useState(false);
       const [visibleCols, setVisibleCols] = React.useState(new Set(DEFAULT_COL_KEYS));
+      const [showExportModal, setShowExportModal] = React.useState(false);
       const [colOrder, setColOrder] = React.useState(DEFAULT_COL_ORDER);
       const [showEditCols, setShowEditCols] = React.useState(false);
       const editColsRef = React.useRef(null);
@@ -1968,12 +2103,13 @@
                 </span>
               </div>
               {/* Export */}
-              <button style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, height:36, padding:"0 10px", width:120, borderRadius:8, border:"none", background:"#0056ce", cursor:"pointer", opacity: anySelected ? 1 : 0.5, fontFamily:"inherit", flexShrink:0 }}>
+              <button onClick={() => anySelected && setShowExportModal(true)} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, height:36, padding:"0 10px", width:120, borderRadius:8, border:"none", background:"#0056ce", cursor: anySelected ? "pointer" : "not-allowed", opacity: anySelected ? 1 : 0.5, fontFamily:"inherit", flexShrink:0 }}>
                 <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
                   <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblDownload} />
                 </div>
                 <span style={{ fontSize:14, fontWeight:600, color:"white", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Export</span>
               </button>
+              {showExportModal && <ExportModal selectedCount={selectedCount} onClose={() => setShowExportModal(false)} />}
             </div>
 
             {/* Scrollable table area */}
