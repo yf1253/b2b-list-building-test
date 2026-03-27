@@ -1960,14 +1960,14 @@
 
       const filterCols = cols => query ? cols.filter(c => c.label.toLowerCase().includes(query)) : cols;
 
-      // Selected items — ordered by colOrder (user-dragged order)
+      // Selected items — ordered by colOrder (user-dragged order), address always fixed so excluded
       const filteredSelected = filterCols(
-        colOrder.map(k => ALL_COLUMNS.find(c => c.key === k)).filter(Boolean)
+        colOrder.map(k => ALL_COLUMNS.find(c => c.key === k)).filter(Boolean).filter(c => c.key !== "address")
       );
 
-      // Unselected items grouped by section — section hidden if all its items are selected
+      // Unselected items grouped by section — section hidden if all its items are selected, address excluded
       const filteredUnselectedSections = SECTION_ORDER
-        .map(s => ({ section:s, cols: filterCols((sectionMap.get(s) || []).filter(c => !visibleCols.has(c.key))) }))
+        .map(s => ({ section:s, cols: filterCols((sectionMap.get(s) || []).filter(c => !visibleCols.has(c.key) && c.key !== "address")) }))
         .filter(s => s.cols.length > 0);
 
       const hasSelected   = filteredSelected.length > 0;
