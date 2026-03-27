@@ -2219,7 +2219,7 @@
                                             onMouseEnter={() => setHoveredTag(tagKey)}
                                             onMouseLeave={() => setHoveredTag(null)}>
                                             <div style={{ background:"#d6e9ff", borderRadius:9999, height:20, minWidth:20, display:"flex", alignItems:"center", gap:4, padding:"0 8px", cursor:"pointer" }}>
-                                              <img alt="" src={imgTblUser} style={{ width:12, height:12, display:"block", flexShrink:0 }} />
+                                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}><path d="M12.5 11.667C14.8011 11.667 16.6668 13.532 16.667 15.833C16.667 17.2136 15.5476 18.3328 14.167 18.333H5.83301C4.45245 18.3328 3.33301 17.2136 3.33301 15.833C3.33318 13.532 5.19892 11.667 7.5 11.667H12.5ZM10 1.6699C12.3011 1.6699 14.1668 3.53197 14.167 5.83301C14.167 8.13419 12.3012 10 10 10C7.69881 10 5.83301 8.13419 5.83301 5.83301C5.83318 3.53197 7.69892 1.6699 10 1.6699Z" fill="#0056CE"/></svg>
                                               <span style={{ fontSize:12, fontWeight:600, color:"#0056ce", letterSpacing:"0.24px", fontFamily:"Inter,sans-serif" }}>{count}</span>
                                             </div>
                                             {hoveredTag === tagKey && (
