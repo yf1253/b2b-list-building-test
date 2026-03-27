@@ -1580,12 +1580,7 @@
           {/* Owner Demographics */}
           <FilterSection title="Owner Demographics">
             <FilterMinMax label="Owner age" options={["18","25","30","35","40","45","50","55","60","65","70","75","80+"]} />
-            <FilterMinMax label="Salary range" options={["$30K","$50K","$75K","$100K","$150K","$200K","$300K","$500K+"]} />
-            <FilterLabeledText label="Education" placeholder="Example: Stanford University" />
-            <div style={{ display:"flex", flexDirection:"column", gap:12, width:"100%" }}>
-              <FilterCheckbox label="Recently changed jobs" />
-              <FilterCheckbox label="Deceased" />
-            </div>
+            <FilterCheckbox label="Deceased" />
           </FilterSection>
 
           {/* School District */}
