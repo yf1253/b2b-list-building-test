@@ -892,7 +892,7 @@
         globalCtx?.registerData("who:showUnlocked", null);
       }, []);
       useEffect(() => {
-        globalCtx?.registerData("who:selected", { label: "Who To Include", tags: [{ text: selected, type: "include" }] });
+        globalCtx?.registerData("who:selected", { label: "Who to Include", tags: [{ text: selected, type: "include" }] });
       }, [selected]);
       useEffect(() => {
         globalCtx?.registerData("who:hasContact", hasContact ? { label: "Has contact information", tags: [] } : null);
@@ -924,7 +924,7 @@
               style={{ display:"flex", gap:8, alignItems:"center", padding:"12px 16px", width:"100%", background: (open || hovered) ? "#f7f8f8" : "white", position:"relative", cursor:"pointer", userSelect:"none" }}
             >
               <div style={{ display:"flex", flex:1, gap:4, alignItems:"center", minWidth:0 }}>
-                <span style={{ fontWeight:500, fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Who To Include</span>
+                <span style={{ fontWeight:500, fontSize:14, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Who to Include</span>
                 {open && (
                   <div
                     style={{ position:"relative", flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center" }}
