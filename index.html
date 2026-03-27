@@ -661,7 +661,7 @@
           <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>
           <div style={{ display:"flex", gap:8, width:"100%", alignItems:"center" }}>
             <div style={{ flex:1 }}><FilterSelectField placeholder="Min" options={options} dataKey={base + ":min"} dataLabel={label + " min"} /></div>
-            <span style={{ color:"#a0aab0", fontSize:14, lineHeight:"20px", flexShrink:0, userSelect:"none" }}>—</span>
+            <div style={{ width:8, height:1, background:"#a0aab0", flexShrink:0 }} />
             <div style={{ flex:1 }}><FilterSelectField placeholder="Max" options={options} dataKey={base + ":max"} dataLabel={label + " max"} /></div>
           </div>
         </div>
