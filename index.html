@@ -1024,7 +1024,7 @@
     const _imgCloseX = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNCA0TDEyIDEyTTEyIDRMNCAxMiIgc3Ryb2tlPSIjMjcyRDMyIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+";
     const imgWhiteCheck = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiByeD0iMyIgZmlsbD0iIzAwNTZDRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTEzLjcwNzEgNy4yOTI4OUMxNC4wOTc2IDcuNjgzNDIgMTQuMDk3NiA4LjMxNjU4IDEzLjcwNzEgOC43MDcxMUw5LjcwNzExIDEyLjcwNzFDOS4zMTY1OCAxMy4wOTc2IDguNjgzNDIgMTMuMDk3NiA4LjI5Mjg5IDEyLjcwNzFMNi4yOTI4OSAxMC43MDcxQzUuOTAyMzcgMTAuMzE2NiA1LjkwMjM3IDkuNjgzNDIgNi4yOTI4OSA5LjI5Mjg5QzYuNjgzNDIgOC45MDIzNyA3LjMxNjU4IDguOTAyMzcgNy43MDcxMSA5LjI5Mjg5TDkgMTAuNTg1OEwxMi4yOTI5IDcuMjkyODlDMTIuNjgzNCA2LjkwMjM3IDEzLjMxNjYgNi45MDIzNyAxMy43MDcxIDcuMjkyODlaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K";
 
-    function ExportModal({ selectedCount, onClose }) {
+    function ExportModal({ selectedCount, onClose, onExport }) {
       const [fileFormat, setFileFormat] = React.useState("csv");
       const [agreed, setAgreed] = React.useState(false);
       const [emailMe, setEmailMe] = React.useState(false);
@@ -1145,7 +1145,7 @@
 
               {/* CTA — right-aligned, max-w-200 min-w-120, "Export N records" */}
               <div style={{ display:"flex", justifyContent:"flex-end", width:"100%" }}>
-                <button disabled={!agreed} onClick={onClose} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, padding:10, minWidth:120, maxWidth:200, borderRadius:8, border:"none", background: agreed ? "#0056ce" : "#a0aab0", cursor: agreed ? "pointer" : "not-allowed" }}>
+                <button disabled={!agreed} onClick={() => agreed && onExport && onExport(totalCredits)} style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:4, padding:10, minWidth:120, maxWidth:200, borderRadius:8, border:"none", background: agreed ? "#0056ce" : "#a0aab0", cursor: agreed ? "pointer" : "not-allowed" }}>
                   <img alt="" src={imgTblDownload} style={{ width:20, height:20, display:"block", flexShrink:0 }} />
                   <span style={{ fontSize:14, fontWeight:600, lineHeight:"20px", color:"white", fontFamily:"Inter,sans-serif", whiteSpace:"nowrap" }}>Export {selectedCount} records</span>
                 </button>
@@ -1993,6 +1993,9 @@
       const [selectedRows, setSelectedRows] = React.useState(new Set());
       const [allSelected, setAllSelected] = React.useState(false);
       const [hoveredRow, setHoveredRow] = React.useState(null);
+      const [creditsUsed, setCreditsUsed] = React.useState(250);
+      const [unlockedRows, setUnlockedRows] = React.useState(new Set());
+      const [hoveredTag, setHoveredTag] = React.useState(null);
       const [currentPage, setCurrentPage] = React.useState(1);
       const [pageDropOpen, setPageDropOpen] = React.useState(false);
       const [visibleCols, setVisibleCols] = React.useState(new Set(DEFAULT_COL_KEYS));
@@ -2029,6 +2032,18 @@
       }); };
       const selectedCount = allSelected ? TOTAL_RECORDS : selectedRows.size;
       const anySelected = selectedCount > 0;
+      const handleExport = (creditsSpent) => {
+        setCreditsUsed(prev => Math.min(500, prev + creditsSpent));
+        setUnlockedRows(prev => {
+          const next = new Set(prev);
+          if (allSelected) { TABLE_ROWS.forEach((_, i) => next.add(i)); }
+          else { selectedRows.forEach(i => next.add(i)); }
+          return next;
+        });
+        setSelectedRows(new Set());
+        setAllSelected(false);
+        setShowExportModal(false);
+      };
       return (
         <div style={{ flex:1, display:"flex", padding:"8px 0 0 8px", background:"#f7f8f8", overflow:"hidden", minWidth:0 }}>
 
@@ -2095,11 +2110,11 @@
               {/* Credit Usage Bar */}
               <div style={{ display:"flex", alignItems:"center", gap:4, background:"#f2f6fa", borderRadius:8, padding:"8px 16px", flexShrink:0, height:36, boxSizing:"border-box" }}>
                 <div style={{ width:100, height:6, display:"flex", borderRadius:9999, overflow:"hidden", flexShrink:0 }}>
-                  <div style={{ flex:1, background:"linear-gradient(-17.5deg,#0056ce 10%,#6534ce 89%)", borderRadius:9999 }} />
-                  <div style={{ flex:1, background:"#add3ff", borderRadius:"0 9999px 9999px 0" }} />
+                  <div style={{ flex:creditsUsed, background:"linear-gradient(-17.5deg,#0056ce 10%,#6534ce 89%)", borderRadius:9999 }} />
+                  <div style={{ flex:500 - creditsUsed, background:"#add3ff", borderRadius:"0 9999px 9999px 0" }} />
                 </div>
                 <span style={{ fontSize:12, color:"#0056ce", letterSpacing:"0.24px", whiteSpace:"nowrap" }}>
-                  <strong style={{ fontWeight:700 }}>250</strong>
+                  <strong style={{ fontWeight:700 }}>{creditsUsed}</strong>
                   <span style={{ fontWeight:500 }}> / 500 Credits</span>
                 </span>
               </div>
@@ -2110,7 +2125,7 @@
                 </div>
                 <span style={{ fontSize:14, fontWeight:600, color:"white", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Export</span>
               </button>
-              {showExportModal && <ExportModal selectedCount={selectedCount} onClose={() => setShowExportModal(false)} />}
+              {showExportModal && <ExportModal selectedCount={selectedCount} onClose={() => setShowExportModal(false)} onExport={handleExport} />}
             </div>
 
             {/* Scrollable table area */}
@@ -2184,20 +2199,91 @@
                                   <span style={{ fontSize:12, fontWeight:500, color:"#6534ce", letterSpacing:"0.24px", whiteSpace:"nowrap" }}>Individual</span>
                                 </div>
                               ) : (isOwners || isResidents) ? (
-                                <>
-                                  <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", filter:"blur(4px)" }}>{isOwners ? row.owners : row.residents}</span>
-                                  {count > 0 && (
-                                    <div className="count-tag-wrap">
-                                      <div className="count-tag-tooltip">Export to view full contact details</div>
-                                      <div style={{ background:"#dfe3e5", borderRadius:9999, height:20, minWidth:20, display:"flex", alignItems:"center", gap:4, padding:"0 8px", flexShrink:0 }}>
-                                        <div style={{ position:"relative", overflow:"hidden", width:12, height:12, flexShrink:0 }}>
-                                          <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblUser} />
-                                        </div>
-                                        <span style={{ fontSize:12, fontWeight:600, color:"#4e5a63", letterSpacing:"0.24px" }}>{count}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
+                                (() => {
+                                  const isUnlocked = unlockedRows.has(ri);
+                                  const nameStr = isOwners ? row.owners : row.residents;
+                                  const tagKey = `${ri}-${col.key}`;
+                                  if (isUnlocked) {
+                                    const names = nameStr.split(',').map(n => n.trim());
+                                    const typeList = ["Individual","Company","Trust"];
+                                    const typeColors = { Individual:{bg:"#f5f2ff",color:"#6534ce"}, Company:{bg:"#eafcf1",color:"#15823d"}, Trust:{bg:"#fff1e9",color:"#cc5e1e"} };
+                                    const iconPhone = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10.67 10.49L9.55 11.61C8.03 10.71 6.72 9.4 5.82 7.88L6.94 6.76C7.14 6.56 7.2 6.27 7.11 6.01L6.06 3.23C5.94 2.88 5.61 2.64 5.24 2.64H3.07C2.56 2.64 2.14 3.06 2.17 3.57C2.51 8.13 6.14 11.76 10.7 12.1C11.21 12.13 11.63 11.71 11.63 11.2V9.03C11.63 8.66 11.39 8.33 11.04 8.21L8.26 7.16C7.99 7.07 7.71 7.13 7.5 7.33" stroke="#818D96" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+                                    const iconEmail = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1.5" y="3.5" width="13" height="9" rx="1" stroke="#818D96" stroke-width="1.4"/><path d="M1.5 5L8 9.5L14.5 5" stroke="#818D96" stroke-width="1.4"/></svg>`;
+                                    const iconVerified = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="7" fill="#20C05C"/><path d="M6.5 10L9 12.5L13.5 7.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                                    const iconCopy = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6.5" y="6.5" width="8" height="9" rx="1.5" stroke="#818D96" stroke-width="1.4"/><path d="M5 4.5H12.5C13.05 4.5 13.5 4.95 13.5 5.5V7" stroke="#818D96" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+                                    return (
+                                      <>
+                                        <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0056ce", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nameStr}</span>
+                                        {count > 0 && (
+                                          <div style={{ position:"relative", flexShrink:0 }}
+                                            onMouseEnter={() => setHoveredTag(tagKey)}
+                                            onMouseLeave={() => setHoveredTag(null)}>
+                                            <div style={{ background:"#d6e9ff", borderRadius:9999, height:20, minWidth:20, display:"flex", alignItems:"center", gap:4, padding:"0 8px", cursor:"pointer" }}>
+                                              <img alt="" src={imgTblUser} style={{ width:12, height:12, display:"block", flexShrink:0 }} />
+                                              <span style={{ fontSize:12, fontWeight:600, color:"#0056ce", letterSpacing:"0.24px", fontFamily:"Inter,sans-serif" }}>{count}</span>
+                                            </div>
+                                            {hoveredTag === tagKey && (
+                                              <div style={{ position:"absolute", top:28, left:0, width:421, background:"white", borderRadius:12, padding:24, boxShadow:"0 12px 24px rgba(0,0,0,0.12), 0 0 2px rgba(0,0,0,0.12)", zIndex:200, display:"flex", flexDirection:"column", gap:16 }}
+                                                onMouseEnter={() => setHoveredTag(tagKey)}
+                                                onMouseLeave={() => setHoveredTag(null)}>
+                                                <span style={{ fontWeight:600, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Inter,sans-serif" }}>
+                                                  {isOwners ? "Current Owners" : "Residents"} ({count})
+                                                </span>
+                                                <div style={{ display:"flex", flexDirection:"column", gap:20 }}>
+                                                  {names.map((name, ni) => {
+                                                    const type = typeList[ni % typeList.length];
+                                                    const {bg, color} = typeColors[type];
+                                                    const phone = ni === 0 ? `503.671.${3900 + ri * 7}` : "--";
+                                                    const email = ni === 0 ? `${name.toLowerCase().replace(/\s+/g,".")}@gmail.com` : "--";
+                                                    return (
+                                                      <div key={ni} style={{ display:"flex", gap:24, alignItems:"flex-start" }}>
+                                                        <div style={{ display:"flex", flexDirection:"column", gap:4, width:130, flexShrink:0 }}>
+                                                          <span style={{ fontSize:14, lineHeight:"20px", color: ni===0 ? "#0056ce" : "#0e0f10", fontFamily:"Helvetica,sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{name}</span>
+                                                          <div style={{ background:bg, borderRadius:99, height:20, display:"inline-flex", alignItems:"center", padding:"0 8px", alignSelf:"flex-start" }}>
+                                                            <span style={{ fontSize:12, fontWeight:500, color, letterSpacing:"0.24px", whiteSpace:"nowrap", fontFamily:"Inter,sans-serif" }}>{type}</span>
+                                                          </div>
+                                                        </div>
+                                                        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                                                          <div style={{ display:"flex", gap:4, alignItems:"center" }}>
+                                                            <span style={{ width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center" }} dangerouslySetInnerHTML={{__html: iconPhone}} />
+                                                            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", whiteSpace:"nowrap" }}>{phone}</span>
+                                                            {ni===0 && <><span dangerouslySetInnerHTML={{__html: iconVerified}} /><span dangerouslySetInnerHTML={{__html: iconCopy}} /></>}
+                                                          </div>
+                                                          <div style={{ display:"flex", gap:4, alignItems:"center" }}>
+                                                            <span style={{ width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center" }} dangerouslySetInnerHTML={{__html: iconEmail}} />
+                                                            <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", fontFamily:"Helvetica,sans-serif", whiteSpace:"nowrap" }}>{email}</span>
+                                                            {ni===0 && <><span dangerouslySetInnerHTML={{__html: iconVerified}} /><span dangerouslySetInnerHTML={{__html: iconCopy}} /></>}
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  })}
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  } else {
+                                    return (
+                                      <>
+                                        <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", filter:"blur(4px)" }}>{nameStr}</span>
+                                        {count > 0 && (
+                                          <div className="count-tag-wrap">
+                                            <div className="count-tag-tooltip">Export to view full contact details</div>
+                                            <div style={{ background:"#dfe3e5", borderRadius:9999, height:20, minWidth:20, display:"flex", alignItems:"center", gap:4, padding:"0 8px", flexShrink:0 }}>
+                                              <div style={{ position:"relative", overflow:"hidden", width:12, height:12, flexShrink:0 }}>
+                                                <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgTblUser} />
+                                              </div>
+                                              <span style={{ fontSize:12, fontWeight:600, color:"#4e5a63", letterSpacing:"0.24px" }}>{count}</span>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  }
+                                })()
                               ) : (
                                 <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{row[col.key]}</span>
                               )}
