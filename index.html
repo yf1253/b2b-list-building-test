@@ -2116,6 +2116,8 @@
       const [colMenuOpen, setColMenuOpen] = React.useState(null); // col.key or null
       const [sortConfig, setSortConfig] = React.useState(null);   // { key, dir: "asc"|"desc" }
       const colMenuRef = React.useRef(null);
+      const [dragHeaderKey, setDragHeaderKey] = React.useState(null);
+      const [dropHeaderIdx, setDropHeaderIdx] = React.useState(null);
       React.useEffect(() => {
         if (!colMenuOpen) return;
         const handler = (e) => { if (colMenuRef.current && !colMenuRef.current.contains(e.target)) setColMenuOpen(null); };
@@ -2289,11 +2291,30 @@
                       {activeCols.map((col, ci) => {
                         const isMenuOpen = colMenuOpen === col.key;
                         const isSorted = sortConfig?.key === col.key;
+                        const isDraggable = col.key !== "address";
+                        const isDragging = dragHeaderKey === col.key;
+                        const isDropTarget = dropHeaderIdx === ci && dragHeaderKey && dragHeaderKey !== col.key;
                         const stickyStyle = ci === 0 ? { position:"sticky", left:44, zIndex: isMenuOpen ? 10 : 3, boxShadow:"2px 0 4px rgba(0,0,0,0.06)" } : {};
                         return (
                           <div key={col.key}
                             ref={isMenuOpen ? colMenuRef : null}
-                            style={{ ...colStyle, width:col.width, ...stickyStyle, position: ci===0 ? "sticky" : "relative", cursor:"pointer", userSelect:"none" }}
+                            draggable={isDraggable}
+                            onDragStart={isDraggable ? e => { e.dataTransfer.effectAllowed="move"; setDragHeaderKey(col.key); } : null}
+                            onDragOver={isDraggable ? e => { e.preventDefault(); e.dataTransfer.dropEffect="move"; setDropHeaderIdx(ci); } : null}
+                            onDrop={isDraggable ? e => {
+                              e.preventDefault();
+                              if (!dragHeaderKey || dragHeaderKey === col.key) return;
+                              const from = colOrder.indexOf(dragHeaderKey);
+                              const to = colOrder.indexOf(col.key);
+                              if (from < 0 || to < 0) return;
+                              const next = [...colOrder];
+                              next.splice(from, 1);
+                              next.splice(to, 0, dragHeaderKey);
+                              handleColReorder(next);
+                              setDragHeaderKey(null); setDropHeaderIdx(null);
+                            } : null}
+                            onDragEnd={() => { setDragHeaderKey(null); setDropHeaderIdx(null); }}
+                            style={{ ...colStyle, width:col.width, ...stickyStyle, position: ci===0 ? "sticky" : "relative", cursor: isDraggable ? "grab" : "pointer", userSelect:"none", opacity: isDragging ? 0.4 : 1, borderLeft: isDropTarget ? "2px solid #0056ce" : undefined }}
                             onMouseEnter={e => e.currentTarget.style.background = "#e3e6e8"}
                             onMouseLeave={e => { if (!isMenuOpen) e.currentTarget.style.background = "#eff1f2"; }}
                           >
