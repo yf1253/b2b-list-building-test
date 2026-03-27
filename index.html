@@ -2233,7 +2233,7 @@
                   <div style={{ width:totalWidth }}>
                     {/* Sticky header */}
                     <div style={{ display:"flex", height:36, position:"sticky", top:0, zIndex:2, flexShrink:0, borderBottom:"1px solid #dfe3e5" }}>
-                      <div style={{ ...colStyle, width:44, cursor:"pointer" }} onClick={() => {
+                      <div style={{ ...colStyle, width:44, cursor:"pointer", justifyContent:"center" }} onClick={() => {
                           const anySelected = selectedRows.size > 0 || allSelected;
                           setAllSelected(false);
                           // Any selection (including indeterminate) → clear all; none selected → select all
@@ -2271,7 +2271,7 @@
                         onMouseLeave={() => setHoveredRow(null)}
                         onClick={() => !unlockedRows.has(ri) && toggleRow(ri)}>
                         {/* Checkbox — always clickable; for unlocked rows it's the only trigger */}
-                        <div style={{ ...cellStyle, width:44, borderRight:"1px solid #eff1f2", background:"transparent" }}
+                        <div style={{ ...cellStyle, width:44, borderRight:"1px solid #eff1f2", background:"transparent", justifyContent:"center" }}
                           onClick={(e) => { e.stopPropagation(); toggleRow(ri); }}>
                           {isSelected
                             ? <img alt="" src={imgEditColCheck2} style={{ width:20, height:20, display:"block", flexShrink:0 }} />
