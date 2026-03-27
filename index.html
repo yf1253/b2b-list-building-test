@@ -943,6 +943,11 @@
       ];
 
       const whoCount = (selected !== "Any" ? 1 : 0) + (hasContact ? 1 : 0) + (mustHavePhone ? 1 : 0) + (highConfPhone ? 1 : 0) + (mustHaveEmail ? 1 : 0) + (highConfEmail ? 1 : 0) + (showUnlocked ? 1 : 0);
+      const prevWhoCountRef = useRef(0);
+      useEffect(() => {
+        const delta = whoCount - prevWhoCountRef.current;
+        if (delta !== 0) { globalCtx?.register(delta); prevWhoCountRef.current = whoCount; }
+      }, [whoCount]);
 
       return (
         <React.Fragment>
