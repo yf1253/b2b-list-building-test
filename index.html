@@ -502,7 +502,7 @@
       const dataKey = (ctx?.title || "filter") + ":" + (label || placeholder || "select");
       return (
         <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          {label && <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>}
+          {label && <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{label}</span>}
           <FilterSelectField placeholder={placeholder} options={options} dataKey={dataKey} dataLabel={label || placeholder} />
         </div>
       );
@@ -574,7 +574,7 @@
 
       return (
         <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          {label && <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>}
+          {label && <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{label}</span>}
 
           {/* Tags */}
           {selectedEntries.length > 0 && (
@@ -647,7 +647,7 @@
     function FilterLabeledText({ label, placeholder }) {
       return (
         <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          {label && <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>}
+          {label && <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{label}</span>}
           <FilterTextField placeholder={placeholder} />
         </div>
       );
@@ -658,7 +658,7 @@
       const base = (ctx?.title || "filter") + ":" + label;
       return (
         <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>
+          <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{label}</span>
           <div style={{ display:"flex", gap:8, width:"100%", alignItems:"center" }}>
             <div style={{ flex:1 }}><FilterSelectField placeholder="Min" options={options} dataKey={base + ":min"} dataLabel={label + " min"} /></div>
             <div style={{ width:8, height:1, background:"#a0aab0", flexShrink:0 }} />
@@ -702,7 +702,7 @@
 
       return (
         <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>
+          <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{label}</span>
           <div style={{ display:"flex", border:"1px solid #c0c6cb", borderRadius:8, overflow:"hidden", height:36, width:"100%", padding:3, boxSizing:"border-box", gap:0 }}>
             {opts.map((opt, i) => (
               <React.Fragment key={opt}>
@@ -726,7 +726,7 @@
     function FilterDateOrDropdown({ label }) {
       return (
         <div style={{ display:"flex", flexDirection:"column", gap:8, width:"100%" }}>
-          {label && <span style={{ fontSize:12, lineHeight:"16px", color:"#0e0f10" }}>{label}</span>}
+          {label && <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10" }}>{label}</span>}
           <div style={{ display:"flex", gap:8, width:"100%" }}>
             {["From","To"].map(p => (
               <div key={p} style={{ flex:1, background:"white", border:"1px solid #c0c6cb", borderRadius:8, display:"flex", height:36, alignItems:"center", padding:"0 8px 0 16px", gap:4 }}>
