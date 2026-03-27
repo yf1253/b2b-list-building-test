@@ -1604,12 +1604,13 @@
               </div>
             )}
           </div>
-          <button onClick={() => setShowSaveModal(true)} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", background:"white", border:"1px solid #818d96", borderRadius:8, fontSize:14, fontWeight:600, lineHeight:"20px", color:"#0e0f10", cursor:"pointer", fontFamily:"Inter, sans-serif", whiteSpace:"nowrap" }}>
-            <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0 }}>
+          {(() => { const saveDisabled = totalFilterCount === 0 && !locVal.trim(); return (
+          <button onClick={() => !saveDisabled && setShowSaveModal(true)} disabled={saveDisabled} style={{ display:"flex", alignItems:"center", gap:4, height:36, padding:"0 10px", background:"white", border:`1px solid ${saveDisabled ? "#c0c6cb" : "#818d96"}`, borderRadius:8, fontSize:14, fontWeight:600, lineHeight:"20px", color: saveDisabled ? "#b0b8be" : "#0e0f10", cursor: saveDisabled ? "default" : "pointer", fontFamily:"Inter, sans-serif", whiteSpace:"nowrap" }}>
+            <div style={{ position:"relative", overflow:"hidden", width:20, height:20, flexShrink:0, opacity: saveDisabled ? 0.4 : 1 }}>
               <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSavedBookmark} />
             </div>
             Save Filters
-          </button>
+          </button>); })()}
           {showSaveModal && (() => {
             const items = [
               locVal ? { label: "Location", tags: [{ text: locVal, type: "include" }] } : null,
