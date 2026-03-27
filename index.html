@@ -2155,9 +2155,10 @@
                     {/* Sticky header */}
                     <div style={{ display:"flex", height:36, position:"sticky", top:0, zIndex:2, flexShrink:0, borderBottom:"1px solid #dfe3e5" }}>
                       <div style={{ ...colStyle, width:44, cursor:"pointer" }} onClick={() => {
-                          const pageAllSelected = TABLE_ROWS.every((_, i) => selectedRows.has(i));
+                          const anySelected = selectedRows.size > 0 || allSelected;
                           setAllSelected(false);
-                          setSelectedRows(pageAllSelected ? new Set() : new Set(TABLE_ROWS.map((_, i) => i)));
+                          // Any selection (including indeterminate) → clear all; none selected → select all
+                          setSelectedRows(anySelected ? new Set() : new Set(TABLE_ROWS.map((_, i) => i)));
                         }}>
                         {(() => {
                           const pageAllSelected = TABLE_ROWS.length > 0 && TABLE_ROWS.every((_, i) => selectedRows.has(i));
