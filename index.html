@@ -1569,7 +1569,7 @@
           {/* Ownership */}
           <FilterSection title="Ownership">
             <FilterMultiSelect label="Owner type" options={["Individual","Trust","LLC","Corporation","Partnership"]} />
-            <FilterMultiSelect label="Occupancy status" options={["Owner Occupied","Tenant Occupied","Vacant","Unknown"]} />
+            <FilterToggleGroup label="Owner occupied" options={["Any","Yes","No"]} />
             <FilterMultiSelect label="Absentee owner location" options={["In State","Out of State","Out of Country"]} />
             <FilterMinMax label="Years of ownership" options={["1","2","3","5","10","15","20","25","30+"]} />
             <FilterMinMax label="Number of properties owned" options={["1","2","3","5","10","15","20","25","50+"]} />
