@@ -457,7 +457,7 @@
         setValue(opt);
         setOpen(false);
         if (dataKey) globalCtx?.registerData(dataKey, { label: dataLabel || placeholder, tags: [{ text: opt, type: "include" }] });
-        ctx?.setSummary?.(dataKey, [{ text: dataLabel ? dataLabel + ": " + opt : opt }]);
+        ctx?.setSummary?.(dataKey, [{ text: dataLabel ? dataLabel + ": " + opt : opt, onRemove: () => { if (isFilled) ctx?.register(-1); setValue(null); setOpen(false); if (dataKey) globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); } }]);
       }
       function handleClear(e) {
         e.stopPropagation();
@@ -561,7 +561,7 @@
             label: label || ctx?.title || "Filter",
             tags: entries.map(([opt, type]) => ({ text: opt, type }))
           });
-          ctx?.setSummary?.(dataKey, entries.map(([opt, type]) => ({ text: opt, type })));
+          ctx?.setSummary?.(dataKey, entries.map(([opt, type]) => ({ text: opt, type, onRemove: () => setSelections(prev => { const next = {...prev}; delete next[opt]; return next; }) })));
         } else {
           globalCtx?.registerData(dataKey, null);
           ctx?.setSummary?.(dataKey, null);
@@ -708,7 +708,7 @@
         setVal(opt);
         if (!isDefault) {
           globalCtx?.registerData(dataKey, { label, tags: [{ text: opt, type: opt === "Exclude" ? "exclude" : "include" }] });
-          ctx?.setSummary?.(dataKey, [{ text: (label ? label + ": " : "") + opt }]);
+          ctx?.setSummary?.(dataKey, [{ text: (label ? label + ": " : "") + opt, onRemove: () => { if (!wasDefault) ctx?.register(-1); setVal(opts[0]); globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); } }]);
         } else {
           globalCtx?.registerData(dataKey, null);
           ctx?.setSummary?.(dataKey, null);
@@ -782,7 +782,7 @@
         if (checked && !prevRef.current) {
           ctx?.register(1);
           globalCtx?.registerData(dataKey, { label, tags: [] });
-          ctx?.setSummary?.(dataKey, [{ text: label }]);
+          ctx?.setSummary?.(dataKey, [{ text: label, onRemove: () => setChecked(false) }]);
         }
         if (!checked && prevRef.current) {
           ctx?.register(-1);
@@ -864,13 +864,13 @@
                     <div key={i} className={`filter-tag filter-tag-${item.type}`}>
                       <span className="tag-text">{item.text}</span>
                       <span className="tag-fade" />
-                      <span className="tag-close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1L9 9M9 1L1 9" stroke="#0e0f10" strokeWidth="1.5" strokeLinecap="round"/></svg></span>
+                      <span className="tag-close" onClick={e => { e.stopPropagation(); item.onRemove?.(); }}><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1L9 9M9 1L1 9" stroke="#0e0f10" strokeWidth="1.5" strokeLinecap="round"/></svg></span>
                     </div>
                   ) : (
                     <div key={i} className="filter-tag filter-tag-plain">
                       <span className="tag-text">{item.text}</span>
                       <span className="tag-fade" />
-                      <span className="tag-close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1L9 9M9 1L1 9" stroke="#4e5a63" strokeWidth="1.5" strokeLinecap="round"/></svg></span>
+                      <span className="tag-close" onClick={e => { e.stopPropagation(); item.onRemove?.(); }}><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1L9 9M9 1L1 9" stroke="#4e5a63" strokeWidth="1.5" strokeLinecap="round"/></svg></span>
                     </div>
                   )
                 )}
