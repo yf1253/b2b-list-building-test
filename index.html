@@ -438,7 +438,7 @@
         if (ctx?.resetKey > 0) {
           setValue(null);
           setOpen(false);
-          if (dataKey) globalCtx?.registerData(dataKey, null);
+          if (dataKey) { globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); }
         }
       }, [ctx?.resetKey]);
 
@@ -450,6 +450,7 @@
         setValue(opt);
         setOpen(false);
         if (dataKey) globalCtx?.registerData(dataKey, { label: dataLabel || placeholder, tags: [{ text: opt, type: "include" }] });
+        ctx?.setSummary?.(dataKey, [{ text: dataLabel ? dataLabel + ": " + opt : opt }]);
       }
       function handleClear(e) {
         e.stopPropagation();
@@ -457,6 +458,7 @@
         setValue(null);
         setOpen(false);
         if (dataKey) globalCtx?.registerData(dataKey, null);
+        ctx?.setSummary?.(dataKey, null);
       }
 
       return (
@@ -535,6 +537,7 @@
           setOpen(false);
           prevCountRef.current = 0;
           globalCtx?.registerData(dataKey, null);
+          ctx?.setSummary?.(dataKey, null);
         }
       }, [ctx?.resetKey]);
 
@@ -551,8 +554,10 @@
             label: label || ctx?.title || "Filter",
             tags: entries.map(([opt, type]) => ({ text: opt, type }))
           });
+          ctx?.setSummary?.(dataKey, entries.map(([opt, type]) => ({ text: opt, type })));
         } else {
           globalCtx?.registerData(dataKey, null);
+          ctx?.setSummary?.(dataKey, null);
         }
       }, [selectedCount, selections]);
 
@@ -684,6 +689,7 @@
         if (ctx?.resetKey > 0) {
           setVal(opts[0]);
           globalCtx?.registerData(dataKey, null);
+          ctx?.setSummary?.(dataKey, null);
         }
       }, [ctx?.resetKey]);
 
@@ -695,8 +701,10 @@
         setVal(opt);
         if (!isDefault) {
           globalCtx?.registerData(dataKey, { label, tags: [{ text: opt, type: opt === "Exclude" ? "exclude" : "include" }] });
+          ctx?.setSummary?.(dataKey, [{ text: (label ? label + ": " : "") + opt }]);
         } else {
           globalCtx?.registerData(dataKey, null);
+          ctx?.setSummary?.(dataKey, null);
         }
       }
 
@@ -767,10 +775,12 @@
         if (checked && !prevRef.current) {
           ctx?.register(1);
           globalCtx?.registerData(dataKey, { label, tags: [] });
+          ctx?.setSummary?.(dataKey, [{ text: label }]);
         }
         if (!checked && prevRef.current) {
           ctx?.register(-1);
           globalCtx?.registerData(dataKey, null);
+          ctx?.setSummary?.(dataKey, null);
         }
         prevRef.current = checked;
       }, [checked]);
@@ -787,6 +797,7 @@
       const [hovered, setHovered] = useState(false);
       const [count, setCount] = useState(0);
       const [resetKey, setResetKey] = useState(0);
+      const [summaryMap, setSummaryMapState] = useState({});
       const headerBg = (open || hovered) ? "#f7f8f8" : "white";
       const globalCtx = useContext(GlobalFilterContext);
 
@@ -795,15 +806,28 @@
         globalCtx?.register(delta);
       }, [globalCtx]);
 
+      const setSummary = useCallback((key, items) => {
+        setSummaryMapState(prev => {
+          if (!items || (Array.isArray(items) && items.length === 0)) {
+            if (!prev[key]) return prev;
+            const next = {...prev}; delete next[key]; return next;
+          }
+          return {...prev, [key]: items};
+        });
+      }, []);
+
       function handleClear(e) {
         e.stopPropagation();
         globalCtx?.register(-count);
         setCount(0);
         setResetKey(k => k + 1);
+        setSummaryMapState({});
       }
 
+      const allSummaryItems = Object.values(summaryMap).flat();
+
       return (
-        <FilterSectionContext.Provider value={{ register, resetKey, title }}>
+        <FilterSectionContext.Provider value={{ register, resetKey, title, setSummary }}>
           <HRule />
           <div style={{ display:"flex", flexDirection:"column", width:"100%", flexShrink:0 }}>
             <div
@@ -825,6 +849,21 @@
               )}
               <FilterArrow up={open} />
             </div>
+            {!open && allSummaryItems.length > 0 && (
+              <div style={{ padding:"4px 16px 10px", display:"flex", flexWrap:"wrap", gap:4 }}>
+                {allSummaryItems.map((item, i) =>
+                  item.type === "include" || item.type === "exclude" ? (
+                    <div key={i} className={`filter-tag filter-tag-${item.type}`} style={{ pointerEvents:"none" }}>
+                      <span className="tag-text">{item.text}</span>
+                    </div>
+                  ) : (
+                    <span key={i} style={{ fontSize:12, lineHeight:"16px", color:"#4e5a63", background:"#eff1f2", borderRadius:4, padding:"2px 6px", whiteSpace:"nowrap" }}>
+                      {item.text}
+                    </span>
+                  )
+                )}
+              </div>
+            )}
             {open && (
               <div style={{ display:"flex", flexDirection:"column", gap:16, padding:"20px 16px", width:"100%" }}>
                 {children}
