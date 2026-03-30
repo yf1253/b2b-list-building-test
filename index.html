@@ -62,10 +62,16 @@
       display: none; position: absolute; right: 24px; top: 0; bottom: 0;
       width: 20px; pointer-events: none; z-index: 2;
     }
+    .filter-tag-include { background: #edf5ff; }
+    .filter-tag-exclude { background: #ffecec; }
+    .filter-tag-plain  { background: #eff1f2; }
     .filter-tag-include .tag-fade { background: linear-gradient(to right, transparent, #edf5ff); }
     .filter-tag-exclude .tag-fade { background: linear-gradient(to right, transparent, #ffecec); }
+    .filter-tag-plain   .tag-fade { background: linear-gradient(to right, transparent, #eff1f2); }
     .filter-tag-include .tag-close { background: #edf5ff; }
     .filter-tag-exclude .tag-close { background: #ffecec; }
+    .filter-tag-plain   .tag-close { background: #eff1f2; }
+    .filter-tag-plain .tag-text { color: #4e5a63; }
     .filter-tag:hover .tag-close { display: flex; }
     .filter-tag:hover .tag-fade { display: block; }
     @keyframes toastSlideIn {
@@ -859,9 +865,11 @@
                       <span className="tag-text">{item.text}</span>
                     </div>
                   ) : (
-                    <span key={i} style={{ fontSize:12, lineHeight:"16px", color:"#4e5a63", background:"#eff1f2", borderRadius:4, padding:"4px 6px", whiteSpace:"nowrap" }}>
-                      {item.text}
-                    </span>
+                    <div key={i} className="filter-tag filter-tag-plain" style={{ pointerEvents:"none" }}>
+                      <span className="tag-text">{item.text}</span>
+                      <span className="tag-fade" />
+                      <span className="tag-close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1L9 9M9 1L1 9" stroke="#4e5a63" strokeWidth="1.5" strokeLinecap="round"/></svg></span>
+                    </div>
                   )
                 )}
               </div>
