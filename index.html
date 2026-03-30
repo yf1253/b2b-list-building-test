@@ -861,8 +861,10 @@
               <div style={{ padding:"16px", display:"flex", flexWrap:"wrap", gap:4 }}>
                 {allSummaryItems.map((item, i) =>
                   item.type === "include" || item.type === "exclude" ? (
-                    <div key={i} className={`filter-tag filter-tag-${item.type}`} style={{ pointerEvents:"none" }}>
+                    <div key={i} className={`filter-tag filter-tag-${item.type}`}>
                       <span className="tag-text">{item.text}</span>
+                      <span className="tag-fade" />
+                      <span className="tag-close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1L9 9M9 1L1 9" stroke="#0e0f10" strokeWidth="1.5" strokeLinecap="round"/></svg></span>
                     </div>
                   ) : (
                     <div key={i} className="filter-tag filter-tag-plain">
