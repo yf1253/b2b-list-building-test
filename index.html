@@ -85,17 +85,29 @@
     .toast-enter { animation: toastSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
     .toast-exit  { animation: toastSlideOut 0.25s ease-in forwards; }
     .count-tag-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
+    @keyframes tip-above-in  { from { opacity:0; transform:translateX(-50%) translateY(4px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    @keyframes tip-above-out { from { opacity:1; transform:translateX(-50%) translateY(0); }  to { opacity:0; transform:translateX(-50%) translateY(4px); } }
     .count-tag-tooltip {
-      display: none; position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%);
-      background: #4e5a63; border-radius: 4px; padding: 8px;
-      white-space: nowrap; font-size: 12px; color: white; font-family: Helvetica, sans-serif;
+      display: none; position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+      background: #272D32; border-radius: 6px; padding: 5px 10px;
+      white-space: nowrap; font-size: 12px; color: white; font-family: 'Inter', sans-serif;
       line-height: 16px; z-index: 100; pointer-events: none;
     }
-    .count-tag-tooltip::after {
-      content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%) rotate(45deg);
-      width: 8px; height: 8px; background: #4e5a63; margin-top: -4px;
+    .count-tag-tooltip::before {
+      content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) rotate(45deg);
+      width: 6px; height: 6px; background: #272D32; margin-bottom: -3px;
     }
-    .count-tag-wrap:hover .count-tag-tooltip { display: block; }
+    .count-tag-wrap:hover .count-tag-tooltip { display: block; animation: col-sort-tip-in 0.15s ease forwards; }
+    .info-tip {
+      background: #272D32; border-radius: 6px; padding: 5px 10px;
+      white-space: normal; width: 200px; font-size: 12px; color: white; font-family: 'Inter', sans-serif;
+      line-height: 16px; z-index: 100; pointer-events: none;
+      animation: col-sort-tip-in 0.15s ease forwards;
+    }
+    .info-tip::before {
+      content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) rotate(45deg);
+      width: 6px; height: 6px; background: #272D32; margin-bottom: -3px;
+    }
     .copy-icon-wrap { position: relative; display: inline-flex; flex-shrink: 0; cursor: pointer; }
     .copy-icon-tip {
       display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
@@ -108,7 +120,20 @@
       width: 6px; height: 6px; background: #4e5a63; margin-top: -3px;
     }
     .copy-icon-wrap:hover .copy-icon-tip { display: block; }
-    div:hover > .col-menu-btn { opacity: 1 !important; }
+    div:hover > .col-sort-btn { opacity: 1 !important; }
+    @keyframes col-sort-tip-in  { from { opacity:0; transform:translateX(-50%) translateY(-4px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    @keyframes col-sort-tip-out { from { opacity:1; transform:translateX(-50%) translateY(0); }  to { opacity:0; transform:translateX(-50%) translateY(-4px); } }
+    .col-sort-fixed-tip {
+      position: fixed; background: #272D32; border-radius: 6px; padding: 5px 10px;
+      white-space: nowrap; font-size: 12px; color: white; font-family: 'Inter', sans-serif;
+      line-height: 16px; z-index: 9999; pointer-events: none; transform: translateX(-50%);
+      animation: col-sort-tip-in 0.15s ease forwards;
+    }
+    .col-sort-fixed-tip.hiding { animation: col-sort-tip-out 0.12s ease forwards; }
+    .col-sort-fixed-tip::before {
+      content: ''; position: absolute; bottom: 100%; left: var(--arrow-left, 50%); transform: translateX(-50%) rotate(45deg);
+      width: 6px; height: 6px; background: #272D32; margin-bottom: -3px;
+    }
     .edit-col-scroll { scrollbar-width: none; -ms-overflow-style: none; }
     .edit-col-scroll::-webkit-scrollbar { display: none; }
   </style>
@@ -132,46 +157,46 @@
     // Column order matches Figma default selected order, then optional columns within each section
     const ALL_COLUMNS = [
       // Default selected (in Figma display order)
-      { key:"address",       label:"Address",                         width:220, default:true,                section:"Location" },
-      { key:"city",          label:"City",                            width:100, default:true,                section:"Location" },
-      { key:"state",         label:"State",                           width:60,  default:true,                section:"Location" },
-      { key:"zip",           label:"Zip",                             width:80,  default:true,                section:"Location" },
-      { key:"owners",        label:"Owners",                          width:200, default:true, blurred:true,  section:"Who to Contact" },
-      { key:"residents",     label:"Residents",                       width:200, default:true, blurred:true,  section:"Who to Contact" },
-      { key:"propType",      label:"Property Type",                   width:140, default:true,                section:"Property Details" },
-      { key:"beds",          label:"Beds",                            width:70,  default:true,                section:"Property Details" },
-      { key:"baths",         label:"Baths",                           width:70,  default:true,                section:"Property Details" },
-      { key:"estValue",      label:"Estimated Value",                 width:120, default:true,                section:"Financial Insight" },
-      { key:"lastSaleDate",  label:"Last Sale Date",                  width:110, default:true,                section:"Price" },
-      { key:"lastSalePrice", label:"Last Sale Price",                 width:110, default:true,                section:"Price" },
-      { key:"ownerType",     label:"Owner Type",                      width:230, default:true,                section:"Ownership" },
-      { key:"occupancy",     label:"Occupancy Status",                width:140, default:true,                section:"Ownership" },
+      { key:"address",       label:"Address",                         width:220, default:true,                section:"Location",           sortType:"text"   },
+      { key:"city",          label:"City",                            width:100, default:true,                section:"Location",           sortType:"text"   },
+      { key:"state",         label:"State",                           width:60,  default:true,                section:"Location",           sortType:"text"   },
+      { key:"zip",           label:"Zip",                             width:80,  default:true,                section:"Location",           sortType:"text"   },
+      { key:"owners",        label:"Owners",                          width:200, default:true, blurred:true,  section:"Who to Contact",     sortType:"text"   },
+      { key:"residents",     label:"Residents",                       width:200, default:true, blurred:true,  section:"Who to Contact",     sortType:"text"   },
+      { key:"propType",      label:"Property Type",                   width:140, default:true,                section:"Property Details",   sortType:"text"   },
+      { key:"beds",          label:"Beds",                            width:70,  default:true,                section:"Property Details",   sortType:"number" },
+      { key:"baths",         label:"Baths",                           width:70,  default:true,                section:"Property Details",   sortType:"number" },
+      { key:"estValue",      label:"Estimated Value",                 width:120, default:true,                section:"Financial Insight",  sortType:"number" },
+      { key:"lastSaleDate",  label:"Last Sale Date",                  width:110, default:true,                section:"Price",              sortType:"date"   },
+      { key:"lastSalePrice", label:"Last Sale Price",                 width:110, default:true,                section:"Price",              sortType:"number" },
+      { key:"ownerType",     label:"Owner Type",                      width:230, default:true,                section:"Ownership",          sortType:"text"   },
+      { key:"occupancy",     label:"Occupancy Status",                width:140, default:true,                section:"Ownership",          sortType:"text"   },
       // Optional columns by section
-      { key:"apn",           label:"APN",                             width:120,                              section:"Location" },
-      { key:"buildingSize",  label:"Building Size (SqFt)",            width:140,                              section:"Property Details" },
-      { key:"lotSize",       label:"Lot Size (SqFt)",                 width:120,                              section:"Property Details" },
-      { key:"yearBuilt",     label:"Year built",                      width:100,                              section:"Property Details" },
-      { key:"stories",       label:"Number of Stories",               width:130,                              section:"Property Details" },
-      { key:"zoningCode",    label:"Zoning Code",                     width:100,                              section:"Property Details" },
-      { key:"pricePerSqft",  label:"Price per sqft (Last Sold Price)",width:190,                              section:"Price" },
-      { key:"preForeclosure",label:"Pre-Foreclosure",                 width:130,                              section:"Financial Insight" },
-      { key:"equityPct",     label:"Equity Percentage (LTV)",         width:170,                              section:"Financial Insight" },
-      { key:"upsideDown",    label:"Upside Down",                     width:110,                              section:"Financial Insight" },
-      { key:"freeClear",     label:"Free & Clear",                    width:100,                              section:"Financial Insight" },
-      { key:"wholesale",     label:"Wholesale",                       width:100,                              section:"Financial Insight" },
-      { key:"retail",        label:"Retail",                          width:80,                               section:"Financial Insight" },
-      { key:"investorScore", label:"Investor Score",                  width:120,                              section:"Financial Insight" },
-      { key:"distresses",    label:"Distresses Indicator",            width:160,                              section:"Financial Insight" },
-      { key:"absenteeOwner", label:"Absentee Owner Location",         width:180,                              section:"Ownership" },
-      { key:"yearsOwned",    label:"Years of Ownership",              width:150,                              section:"Ownership" },
-      { key:"numPropsOwned", label:"Number of Properties Owned",      width:200,                              section:"Ownership" },
-      { key:"inherited",     label:"Inherited",                       width:90,                               section:"Ownership" },
-      { key:"taxExemption",  label:"Tax Exemption Status",            width:160,                              section:"Ownership" },
-      { key:"ownerAge",      label:"Owner Age",                       width:90,                               section:"Owner Demographics" },
-      { key:"changedJobs",   label:"Recently Changed Jobs",           width:170,                              section:"Owner Demographics" },
-      { key:"deceased",      label:"Deceased",                        width:90,                               section:"Owner Demographics" },
-      { key:"schoolDistrict",label:"School District",                 width:130,                              section:"School District" },
-      { key:"schoolType",    label:"School Type",                     width:110,                              section:"School District" },
+      { key:"apn",           label:"APN",                             width:120,                              section:"Location",           sortType:"text"   },
+      { key:"buildingSize",  label:"Building Size (SqFt)",            width:140,                              section:"Property Details",   sortType:"number" },
+      { key:"lotSize",       label:"Lot Size (SqFt)",                 width:120,                              section:"Property Details",   sortType:"number" },
+      { key:"yearBuilt",     label:"Year built",                      width:100,                              section:"Property Details",   sortType:"number" },
+      { key:"stories",       label:"Number of Stories",               width:130,                              section:"Property Details",   sortType:"number" },
+      { key:"zoningCode",    label:"Zoning Code",                     width:100,                              section:"Property Details",   sortType:"text"   },
+      { key:"pricePerSqft",  label:"Price per sqft (Last Sold Price)",width:190,                              section:"Price",              sortType:"number" },
+      { key:"preForeclosure",label:"Pre-Foreclosure",                 width:130,                              section:"Financial Insight",  sortType:"text"   },
+      { key:"equityPct",     label:"Equity Percentage (LTV)",         width:170,                              section:"Financial Insight",  sortType:"number" },
+      { key:"upsideDown",    label:"Upside Down",                     width:110,                              section:"Financial Insight",  sortType:"text"   },
+      { key:"freeClear",     label:"Free & Clear",                    width:100,                              section:"Financial Insight",  sortType:"text"   },
+      { key:"wholesale",     label:"Wholesale",                       width:100,                              section:"Financial Insight",  sortType:"text"   },
+      { key:"retail",        label:"Retail",                          width:80,                               section:"Financial Insight",  sortType:"text"   },
+      { key:"investorScore", label:"Investor Score",                  width:120,                              section:"Financial Insight",  sortType:"number" },
+      { key:"distresses",    label:"Distresses Indicator",            width:160,                              section:"Financial Insight",  sortType:"text"   },
+      { key:"absenteeOwner", label:"Absentee Owner Location",         width:180,                              section:"Ownership",          sortType:"text"   },
+      { key:"yearsOwned",    label:"Years of Ownership",              width:150,                              section:"Ownership",          sortType:"number" },
+      { key:"numPropsOwned", label:"Number of Properties Owned",      width:200,                              section:"Ownership",          sortType:"number" },
+      { key:"inherited",     label:"Inherited",                       width:90,                               section:"Ownership",          sortType:"text"   },
+      { key:"taxExemption",  label:"Tax Exemption Status",            width:160,                              section:"Ownership",          sortType:"text"   },
+      { key:"ownerAge",      label:"Owner Age",                       width:90,                               section:"Owner Demographics", sortType:"number" },
+      { key:"changedJobs",   label:"Recently Changed Jobs",           width:170,                              section:"Owner Demographics", sortType:"text"   },
+      { key:"deceased",      label:"Deceased",                        width:90,                               section:"Owner Demographics", sortType:"text"   },
+      { key:"schoolDistrict",label:"School District",                 width:130,                              section:"School District",    sortType:"text"   },
+      { key:"schoolType",    label:"School Type",                     width:110,                              section:"School District",    sortType:"text"   },
     ];
     const DEFAULT_COL_KEYS = new Set(ALL_COLUMNS.filter(c => c.default).map(c => c.key));
     const DEFAULT_COL_ORDER = ALL_COLUMNS.filter(c => c.default).map(c => c.key);
@@ -209,8 +234,8 @@
     const imgLogo = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTk2IiBoZWlnaHQ9IjI1IiB2aWV3Qm94PSIwIDAgMTk2IDI1IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMTUxLjA0NSA2LjkwMzU4QzE1MS43MDMgNi45MDM1OCAxNTIuMjM2IDYuMzcwNDQgMTUyLjIzNiA1LjcxMjc4QzE1Mi4yMzYgNS4wNTUxMSAxNTEuNzAzIDQuNTIxOTcgMTUxLjA0NSA0LjUyMTk3QzE1MC4zODggNC41MjE5NyAxNDkuODU0IDUuMDU1MTEgMTQ5Ljg1NCA1LjcxMjc4QzE0OS44NTQgNi4zNzA0NCAxNTAuMzg4IDYuOTAzNTggMTUxLjA0NSA2LjkwMzU4WiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTIzLjMzMiAxMi4wOTY1TDEyMy4yNDcgMTIuMDY5MUwxMjMuMzI0IDEyLjAyMzdDMTI0LjU0MiAxMS4zMTMgMTI1LjE2IDEwLjE5NTEgMTI1LjE2IDguNzAwODRDMTI1LjE2IDcuNTU0MjYgMTI0Ljc2MyA2LjU5MDUgMTIzLjk4IDUuODM2MTZDMTIzLjE5NiA1LjA4MTMyIDEyMi4wNzYgNC42OTg3MyAxMjAuNjUgNC42OTg3M0gxMTUuNTY1VjIwLjMwMTVIMTIwLjkzN0MxMjIuNTQgMjAuMzAxNSAxMjMuODMyIDE5LjkyNTQgMTI0Ljc3OCAxOS4xODMyQzEyNS43MjEgMTguNDI5NiAxMjYuMTk5IDE3LjM1NTIgMTI2LjE5OSAxNS45OUMxMjYuMTk5IDE0LjAxNjEgMTI1LjIzNCAxMi43MDYyIDEyMy4zMzIgMTIuMDk2NVpNMTIzLjcyNCAxOC4wOTY1QzEyMy4xMyAxOC42MTYxIDEyMi4yNTkgMTguODc5NiAxMjEuMTM2IDE4Ljg3OTZIMTE3LjEyVjEyLjk0NTlIMTIxLjEzNkMxMjIuMjc1IDEyLjk0NTkgMTIzLjE0NiAxMy4yMjQ2IDEyMy43MjYgMTMuNzc0NUwxMjMuNzI3IDEzLjc3NTNDMTI0LjMyIDE0LjMwOTUgMTI0LjYyMiAxNS4wMzI0IDEyNC42MjIgMTUuOTIzOEMxMjQuNjIyIDE2Ljg0NDUgMTI0LjMyIDE3LjU3NTQgMTIzLjcyNCAxOC4wOTY1Wk0xMTcuMTIgMTEuNjEyNFY2LjEyMDQ4SDEyMC42NUMxMjEuNTQgNi4xMjA0OCAxMjIuMjU2IDYuMzg0NjMgMTIyLjc3NyA2LjkwNTk5QzEyMy4zMTIgNy40MjU5OSAxMjMuNTgzIDguMDgxODggMTIzLjU4MyA4Ljg1NTUzQzEyMy41ODMgOS42NzI5IDEyMy4zMTkgMTAuMzQ0IDEyMi43OTggMTAuODVMMTIyLjc5OCAxMC44NTA1QzEyMi4yOTIgMTEuMzU2MSAxMjEuNTY5IDExLjYxMjQgMTIwLjY1IDExLjYxMjRIMTE3LjEyWiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTM2LjU0NyAxNi42MzdMMTM2LjU0NSAxNi42NDMzQzEzNS45OTYgMTguMjczNiAxMzQuODc2IDE5LjEwMDMgMTMzLjIxNiAxOS4xMDAzQzEzMi4yNjcgMTkuMTAwMyAxMzEuNTA2IDE4LjgwNjIgMTMwLjk1NiAxOC4yMjY0QzEzMC40MDcgMTcuNjQ2NyAxMzAuMTI4IDE2Ljg3MTkgMTMwLjEyOCAxNS45MjM3VjkuMzM3MzRIMTI4LjY2MVYxNi4wMzQyQzEyOC42NjEgMTcuMzg1OSAxMjkuMDQ0IDE4LjQ3NjQgMTI5Ljc5OSAxOS4yNzZDMTMwLjU2OCAyMC4wNzM3IDEzMS42MjEgMjAuNDc4IDEzMi45MjkgMjAuNDc4QzEzNC40NTQgMjAuNDc4IDEzNS42NDggMTkuOTE4NyAxMzYuNDc1IDE4LjgxNTVMMTM2LjU0NyAxOC43MTk2VjIwLjMwMTVIMTM4LjAxM1Y5LjMzNzM0SDEzNi41NDdWMTYuNjM3WiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTQ1LjExMSAxNC4yMTYyTDE0NC4xNCAxMy44NjMzQzE0My40NjUgMTMuNjA3OSAxNDMuMDA0IDEzLjM0NDMgMTQyLjczMyAxMy4wNTg0QzE0Mi40NjEgMTIuNzU2NSAxNDIuMzIzIDEyLjM4MjcgMTQyLjMyMyAxMS45NDc4QzE0Mi4zMjMgMTEuNDk1NSAxNDIuNSAxMS4xMzU1IDE0Mi44NDkgMTAuODc2OUMxNDMuMTkyIDEwLjYwODQgMTQzLjYzOSAxMC40NzIxIDE0NC4xNzUgMTAuNDcyMUMxNDUuMDgzIDEwLjQ3MjEgMTQ1Ljc0MyAxMC44NTM5IDE0Ni4xMzYgMTEuNjA2N0wxNDYuMTU4IDExLjY0ODlMMTQ3LjMyNSAxMC45ODIzTDE0Ny4zMDMgMTAuOTQyOEMxNDYuNjYyIDkuNzYwMTYgMTQ1LjYxIDkuMTYwNTIgMTQ0LjE3NSA5LjE2MDUyQzE0My4yMTggOS4xNjA1MiAxNDIuNDE2IDkuNDMyMTMgMTQxLjc5NCA5Ljk2ODA2QzE0MS4xODcgMTAuNDg3MiAxNDAuODggMTEuMTYwOSAxNDAuODggMTEuOTdDMTQwLjg4IDEzLjQxNzMgMTQxLjczMyAxNC40Njc1IDE0My40MTUgMTUuMDkxMkwxNDQuMzQ1IDE1LjQ0NTFDMTQ1LjA4MiAxNS43MTAzIDE0NS42MTQgMTUuOTk1NCAxNDUuOTI3IDE2LjI5NDJDMTQ2LjI1NyAxNi41NzggMTQ2LjQyNCAxNi45ODExIDE0Ni40MjQgMTcuNDkyMUMxNDYuNDI0IDE3Ljk4OTQgMTQ2LjIwMyAxOC40MDE2IDE0NS43NjcgMTguNzE3MUMxNDUuMzUgMTkuMDE1NSAxNDQuODE0IDE5LjE2NjggMTQ0LjE3NSAxOS4xNjY4QzE0My4wNDQgMTkuMTY2OCAxNDIuMTU1IDE4LjYxNDYgMTQxLjUzNSAxNy41MjZMMTQxLjUxIDE3LjQ4MzNMMTQwLjM0IDE4LjI1NjJMMTQwLjM2MSAxOC4yOTM1QzE0MS4xNzcgMTkuNzQzMSAxNDIuNDQ1IDIwLjQ3ODEgMTQ0LjEzMSAyMC40NzgxQzE0NS4yNjQgMjAuNDc4MSAxNDYuMTg0IDIwLjE4NDEgMTQ2Ljg2NiAxOS42MDQzQzE0Ny41NDYgMTkuMDI1NSAxNDcuODkgMTguMyAxNDcuODkgMTcuNDQ3OUMxNDcuODkgMTYuNjY2NiAxNDcuNjYzIDE2LjAxNDMgMTQ3LjIxNiAxNS41MDg3QzE0Ni43NjYgMTUuMDAwOSAxNDYuMDU4IDE0LjU2NTkgMTQ1LjExMSAxNC4yMTYyWiIgZmlsbD0iIzEzNzBGMyIvPgo8cGF0aCBkPSJNMTUxLjc3OCA5LjMzNzM0SDE1MC4zMTJWMjAuMzAxNUgxNTEuNzc4VjkuMzM3MzRaIiBmaWxsPSIjMTM3MEYzIi8+CjxwYXRoIGQ9Ik0xNjAuMjI0IDkuMTYwNTJDMTU4LjY1NSA5LjE2MDUyIDE1Ny40NTQgOS43MjcxMiAxNTYuNjU1IDEwLjg0NDZMMTU2LjU4MyAxMC45NDYyVjkuMzM3NDFIMTU1LjExN1YyMC4zMDE1SDE1Ni41ODNMMTU2LjU4NiAxMy4wNTc0QzE1Ni44MDggMTIuMjc2MSAxNTcuMjEzIDExLjY1NDMgMTU3Ljc5MSAxMS4yMDkyQzE1OC4zNzEgMTAuNzY0MSAxNTkuMDg1IDEwLjUzODQgMTU5LjkxNCAxMC41Mzg0QzE2MC44NzggMTAuNTM4NCAxNjEuNjQ2IDEwLjgzMjUgMTYyLjE5NiAxMS40MTIzQzE2Mi43NDYgMTEuOTkxOCAxNjMuMDI0IDEyLjc2NjUgMTYzLjAyNCAxMy43MTQ4VjIwLjMwMTVIMTY0LjQ5MVYxMy42MDQ1QzE2NC40OTEgMTIuMjY3NyAxNjQuMDkzIDExLjE4NDYgMTYzLjMxIDEwLjM4NjFDMTYyLjU0IDkuNTcyNzYgMTYxLjUwMiA5LjE2MDUyIDE2MC4yMjQgOS4xNjA1MloiIGZpbGw9IiMxMzcwRjMiLz4KPHBhdGggZD0iTTE3Ny43MDIgMTUuMDQyNEMxNzcuNjg3IDEzLjMxOCAxNzcuMiAxMS44OTkzIDE3Ni4yNTUgMTAuODI1OUMxNzUuMjk1IDkuNzIwODUgMTczLjk5NyA5LjE2MDUyIDE3Mi4zOTYgOS4xNjA1MkMxNzAuODY5IDkuMTYwNTIgMTY5LjU1NiA5LjcxMzczIDE2OC40OTQgMTAuODA1MkMxNjcuNDQ2IDExLjg5NTYgMTY2LjkxNSAxMy4yNDYyIDE2Ni45MTUgMTQuODE5NkMxNjYuOTE1IDE2LjQwNyAxNjcuNDU0IDE3Ljc2NTEgMTY4LjUxNiAxOC44NTYxQzE2OS41NzcgMTkuOTMyMyAxNzAuOTM1IDIwLjQ3ODEgMTcyLjU1MiAyMC40NzgxQzE3NC4yOTggMjAuNDc4MSAxNzUuNzU1IDE5LjkwNzIgMTc2Ljg4MyAxOC43ODE1TDE3Ni45MTQgMTguNzUwM0wxNzUuOTc0IDE3LjcyNjZMMTc1Ljk0IDE3Ljc1OTVDMTc1LjAyIDE4LjY0OTIgMTczLjg4IDE5LjEwMDQgMTcyLjU1MiAxOS4xMDA0QzE3MS40NDEgMTkuMTAwNCAxNzAuNDgxIDE4LjczMjcgMTY5LjY5OCAxOC4wMDhDMTY4LjkyOCAxNy4yNjc5IDE2OC40OTIgMTYuMzAwMSAxNjguNDAzIDE1LjEzMTdMMTY4LjQgMTUuMDg4NkgxNzcuNzAzTDE3Ny43MDIgMTUuMDQyNFpNMTY5Ljg5OCAxMS4zNjQ0QzE3MC42MDkgMTAuODAxNyAxNzEuNDIgMTAuNTE2NCAxNzIuMzA5IDEwLjUxNjJDMTcyLjMzNyAxMC41MTU5IDE3Mi4zNjQgMTAuNTE1NSAxNzIuMzkxIDEwLjUxNTVDMTczLjM2IDEwLjUxNTUgMTc0LjE4IDEwLjc5MzcgMTc0LjgzIDExLjM0M0MxNzUuNDk4IDExLjkwNzMgMTc1LjkwNCAxMi43MTg0IDE3Ni4wMzcgMTMuNzU0TDE3Ni4wNDMgMTMuNzk5MkgxNjguNTA1TDE2OC41MTUgMTMuNzUxM0MxNjguNzIyIDEyLjczMDIgMTY5LjE4NyAxMS45MjczIDE2OS44OTggMTEuMzY0NFoiIGZpbGw9IiMxMzcwRjMiLz4KPHBhdGggZD0iTTE4My44NzUgMTQuMjE2MkwxODIuOTA0IDEzLjg2MzNDMTgyLjIyOCAxMy42MDc5IDE4MS43NjggMTMuMzQ0NCAxODEuNDk3IDEzLjA1ODRDMTgxLjIyNiAxMi43NTczIDE4MS4wODggMTIuMzgzNiAxODEuMDg4IDExLjk0NzhDMTgxLjA4OCAxMS40OTQ5IDE4MS4yNjQgMTEuMTM0OCAxODEuNjEyIDEwLjg3NjlDMTgxLjk1NiAxMC42MDg0IDE4Mi40MDIgMTAuNDcyMSAxODIuOTM5IDEwLjQ3MjFDMTgzLjg0NiAxMC40NzIxIDE4NC41MDYgMTAuODUzOSAxODQuOTAxIDExLjYwNjdMMTg0LjkyMyAxMS42NDg5TDE4Ni4wODggMTAuOTgyNUwxODYuMDY3IDEwLjk0M0MxODUuNDI2IDkuNzYwMTYgMTg0LjM3MyA5LjE2MDUyIDE4Mi45MzkgOS4xNjA1MkMxODEuOTgxIDkuMTYwNTIgMTgxLjE4IDkuNDMyMTMgMTgwLjU1NyA5Ljk2ODA2QzE3OS45NTEgMTAuNDg4MSAxNzkuNjQzIDExLjE2MTYgMTc5LjY0MyAxMS45N0MxNzkuNjQzIDEzLjQxNzMgMTgwLjQ5NyAxNC40Njc1IDE4Mi4xNzkgMTUuMDkxMkwxODMuMTA4IDE1LjQ0NTFDMTgzLjg0NSAxNS43MTAzIDE4NC4zNzggMTUuOTk1MyAxODQuNjkyIDE2LjI5MzhDMTg1LjAyMSAxNi41NzkgMTg1LjE4OCAxNi45ODIxIDE4NS4xODggMTcuNDkyMUMxODUuMTg4IDE3Ljk4ODkgMTg0Ljk2NyAxOC40MDA5IDE4NC41MyAxOC43MTcxQzE4NC4xMTMgMTkuMDE1NSAxODMuNTc4IDE5LjE2NjggMTgyLjkzOSAxOS4xNjY4QzE4MS44MDcgMTkuMTY2OCAxODAuOTE5IDE4LjYxNDYgMTgwLjI5OCAxNy41MjZMMTgwLjI3NCAxNy40ODMzTDE3OS4xMDQgMTguMjU2MkwxNzkuMTI1IDE4LjI5MzVDMTc5Ljk0IDE5Ljc0MzEgMTgxLjIwOCAyMC40NzgxIDE4Mi44OTUgMjAuNDc4MUMxODQuMDI4IDIwLjQ3ODEgMTg0Ljk0OCAyMC4xODQxIDE4NS42MjkgMTkuNjA0M0MxODYuMzA5IDE5LjAyNTUgMTg2LjY1NCAxOC4zIDE4Ni42NTQgMTcuNDQ3OUMxODYuNjU0IDE2LjY2NjYgMTg2LjQyNyAxNi4wMTQzIDE4NS45NzkgMTUuNTA4N0MxODUuNTMgMTUuMDAxIDE4NC44MjIgMTQuNTY2MSAxODMuODc1IDE0LjIxNjJaIiBmaWxsPSIjMTM3MEYzIi8+CjxwYXRoIGQ9Ik0xOTQuOTI2IDE1LjUwODdDMTk0LjQ3NiAxNS4wMDA5IDE5My43NjggMTQuNTY1OSAxOTIuODIxIDE0LjIxNjJMMTkxLjg1IDEzLjg2MzNDMTkxLjE3NSAxMy42MDc5IDE5MC43MTQgMTMuMzQ0NCAxOTAuNDQzIDEzLjA1ODRDMTkwLjE3MSAxMi43NTY3IDE5MC4wMzMgMTIuMzgyOSAxOTAuMDMzIDExLjk0NzhDMTkwLjAzMyAxMS40OTU0IDE5MC4yMSAxMS4xMzUzIDE5MC41NTggMTAuODc2OUMxOTAuOTAyIDEwLjYwODQgMTkxLjM0OSAxMC40NzIxIDE5MS44ODUgMTAuNDcyMUMxOTIuNzkzIDEwLjQ3MjEgMTkzLjQ1MiAxMC44NTM5IDE5My44NDYgMTEuNjA2N0wxOTMuODY4IDExLjY0ODlMMTk1LjAzNSAxMC45ODIzTDE5NS4wMTMgMTAuOTQyOEMxOTQuMzcyIDkuNzYwMTYgMTkzLjMxOSA5LjE2MDUyIDE5MS44ODUgOS4xNjA1MkMxOTAuOTI3IDkuMTYwNTIgMTkwLjEyNiA5LjQzMjEzIDE4OS41MDQgOS45NjgwNkMxODguODk3IDEwLjQ4NyAxODguNTkgMTEuMTYwNiAxODguNTkgMTEuOTdDMTg4LjU5IDEzLjQxNzMgMTg5LjQ0MyAxNC40Njc1IDE5MS4xMjUgMTUuMDkxMkwxOTIuMDU0IDE1LjQ0NTFDMTkyLjc5MiAxNS43MTAzIDE5My4zMjQgMTUuOTk1MyAxOTMuNjM3IDE2LjI5NDJDMTkzLjk2NyAxNi41NzgxIDE5NC4xMzQgMTYuOTgxMiAxOTQuMTM0IDE3LjQ5MjFDMTk0LjEzNCAxNy45ODk0IDE5My45MTMgMTguNDAxNiAxOTMuNDc3IDE4LjcxNzFDMTkzLjA2IDE5LjAxNTUgMTkyLjUyNCAxOS4xNjY4IDE5MS44ODUgMTkuMTY2OEMxOTAuNzU0IDE5LjE2NjggMTg5Ljg2NSAxOC42MTQ2IDE4OS4yNDUgMTcuNTI2TDE4OS4yMiAxNy40ODMzTDE4OC4wNSAxOC4yNTYyTDE4OC4wNzEgMTguMjkzNUMxODguODg2IDE5Ljc0MzEgMTkwLjE1NSAyMC40NzgxIDE5MS44NDEgMjAuNDc4MUMxOTIuOTc0IDIwLjQ3ODEgMTkzLjg5NCAyMC4xODQxIDE5NC41NzYgMTkuNjA0M0MxOTUuMjU2IDE5LjAyNTUgMTk1LjYgMTguMyAxOTUuNiAxNy40NDc5QzE5NS42IDE2LjY2NjYgMTk1LjM3MyAxNi4wMTQzIDE5NC45MjYgMTUuNTA4N1oiIGZpbGw9IiMxMzcwRjMiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik01MS45OTMyIDEyLjQ5OTdDNTEuOTkzMiA3Ljk5OTU1IDU1LjQxNjQgNC41MzExMyA1OS42NjM4IDQuNTMxMTNDNjMuOTMyMyA0LjUzMTEzIDY3LjMzNDUgNy45OTk1NSA2Ny4zMzQ1IDEyLjQ5OTdDNjcuMzM0NSAxNi45OTk5IDYzLjkzMjMgMjAuNDY4MyA1OS42NjM4IDIwLjQ2ODNDNTUuNDE2NCAyMC40NjgzIDUxLjk5MzIgMTYuOTk5OSA1MS45OTMyIDEyLjQ5OTdaTTY0Ljg0MiAxMi40OTlDNjQuODQyIDkuMzgxNzkgNjIuNjIzIDYuOTQ1MDYgNTkuNjY0MyA2Ljk0NTA2QzU2LjcwNTcgNi45NDUwNiA1NC40ODY4IDkuMzgxNzkgNTQuNDg2OCAxMi40OTlDNTQuNDg2OCAxNS42MTYyIDU2LjcwNTcgMTguMDUyOCA1OS42NjQzIDE4LjA1MjhDNjIuNjIzIDE4LjA1MjggNjQuODQyIDE1LjYxNjIgNjQuODQyIDEyLjQ5OVoiIGZpbGw9IiMzQTQ0NEEiLz4KPHBhdGggZD0iTTMwLjcxNDMgMTYuMTg4MkwyOC44NTQ1IDE3LjgxMjdDMjkuODA1NSAxOS40MTUyIDMxLjY0NDEgMjAuNDY4OSAzMy45MDU0IDIwLjQ2ODlDMzYuODAwNiAyMC40Njg5IDM4LjY4MTQgMTguNjY4NyAzOC42ODE0IDE2LjAzNDRDMzguNjgxNCAxMy44NjEzIDM3LjI4NjcgMTIuNTAwMiAzNS4yMzY4IDExLjU3ODJMMzQuMDc0NCAxMS4wMjk0QzMyLjU3NCAxMC4zNzA4IDMxLjg5NzYgOS42NDY0OSAzMS44OTc2IDguNjM2NjZDMzEuODk3NiA3LjU2MDk4IDMyLjg2OTggNi45NDYzMiAzMy44ODQzIDYuOTQ2MzJDMzQuOTYyIDYuOTQ2MzIgMzUuNjM4MyA3LjM2MzQyIDM2LjQyMDIgOC4zMjkzM0wzOC4xMTA4IDYuNTA3MzVDMzcuMDEyIDUuMTQ2MjkgMzUuNjM4MyA0LjUzMTYyIDMzLjkwNTQgNC41MzE2MkMzMS42MjMgNC41MzE2MiAyOS40NDYzIDYuMTU2MDMgMjkuNDQ2MyA4LjY1ODYyQzI5LjQ0NjMgMTAuNjc4MiAzMC41NjYzIDEyLjE3MDkgMzIuODI3NSAxMy4yMDI3TDM0LjAxMTEgMTMuNzI5NkMzNS40OTA0IDE0LjQxIDM2LjE4NzggMTUuMDkwNiAzNi4xODc4IDE2LjI1NEMzNi4xODc4IDE3LjM3MzYgMzUuMzQyMyAxOC4wNTQxIDMzLjg4NDMgMTguMDU0MUMzMi41NzQgMTguMDU0MSAzMS40MTE2IDE3LjE3NTkgMzAuNzE0MyAxNi4xODgyWiIgZmlsbD0iIzNBNDQ0QSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQ1LjUyOCA0LjcwNzU4SDQxLjA0NzlWMjAuMjkzNUg0My40OTkyVjE0LjYzSDQ1LjUyOEM0OC42MzQ3IDE0LjYzIDUwLjc2OTEgMTIuNTY2NCA1MC43NjkxIDkuNjY4NzhDNTAuNzY5MSA2LjcyNzE0IDQ4LjYzNDcgNC43MDc1OCA0NS41MjggNC43MDc1OFpNNDguMjc1MSA5LjY2ODM2QzQ4LjI3NTEgMTEuMjI2OSA0Ny4yMTg0IDEyLjI1ODcgNDUuNDIyMSAxMi4yNTg3SDQzLjQ5OTFWNy4wNzgwNEg0NS40MjIxQzQ3LjIxODQgNy4wNzgwNCA0OC4yNzUxIDguMTA5NzMgNDguMjc1MSA5LjY2ODM2WiIgZmlsbD0iIzNBNDQ0QSIvPgo8cGF0aCBkPSJNNzIuMjYgNC43MDgxM0g2OS44MDg2VjIwLjI5NDFINzIuMjZWMTIuOTQwMkw3OC45NTkzIDIwLjI5NDFIODIuMTI5M0w3NS4xMzQyIDEyLjU4ODlMODEuNDk1MyA0LjcwODEzSDc4LjU3ODhMNzIuMjYgMTIuNTQ1VjQuNzA4MTNaIiBmaWxsPSIjM0E0NDRBIi8+CjxwYXRoIGQ9Ik04My43OTg4IDQuNzA4MTNIOTIuNjk1OFY3LjIxMDcySDg2LjI1MDNWMTEuMTYySDkxLjQyNzhWMTMuNjIwN0g4Ni4yNTAzVjE3Ljc5MTdIOTIuNjk1OFYyMC4yOTQxSDgzLjc5ODhWNC43MDgxM1oiIGZpbGw9IiMzQTQ0NEEiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMDIuMDk4IDQuNTMxMTNDOTcuODUxIDQuNTMxMTMgOTQuNDI3NyA3Ljk5OTU1IDk0LjQyNzcgMTIuNDk5N0M5NC40Mjc3IDE2Ljk5OTkgOTcuODUxIDIwLjQ2ODMgMTAyLjA5OCAyMC40NjgzQzEwNi4zNjcgMjAuNDY4MyAxMDkuNzY5IDE2Ljk5OTkgMTA5Ljc2OSAxMi40OTk3QzEwOS43NjkgNy45OTk1NSAxMDYuMzY3IDQuNTMxMTMgMTAyLjA5OCA0LjUzMTEzWk0xMDIuMDk5IDYuOTQ1MDZDMTA1LjA1OCA2Ljk0NTA2IDEwNy4yNzcgOS4zODE3OSAxMDcuMjc3IDEyLjQ5OUMxMDcuMjc3IDE1LjYxNjIgMTA1LjA1OCAxOC4wNTI4IDEwMi4wOTkgMTguMDUyOEM5OS4xNDAxIDE4LjA1MjggOTYuOTIxNCAxNS42MTYyIDk2LjkyMTQgMTIuNDk5Qzk2LjkyMTQgOS4zODE3OSA5OS4xNDAxIDYuOTQ1MDYgMTAyLjA5OSA2Ljk0NTA2WiIgZmlsbD0iIzNBNDQ0QSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE0LjE5NTQgNS4xODY1TDEyLjQ1NjEgMEMxOS4zMzkgMC4wMjM5Mjc5IDI0LjkxMTMgNS42MTExIDI0LjkxMTMgMTIuNUMyNC45MTEzIDE5LjM5MjcgMTkuMzQ0MSAyNC45ODIxIDEyLjQ1NjEgMjVMMTQuMTgzMiAxOS44MTY0QzE3LjQ4NDkgMTkuMDE5NiAxOS45MzggMTYuMDQ2NiAxOS45MzggMTIuNUMxOS45MzggOC45NTc3OSAxNy40OTEgNS45ODc1OSAxNC4xOTU0IDUuMTg2NVoiIGZpbGw9IiMzMzkyRkYiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMC43MTU5IDUuMTg2NUwxMi40NTUyIDBDNS41NzIyNSAwLjAyMzkyNzkgMCA1LjYxMTEgMCAxMi41QzAgMTkuMzkyNyA1LjU2NzE3IDI0Ljk4MjEgMTIuNDU1MiAyNUwxMC43MjggMTkuODE2NEM3LjQyNjM4IDE5LjAxOTYgNC45NzMyOSAxNi4wNDY2IDQuOTczMjkgMTIuNUM0Ljk3MzI5IDguOTU3NzkgNy40MjAzMyA1Ljk4NzU5IDEwLjcxNTkgNS4xODY1WiIgZmlsbD0iIzMzOTJGRiIvPgo8L3N2Zz4K";
     const imgHeaderBgCircle = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgiIGhlaWdodD0iMjgiIHZpZXdCb3g9IjAgMCAyOCAyOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0IDBDMjEuNzMyIDAgMjggNi4yNjgwMSAyOCAxNEMyOCAxNC4wODM4IDI3Ljk5NzYgMTQuMTY3NSAyNy45OTYxIDE0LjI1MUMyNy4zNTggMTQuMDg3MSAyNi42ODkyIDE0IDI2IDE0QzIxLjU4MTcgMTQgMTggMTcuNTgxNyAxOCAyMkMxOCAyMy44MTI1IDE4LjYwMzIgMjUuNDgzOCAxOS42MTkxIDI2LjgyNTJDMTcuODk5MSAyNy41Nzk5IDE1Ljk5ODcgMjggMTQgMjhDNi4yNjgwMSAyOCAwIDIxLjczMiAwIDE0QzAgNi4yNjgwMSA2LjI2ODAxIDAgMTQgMFoiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8yMDA0XzY1NjkpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMjAwNF82NTY5IiB4MT0iMjguMDIyMyIgeTE9IjE0IiB4Mj0iMC4wMjIyNzY5IiB5Mj0iMTQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iI0Q2RTlGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNFREY1RkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K";
     const imgHeaderMenu     = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI3IiB2aWV3Qm94PSIwIDAgOCA3IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNNy4yMDAyIDUuMzk4NDRDNC42NDE3OSA1LjM5ODU1IDcuOTk5ODkgNS43MzQzOCA4IDYuMTQ4NDRDOCA2LjU2MjU4IDcuNjQxODYgNi44OTgzMiA3LjIwMDIgNi44OTg0NEgwLjgwMDc4MUMwLjM1OTA1NCA2Ljg5ODQgMC4wMDA5NzY1NjIgNi41NjI2MiAwLjAwMDk3NjU2MiA2LjE0ODQ0QzAuMDAxMDg5MjIgNS43MzQzNCAwLjM1OTEyMyA1LjM5ODQ4IDAuODAwNzgxIDUuMzk4NDRINy4yMDAyWk03LjIwMDIgMi42OTgyNEM3LjY0MTcyIDIuNjk4MzUgNy45OTk3NyAzLjAzNDI4IDggMy40NDgyNEM4IDMuODYyMzkgNy42NDE4NiA0LjE5ODEzIDcuMjAwMiA0LjE5ODI0SDAuODAwNzgxQzAuMzU5MDU0IDQuMTk4MiAwLjAwMDk3NjU2MiAzLjg2MjQzIDAuMDAwOTc2NTYyIDMuNDQ4MjRDMC4wMDEyMDE1NiAzLjAzNDIzIDAuMzU5MTkyIDIuNjk4MjggMC44MDA3ODEgMi42OTgyNEg3LjIwMDJaTTcuMTk5MjIgMEM3LjY0MDg4IDAuMDAwMTEyNjM3IDcuOTk5MDIgMC4zMzU4NTYgNy45OTkwMiAwLjc1QzcuOTk5MDIgMS4xNjQxNCA3LjY0MDg4IDEuNDk5ODkgNy4xOTkyMiAxLjVIMC43OTk4MDVDMC4zNTgwNzcgMS40OTk5NiAwIDEuMTY0MTkgMCAwLjc1QzAgMC4zMzU4MTMgMC4zNTgwNzcgNC4yNDYzMWUtMDUgMC43OTk4MDUgMEg3LjE5OTIyWiIgZmlsbD0iIzRFNUE2MyIvPgo8L3N2Zz4K";
-    const imgSideCollapseIcon = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0Ljg0MzEgMy4yNTUyNUMxNi43NTQ5IDMuMjU1MjUgMTguMzMyOCA0LjczNjkxIDE4LjMzMjcgNi41ODg1OFYxMy4yNTUyQzE4LjMzMjcgMTUuMTA2OSAxNi43NTQ5IDE2LjU4ODYgMTQuODQzMSAxNi41ODg2SDcuNDk5MzVINS4xNTU2QzMuMjQzNzcgMTYuNTg4NiAxLjY2NTkzIDE1LjEwNjkgMS42NjYwMiAxMy4yNTUyVjYuNTg4NThDMS42NjYwMiA0LjczNjkxIDMuMjQzNzcgMy4yNTUyNSA1LjE1NTYgMy4yNTUyNUg3LjQ5OTM1SDE0Ljg0MzFaTTE0Ljg0MzEgNC45MjE5MUg4LjMzMjY4VjE0LjkyMTlIMTQuODQzMUMxNS44NTUxIDE0LjkyMTkgMTYuNjY2IDE0LjE2NDQgMTYuNjY2IDEzLjI1NTJWNi41ODg1OEMxNi42NjYgNS42Nzk0MSAxNS44NTUxIDQuOTIxOTEgMTQuODQzMSA0LjkyMTkxWk02LjY2NjAyIDQuOTIxOTFINS4xNTU2QzQuMTQzNiA0LjkyMTkxIDMuMzMyNjggNS42Nzk0MSAzLjMzMjY4IDYuNTg4NThWMTMuMjU1MkMzLjMzMjY4IDE0LjE2NDQgNC4xNDM2IDE0LjkyMTkgNS4xNTU2IDE0LjkyMTlINi42NjYwMlY0LjkyMTkxWiIgZmlsbD0iIzI3MkQzMiIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE0Ljk5OTcgMTAuODMzM0MxNS40NTk5IDEwLjgzMzMgMTUuODMzIDEwLjQ2MDIgMTUuODMzIDEwQzE1LjgzMyA5LjUzOTc2IDE1LjQ1OTkgOS4xNjY2NyAxNC45OTk3IDkuMTY2NjdMMTIuMDExNSA5LjE2NjY3TDEyLjI1NTYgOC45MjI1OUMxMi41ODEgOC41OTcxNSAxMi41ODEgOC4wNjk1MSAxMi4yNTU2IDcuNzQ0MDhDMTEuOTMwMiA3LjQxODY0IDExLjQwMjUgNy40MTg2NCAxMS4wNzcxIDcuNzQ0MDhMOS40MTA0MiA5LjQxMDc0QzkuMDg0OTggOS43MzYxOCA5LjA4NDk4IDEwLjI2MzggOS40MTA0MiAxMC41ODkzTDExLjA3NzEgMTIuMjU1OUMxMS40MDI1IDEyLjU4MTQgMTEuOTMwMiAxMi41ODE0IDEyLjI1NTYgMTIuMjU1OUMxMi41ODEgMTEuOTMwNSAxMi41ODEgMTEuNDAyOCAxMi4yNTU2IDExLjA3NzRMMTIuMDExNSAxMC44MzMzTDE0Ljk5OTcgMTAuODMzM1oiIGZpbGw9IiMyNzJEMzIiLz4KPC9zdmc+Cg==";
-    const imgSideExpandIcon   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0Ljg0MzEgMy4yNTUyOEMxNi43NTQ5IDMuMjU1MjggMTguMzMyOCA0LjczNjk1IDE4LjMzMjcgNi41ODg2MVYxMy4yNTUzQzE4LjMzMjcgMTUuMTA2OSAxNi43NTQ5IDE2LjU4ODYgMTQuODQzMSAxNi41ODg2SDcuNDk5MzVINS4xNTU2QzMuMjQzNzcgMTYuNTg4NiAxLjY2NTkzIDE1LjEwNjkgMS42NjYwMiAxMy4yNTUzVjYuNTg4NjFDMS42NjYwMiA0LjczNjk1IDMuMjQzNzcgMy4yNTUyOCA1LjE1NTYgMy4yNTUyOEg3LjQ5OTM1SDE0Ljg0MzFaTTE0Ljg0MzEgNC45MjE5NUg4LjMzMjY4VjE0LjkyMTlIMTQuODQzMUMxNS44NTUxIDE0LjkyMTkgMTYuNjY2IDE0LjE2NDQgMTYuNjY2IDEzLjI1NTNWNi41ODg2MUMxNi42NjYgNS42Nzk0NCAxNS44NTUxIDQuOTIxOTUgMTQuODQzMSA0LjkyMTk1Wk02LjY2NjAyIDQuOTIxOTVINS4xNTU2QzQuMTQzNiA0LjkyMTk1IDMuMzMyNjggNS42Nzk0NCAzLjMzMjY4IDYuNTg4NjFWMTMuMjU1M0MzLjMzMjY4IDE0LjE2NDQgNC4xNDM2IDE0LjkyMTkgNS4xNTU2IDE0LjkyMTlINi42NjYwMlY0LjkyMTk1WiIgZmlsbD0iIzI3MkQzMiIvPgo8L3N2Zz4K";
+    const imgSideCollapseIcon = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE2Ljc4NzEgNC4zMzMwMUMxOC42OTg5IDQuMzMzMDEgMjAuMjc3NCA1LjgxNDM1IDIwLjI3NzMgNy42NjYwMlYxNi4zMzNDMjAuMjc3MSAxOC4xODQ0IDE4LjY5ODggMTkuNjY2IDE2Ljc4NzEgMTkuNjY2SDcuMDk5NjFDNS4xODgwOSAxOS42NjU4IDMuNjEwNTUgMTguMTg0MyAzLjYxMDM1IDE2LjMzM1Y3LjY2NjAyQzMuNjEwMzUgNS44MTQ0NSA1LjE4NzkyIDQuMzMzMTggNy4wOTk2MSA0LjMzMzAxSDE2Ljc4NzFaTTcuMDk5NjEgNS45OTkwMkM2LjA4Nzc2IDUuOTk5MTkgNS4yNzczNCA2Ljc1Njk1IDUuMjc3MzQgNy42NjYwMlYxNi4zMzNDNS4yNzc2MyAxNy4yNDE5IDYuMDg3OTQgMTcuOTk4OSA3LjA5OTYxIDE3Ljk5OUg3LjYxMDM1VjUuOTk5MDJINy4wOTk2MVpNOS4yNzczNCAxNy45OTlIMTYuNzg3MUMxNy43OTg5IDE3Ljk5OSAxOC42MTAxIDE3LjI0MiAxOC42MTA0IDE2LjMzM1Y3LjY2NjAyQzE4LjYxMDQgNi43NTY4NSAxNy43OTkxIDUuOTk5MDIgMTYuNzg3MSA1Ljk5OTAySDkuMjc3MzRWMTcuOTk5Wk0xNC44Mzk4IDguNjc1NzhDMTUuMTE1NiA4LjQwMDMgMTUuNTYzIDguNDAwNDYgMTUuODM4OSA4LjY3NTc4QzE2LjExNDcgOC45NTE2MiAxNi4xMTQ2IDkuMzk5ODcgMTUuODM4OSA5LjY3NTc4TDEzLjMzODkgMTIuMTc2OEwxNS44Mzg5IDE0LjY3NjhDMTYuMTE0NyAxNC45NTI2IDE2LjExNDYgMTUuMzk5OSAxNS44Mzg5IDE1LjY3NThDMTUuNTYzIDE1Ljk1MTUgMTUuMTE1NyAxNS45NTE2IDE0LjgzOTggMTUuNjc1OEwxMS44NDI4IDEyLjY3ODdDMTEuNzA0MSAxMi41NCAxMS42MzU5IDEyLjM1NzUgMTEuNjM2NyAxMi4xNzU4QzExLjYzNjEgMTEuOTk0MiAxMS43MDQzIDExLjgxMjQgMTEuODQyOCAxMS42NzM4TDE0LjgzOTggOC42NzU3OFoiIGZpbGw9IiMyNzJEMzIiLz4KPC9zdmc+";
+    const imgSideExpandIcon   = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE2LjY3NjggNC4zMDA5NkMxOC41ODg2IDQuMzAwOTYgMjAuMTY3MSA1Ljc4MjMxIDIwLjE2NyA3LjYzMzk3VjE2LjMwMUMyMC4xNjY3IDE4LjE1MjQgMTguNTg4NCAxOS42MzQgMTYuNjc2OCAxOS42MzRINi45ODkyNkM1LjA3Nzc0IDE5LjYzMzggMy41MDAxOSAxOC4xNTIzIDMuNSAxNi4zMDFWNy42MzM5N0MzLjUgNS43ODI0MSA1LjA3NzU3IDQuMzAxMTMgNi45ODkyNiA0LjMwMDk2SDE2LjY3NjhaTTYuOTg5MjYgNS45NjY5OEM1Ljk3NzQxIDUuOTY3MTQgNS4xNjY5OSA2LjcyNDkgNS4xNjY5OSA3LjYzMzk3VjE2LjMwMUM1LjE2NzI4IDE3LjIwOTggNS45Nzc1OSAxNy45NjY4IDYuOTg5MjYgMTcuOTY3SDE0LjVWNS45NjY5OEg2Ljk4OTI2Wk0xNi4xNjcgMTcuOTY3SDE2LjY3NjhDMTcuNjg4NiAxNy45NjcgMTguNDk5NyAxNy4yMDk5IDE4LjUgMTYuMzAxVjcuNjMzOTdDMTguNSA2LjcyNDgxIDE3LjY4ODggNS45NjY5OCAxNi42NzY4IDUuOTY2OThIMTYuMTY3VjE3Ljk2N1pNNy45NjQ4NCA4LjQxOTEzQzguMjQwNzQgOC4xNDM2MyA4LjY4ODA5IDguMTQzNDQgOC45NjM4NyA4LjQxOTEzTDExLjk2MDkgMTEuNDE3MkMxMi4wOTk0IDExLjU1NTggMTIuMTY3NyAxMS43Mzc1IDEyLjE2NyAxMS45MTkxQzEyLjE2NzcgMTIuMTAwOCAxMi4wOTk1IDEyLjI4MzUgMTEuOTYwOSAxMi40MjIxTDguOTYzODcgMTUuNDE5MUM4LjY4ODAxIDE1LjY5NDUgOC4yNDA2MiAxNS42OTQ3IDcuOTY0ODQgMTUuNDE5MUM3LjY4OTA5IDE1LjE0MzQgNy42ODkzNiAxNC42OTYgNy45NjQ4NCAxNC40MjAxTDEwLjQ2NDggMTEuOTIwMUw3Ljk2NDg0IDkuNDE5MTNDNy42ODkwOSA5LjE0MzM3IDcuNjg5MzYgOC42OTUwNiA3Ljk2NDg0IDguNDE5MTNaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPg==";
     const imgSideRegSearch    = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkuOTk5NjcgMS42NjY2NkM3LjY5ODQ5IDEuNjY2NjYgNS44MzMwMSAzLjUzMjE0IDUuODMzMDEgNS44MzMzMkM1LjgzMzAxIDguMTM0NTEgNy42OTg0OSA5Ljk5OTk5IDkuOTk5NjcgOS45OTk5OUMxMi4zMDA5IDkuOTk5OTkgMTQuMTY2MyA4LjEzNDUxIDE0LjE2NjMgNS44MzMzMkMxNC4xNjYzIDMuNTMyMTQgMTIuMzAwOSAxLjY2NjY2IDkuOTk5NjcgMS42NjY2NloiIGZpbGw9IiMyNzJEMzIiLz4KPHBhdGggZD0iTTExLjg1MjUgMTEuNjY3QzEwLjcxMTggMTIuNzU5MiAxMCAxNC4yOTU5IDEwIDE2VjE4LjMzM0g1LjgzMzAxQzQuNDUyNDUgMTguMzMyOCAzLjMzMzAxIDE3LjIxMzYgMy4zMzMwMSAxNS44MzNDMy4zMzMxOCAxMy41MzIgNS4xOTg5MiAxMS42NjcgNy41IDExLjY2N0gxMS44NTI1WiIgZmlsbD0iIzI3MkQzMiIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE0Ljk5NTEgMTQuMTY2N0MxNC41MzQ5IDE0LjE2NjcgMTQuMTYxOCAxNC41Mzk4IDE0LjE2MTggMTVDMTQuMTYxOCAxNS40NjAyIDE0LjUzNDkgMTUuODMzMyAxNC45OTUxIDE1LjgzMzNDMTUuNDU1NCAxNS44MzMzIDE1LjgyODUgMTUuNDYwMiAxNS44Mjg1IDE1QzE1LjgyODUgMTQuNTM5OCAxNS40NTU0IDE0LjE2NjcgMTQuOTk1MSAxNC4xNjY3Wk0xMi40OTUxIDE1QzEyLjQ5NTEgMTMuNjE5MyAxMy42MTQ0IDEyLjUgMTQuOTk1MSAxMi41QzE2LjM3NTggMTIuNSAxNy40OTUxIDEzLjYxOTMgMTcuNDk1MSAxNUMxNy40OTUxIDE1LjM4NiAxNy40MDc3IDE1Ljc1MTUgMTcuMjUxNSAxNi4wNzc4TDE4LjA4NDQgMTYuOTEwN0MxOC40MDk4IDE3LjIzNjIgMTguNDA5OCAxNy43NjM4IDE4LjA4NDQgMTguMDg5M0MxNy43NTg5IDE4LjQxNDcgMTcuMjMxMyAxOC40MTQ3IDE2LjkwNTkgMTguMDg5M0wxNi4wNzMgMTcuMjU2NEMxNS43NDY2IDE3LjQxMjUgMTUuMzgxMSAxNy41IDE0Ljk5NTEgMTcuNUMxMy42MTQ0IDE3LjUgMTIuNDk1MSAxNi4zODA3IDEyLjQ5NTEgMTVaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=";
     const imgSidePublicSearch = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTguMzMzMDEgMi41QzExLjU1NDYgMi41IDE0LjE2NjggNS4xMTE1IDE0LjE2NyA4LjMzMzAxQzE0LjE2NyA5LjY0MzIgMTMuNzM0MSAxMC44NTI0IDEzLjAwNDkgMTEuODI2MkwxNy4yNTU5IDE2LjA3NzFDMTcuNTgxMyAxNi40MDI2IDE3LjU4MTMgMTYuOTMwNCAxNy4yNTU5IDE3LjI1NTlDMTYuOTMwNCAxNy41ODEzIDE2LjQwMjYgMTcuNTgxMyAxNi4wNzcxIDE3LjI1NTlMMTEuODI2MiAxMy4wMDQ5QzEwLjg1MjQgMTMuNzM0MSA5LjY0MzIgMTQuMTY3IDguMzMzMDEgMTQuMTY3QzUuMTExNSAxNC4xNjY4IDIuNSAxMS41NTQ2IDIuNSA4LjMzMzAxQzIuNTAwMTggNS4xMTE2IDUuMTExNiAyLjUwMDE4IDguMzMzMDEgMi41Wk04LjMzMzAxIDQuMTY2OTlDNi4wMzIwOCA0LjE2NzE3IDQuMTY3MTcgNi4wMzIwOCA0LjE2Njk5IDguMzMzMDFDNC4xNjY5OSAxMC42MzQxIDYuMDMxOTcgMTIuNDk5OCA4LjMzMzAxIDEyLjVDMTAuNjM0MiAxMi41IDEyLjUgMTAuNjM0MiAxMi41IDguMzMzMDFDMTIuNDk5OCA2LjAzMTk3IDEwLjYzNDEgNC4xNjY5OSA4LjMzMzAxIDQuMTY2OTlaIiBmaWxsPSIjMTYyNTQwIi8+Cjwvc3ZnPgo=";
     const imgSideBatchAppend  = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwLjE2NyAxLjY2Njk5QzEwLjM5OTggMS42NjY5OSAxMC41MTY0IDEuNjY2NyAxMC42MDU1IDEuNzExOTFDMTAuNjgzOSAxLjc1MTg2IDEwLjc0ODEgMS44MTYxMyAxMC43ODgxIDEuODk0NTNDMTAuODMzMyAxLjk4MzU3IDEwLjgzMyAyLjEwMDE4IDEwLjgzMyAyLjMzMzAxVjQuMTY2OTlDMTAuODMzMiA2LjAwNzc5IDEyLjMyNjIgNy41IDE0LjE2NyA3LjVIMTZDMTYuMjMzNCA3LjUgMTYuMzUwMyA3LjUwMDQ4IDE2LjQzOTUgNy41NDU5QzE2LjUxNzYgNy41ODU4NSAxNi41ODEyIDcuNjQ5MyAxNi42MjExIDcuNzI3NTRDMTYuNjY2NSA3LjgxNjY3IDE2LjY2NyA3LjkzMzY0IDE2LjY2NyA4LjE2Njk5VjE0LjMzM0MxNi42NjcgMTUuNzMzMSAxNi42NjcgMTYuNDM0IDE2LjM5NDUgMTYuOTY4OEMxNi4xNTQ5IDE3LjQzOSAxNS43NzIgMTcuODIwOSAxNS4zMDE4IDE4LjA2MDVDMTQuNzY3IDE4LjMzMyAxNC4wNjY5IDE4LjMzMyAxMi42NjcgMTguMzMzSDcuMzMzMDFDNS45MzMwOSAxOC4zMzMgNS4yMzI5OCAxOC4zMzMgNC42OTgyNCAxOC4wNjA1QzQuMjI4IDE3LjgyMDkgMy44NDUxMiAxNy40MzkgMy42MDU0NyAxNi45Njg4QzMuMzMyOTkgMTYuNDM0IDMuMzMzMDEgMTUuNzMzMSAzLjMzMzAxIDE0LjMzM1Y1LjY2Njk5QzMuMzMzMDEgNC4yNjY4NiAzLjMzMjk5IDMuNTY2MDMgMy42MDU0NyAzLjAzMTI1QzMuODQ1MTIgMi41NjEwMSA0LjIyOCAyLjE3OTExIDQuNjk4MjQgMS45Mzk0NUM1LjIzMjk4IDEuNjY2OTkgNS45MzMwOSAxLjY2Njk5IDcuMzMzMDEgMS42NjY5OUgxMC4xNjdaTTEwLjU4ODkgOC41NzcxNUMxMC4yNjM1IDguMjUyMTUgOS43MzY0OSA4LjI1MjE1IDkuNDExMTMgOC41NzcxNUw3Ljc0NDE0IDEwLjI0NDFDNy40MTg3IDEwLjU2OTYgNy40MTg3IDExLjA5NzQgNy43NDQxNCAxMS40MjI5QzguMDY5NTkgMTEuNzQ4MSA4LjU5NzQ3IDExLjc0ODIgOC45MjI4NSAxMS40MjI5TDkuMTY2OTkgMTEuMTc4N1YxNC4xNjdDOS4xNjcxNyAxNC42MjcxIDkuNTM5ODcgMTUgMTAgMTVDMTAuNDYwMSAxNSAxMC44MzI4IDE0LjYyNzEgMTAuODMzIDE0LjE2N1YxMS4xNzg3TDExLjA3NzEgMTEuNDIyOUMxMS40MDI1IDExLjc0ODIgMTEuOTMwNCAxMS43NDgxIDEyLjI1NTkgMTEuNDIyOUMxMi41ODEzIDExLjA5NzQgMTIuNTgxMyAxMC41Njk2IDEyLjI1NTkgMTAuMjQ0MUwxMC41ODg5IDguNTc3MTVaTTEzLjA4ODkgMS42NjY5OUMxMy4yNDUgMS42NjY5OSAxMy4zOTU0IDEuNzI4NSAxMy41MDU5IDEuODM4ODdMMTYuNDk0MSA0LjgyNzE1QzE2LjYwNDYgNC45Mzc2NiAxNi42NjcgNS4wODc4NiAxNi42NjcgNS4yNDQxNEMxNi42NjcgNS41Njk1NSAxNi40MDI2IDUuODMzMDEgMTYuMDc3MSA1LjgzMzAxSDE0LjE2N0MxMy4yNDY2IDUuODMzMDEgMTIuNTAwMiA1LjA4NzMyIDEyLjUgNC4xNjY5OVYyLjI1NTg2QzEyLjUgMS45MzA1OCAxMi43NjM2IDEuNjY3MiAxMy4wODg5IDEuNjY2OTlaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=";
@@ -292,57 +317,23 @@
         </div>
       );
 
-      if (collapsed) {
-        return (
-          <aside style={{
-            background:"#f7f8f8", borderRight:"1px solid #dfe3e5",
-            display:"flex", flexDirection:"column",
-            height:"100%", alignItems:"flex-start",
-            width:60, flexShrink:0, padding:"16px 0 0"
-          }}>
-            {/* Expand button */}
-            <div style={{ padding:"0 12px" }}>
-              <button onClick={() => setCollapsed(false)} style={{ display:"flex", alignItems:"center", justifyContent:"center", borderRadius:8, width:40, height:40, cursor:"pointer", background:"transparent", border:0 }}>
-                <div style={{ position:"relative", flexShrink:0, width:20, height:20 }}>
-                  <div style={{ position:"absolute", top:"0%", right:"0%", bottom:"0%", left:"0%" }}>
-                    <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSideExpandIcon} />
-                  </div>
-                </div>
-              </button>
-            </div>
-            {/* Icon-only nav */}
-            <div style={{ display:"flex", flexDirection:"column", gap:4, alignItems:"flex-start", width:"100%", padding:"0 12px" }}>
-              <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconSimple(imgSideRegSearch, "0%")}
-              </div>
-              <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconSimple(imgSidePublicSearch, "0%")}
-              </div>
-              <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconSimple(imgSideBatchAppend, "0%")}
-              </div>
-              {/* List Building (active) */}
-              <div style={{ background:"#dfe3e5", display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, cursor:"pointer" }}>
-                {iconSimple(imgSideListBuilding, "0%")}
-              </div>
-            </div>
-          </aside>
-        );
-      }
+      const labelStyle = { transition:"opacity 0.18s ease", opacity: collapsed ? 0 : 1, whiteSpace:"nowrap" };
 
       return (
         <aside style={{
           background:"#f7f8f8", borderRight:"1px solid #dfe3e5",
           display:"flex", flexDirection:"column",
           height:"100%", alignItems:"flex-start",
-          width:240, flexShrink:0, padding:"16px 0 0"
+          width: collapsed ? 60 : 240, flexShrink:0, padding:"16px 0 0",
+          transition:"width 0.25s ease",
+          overflow:"hidden"
         }}>
-          {/* Collapse btn */}
-          <div style={{ padding:"0 12px" }}>
-            <button onClick={() => setCollapsed(true)} style={{ display:"flex", alignItems:"center", justifyContent:"center", borderRadius:8, width:40, height:40, cursor:"pointer", background:"transparent", border:0 }}>
-              <div style={{ position:"relative", flexShrink:0, width:20, height:20 }}>
+          {/* Toggle btn */}
+          <div style={{ padding:"0 12px", flexShrink:0 }}>
+            <button onClick={() => setCollapsed(v => !v)} style={{ display:"flex", alignItems:"center", justifyContent:"center", borderRadius:8, width:40, height:40, cursor:"pointer", background:"transparent", border:0 }}>
+              <div style={{ position:"relative", flexShrink:0, width:24, height:24 }}>
                 <div style={{ position:"absolute", top:"0%", right:"0%", bottom:"0%", left:"0%" }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={imgSideCollapseIcon} />
+                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src={collapsed ? imgSideExpandIcon : imgSideCollapseIcon} />
                 </div>
               </div>
             </button>
@@ -353,32 +344,31 @@
             {/* Regulated Search */}
             <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
               {iconSimple(imgSideRegSearch, "0%")}
-              <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Regulated Search</span>
+              <span style={{ ...labelStyle, flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Regulated Search</span>
             </div>
 
             {/* Public Search */}
             <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
               {iconSimple(imgSidePublicSearch, "0%")}
-              <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Public Search</span>
+              <span style={{ ...labelStyle, flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Public Search</span>
             </div>
 
             {/* Batch Append */}
             <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
               {iconSimple(imgSideBatchAppend, "0%")}
-              <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Batch Append</span>
+              <span style={{ ...labelStyle, flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>Batch Append</span>
             </div>
 
             {/* List Building */}
             <div style={{ display:"flex", flexDirection:"column", gap:8, alignItems:"flex-start", width:"100%" }}>
-              <div style={{ display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
+              <div style={{ background: collapsed ? "#dfe3e5" : "transparent", transition:"background 0.18s ease", display:"flex", gap:8, alignItems:"center", padding:itemPad, borderRadius:8, width:"100%", cursor:"pointer" }}>
                 {iconSimple(imgSideListBuilding, "0%")}
-                <span style={{ flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>List Building</span>
-                <Badge />
-                {arrowUpIcon(imgSideArrowUp)}
+                <span style={{ ...labelStyle, flex:1, fontSize:14, lineHeight:"20px", color:"#0e0f10", fontWeight:500 }}>List Building</span>
+                <span style={{ ...labelStyle, display:"flex", alignItems:"center", gap:4, flexShrink:0 }}><Badge />{arrowUpIcon(imgSideArrowUp)}</span>
               </div>
 
               {/* Sub-nav */}
-              <div style={{ display:"flex", gap:8, alignItems:"flex-start", paddingLeft:20, width:"100%" }}>
+              <div style={{ display:"flex", gap:8, alignItems:"flex-start", paddingLeft:20, width:"100%", transition:"opacity 0.18s ease", opacity: collapsed ? 0 : 1 }}>
                 <div style={{ display:"flex", alignSelf:"stretch" }}>
                   <div style={{ background:"#dfe3e5", width:1, height:"100%" }} />
                 </div>
@@ -457,7 +447,7 @@
         setValue(opt);
         setOpen(false);
         if (dataKey) globalCtx?.registerData(dataKey, { label: dataLabel || placeholder, tags: [{ text: opt, type: "include" }] });
-        ctx?.setSummary?.(dataKey, [{ text: dataLabel ? dataLabel + ": " + opt : opt, onRemove: () => { if (isFilled) ctx?.register(-1); setValue(null); setOpen(false); if (dataKey) globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); } }]);
+        ctx?.setSummary?.(dataKey, [{ text: dataLabel ? dataLabel + ": " + opt : opt, onRemove: () => { ctx?.register(-1); setValue(null); setOpen(false); if (dataKey) globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); } }]);
       }
       function handleClear(e) {
         e.stopPropagation();
@@ -708,7 +698,7 @@
         setVal(opt);
         if (!isDefault) {
           globalCtx?.registerData(dataKey, { label, tags: [{ text: opt, type: opt === "Exclude" ? "exclude" : "include" }] });
-          ctx?.setSummary?.(dataKey, [{ text: (label ? label + ": " : "") + opt, onRemove: () => { if (!wasDefault) ctx?.register(-1); setVal(opts[0]); globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); } }]);
+          ctx?.setSummary?.(dataKey, [{ text: (label ? label + ": " : "") + opt, onRemove: () => { ctx?.register(-1); setVal(opts[0]); globalCtx?.registerData(dataKey, null); ctx?.setSummary?.(dataKey, null); } }]);
         } else {
           globalCtx?.registerData(dataKey, null);
           ctx?.setSummary?.(dataKey, null);
@@ -1024,18 +1014,8 @@
                   >
                     {/* Tooltip */}
                     {infoHovered && (
-                      <div style={{ position:"absolute", left:-86, top:-60, zIndex:10, width:190, display:"flex", flexDirection:"column", alignItems:"center", pointerEvents:"none" }}>
-                        <div style={{ background:"#4e5a63", borderRadius:4, padding:"8px", width:"100%", boxSizing:"border-box", flexShrink:0 }}>
-                          <p style={{ color:"white", fontSize:12, lineHeight:"16px", fontFamily:"Helvetica, sans-serif", letterSpacing:0, width:174, height:32, margin:0, flexShrink:0 }}>
-                            Some records may appear in both owners and residents
-                          </p>
-                        </div>
-                        {/* Arrow caret pointing down */}
-                        <div style={{ width:16, height:4, display:"flex", alignItems:"flex-end", justifyContent:"center", flexShrink:0 }}>
-                          <div style={{ width:11.314, height:11.314, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                            <div style={{ width:8, height:8, background:"#4e5a63", transform:"rotate(-45deg)", flexShrink:0 }} />
-                          </div>
-                        </div>
+                      <div className="info-tip" style={{ position:"absolute", top:"calc(100% + 10px)", left:"50%", transform:"translateX(-50%)", zIndex:10, pointerEvents:"none" }}>
+                        Some records may appear in both owners and residents
                       </div>
                     )}
                     {/* Info icon image */}
@@ -1495,18 +1475,14 @@
       };
 
       return (
-        <div style={{ borderRight: collapsed ? "none" : "1px solid #dfe3e5", display:"flex", flexDirection:"column", height:"100%", width: collapsed ? 0 : 340, flexShrink:0, overflow:"hidden", transition:"width 0.2s ease" }}>
-        {collapsed ? null : (
+        <div style={{ borderRight:"1px solid #dfe3e5", display:"flex", flexDirection:"column", height:"100%", width: collapsed ? 0 : 340, flexShrink:0, overflow:"hidden", transition:"width 0.25s ease" }}>
         <GlobalFilterContext.Provider value={{ register: globalRegister, registerData: registerFilterData }}>
         <React.Fragment>
         <div key={clearKey} onChange={handleFilterInteraction} onClick={handleFilterInteraction} style={{ display:"flex", flexDirection:"column", alignItems:"flex-start", flex:1, overflowY:"auto", width:"100%" }}>
           {/* Header */}
           <div style={{ display:"flex", gap:16, alignItems:"center", padding:"20px 20px 16px", width:"100%", flexShrink:0, height:68, boxSizing:"border-box" }}>
             <div style={{ display:"flex", flex:1, gap:6, alignItems:"center", minWidth:0 }}>
-              <div style={{ position:"relative", flexShrink:0, width:20, height:20 }}>
-                  <img alt="" style={{ position:"absolute", display:"block", width:"100%", height:"100%", maxWidth:"none" }} src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjczOTMgOS4wMjA3NUMxNS4wNjAzIDguODYwMjQgMTUuNDM5OCA4Ljg2MDE5IDE1Ljc2MDggOS4wMjA3NUwxOS44ODU4IDExLjA4NDJDMjAuMjYyNSAxMS4yNzI3IDIwLjUgMTEuNjUyOCAyMC41IDEyLjA2NzZWMTYuOTkyNEMyMC41IDE4LjIxMTUgMTkuNDkyNiAxOS4xOTk0IDE4LjI1IDE5LjE5OTVIMTcuNjA0NUMxNy4xMzI2IDE5LjE5OTQgMTYuNzUwMSAxOC44MjQ2IDE2Ljc1IDE4LjM2MTZWMTYuMjU3MUMxNi43NSAxNS40NDQ0IDE2LjA3ODQgMTQuNzg1NCAxNS4yNSAxNC43ODU0QzE0LjQyMTYgMTQuNzg1NCAxMy43NSAxNS40NDQ0IDEzLjc1IDE2LjI1NzFWMTguMzYxNkMxMy43NSAxOC44MjQ1IDEzLjM2NzQgMTkuMTk5MyAxMi44OTU1IDE5LjE5OTVIMTIuMjVDMTEuMDA3NCAxOS4xOTk1IDEwIDE4LjIxMTUgMTAgMTYuOTkyNFYxMi4wNjc2QzEwIDExLjY1MjggMTAuMjM3NiAxMS4yNzI3IDEwLjYxNDMgMTEuMDg0MkwxNC43MzkzIDkuMDIwNzVaTTguMjM5MjggNy4xMjAzNkM4LjUxMjI4IDYuOTgzOSA4LjgyNzU5IDYuOTY0MDcgOS4xMTMzMSA3LjA1OTgyQzkuMTM0NzMgNy4wNjkxNCA5LjE1Njc2IDcuMDc3NCA5LjE3Nzc2IDcuMDg4MTRMOS43MzM0MiA3LjM3MDM2TDguNTg0OTkgNy45NDA2OEM3LjY3NDE1IDguMzkyNjEgNy4yOTY3OCA5LjUxMTE0IDcuNzU1ODggMTAuNDIyMUM4LjAzMDAxIDEwLjk3IDguNTQxMzYgMTEuMzE3NiA5LjEzMzgxIDExLjQwNjVDOS4wNjcxNyAxMS42MTM4IDkuMDM3MTUgMTEuODIyIDkuMDM3MTMgMTIuMDQ0MlYxMi45MTI0QzguOTQ0MjEgMTIuODk0NyA4Ljg0ODIyIDEyLjg4NSA4Ljc1MDAyIDEyLjg4NUM3LjkyMTY3IDEyLjg4NSA3LjI1MDE0IDEzLjU0NDEgNy4yNTAwMiAxNC4zNTY3VjE2LjQ2MTJDNy4yNTAwMiAxNi45MjQyIDYuODY3NDMgMTcuMjk5OSA2LjM5NTUzIDE3LjMwMDFINS43NTAwMkM0LjUwNzM4IDE3LjMwMDEgMy41MDAwMiAxNi4zMTExIDMuNTAwMDIgMTUuMDkyVjEwLjE2NzJDMy41MDAxIDkuNzUyNDQgMy43Mzc2MiA5LjM3MjI5IDQuMTE0MjggOS4xODM4NEw4LjIzOTI4IDcuMTIwMzZaTTE1LjAwNjkgNS45Njk5N0MxNS4yMTQzIDUuODY2MjcgMTUuNDU5NiA1Ljg2NjI3IDE1LjY2NyA1Ljk2OTk3TDIxLjU5MjggOC45MzI4NkgyMS41NzgxQzIxLjk0ODQgOS4xMTgxIDIyLjA5NjMgOS41NjMxMiAyMS45MTEyIDkuOTI2MDNDMjEuNzI2IDEwLjI5NjQgMjEuMjgwOSAxMC40NDQyIDIwLjkxOCAxMC4yNTlMMTUuMzI2MiA3LjQ1OTIzTDkuNzMzNDIgMTAuMjU5QzkuMzcwNDYgMTAuNDM2OCA4LjkyNTQ0IDEwLjI4OSA4Ljc0MDI2IDkuOTI2MDNDOC41NjI1NCA5LjU2MzA4IDguNzExMzEgOS4xMTgwMyA5LjA3NDI0IDguOTMyODZMMTUuMDA2OSA1Ljk2OTk3Wk04LjM0MDg0IDQuMDgxM0M4LjU0ODIxIDMuOTc3NjkgOC43OTI2OCAzLjk3NzYzIDkuMDAwMDIgNC4wODEzTDEyLjY1MTQgNS45MDM1N0wxMC45OTIyIDYuNzMzNjRIMTAuOTg1NEw4LjY1OTIgNS41NzA1NkwzLjA2NjQzIDguMzcwMzZDMi43MDM2MiA4LjU0Nzk3IDIuMjU5NTIgOC4zOTk5OSAyLjA3NDI0IDguMDM3MzVDMS44OTY0NyA3LjY3NDM5IDIuMDQ0MjkgNy4yMjkzOCAyLjQwNzI1IDcuMDQ0MTlMOC4zNDA4NCA0LjA4MTNaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=" />
-              </div>
-              <span style={{ fontWeight:600, fontSize:16, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Find Properties</span>
+              <span style={{ fontWeight:600, fontSize:16, lineHeight:"20px", color:"#0e0f10", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>Lead Builder: Properties</span>
             </div>
           </div>
 
@@ -1678,7 +1654,6 @@
         </div>
         </React.Fragment>
         </GlobalFilterContext.Provider>
-        )}
         </div>
       );
     }
@@ -2168,6 +2143,25 @@
       const [colMenuOpen, setColMenuOpen] = React.useState(null); // col.key or null
       const [sortConfig, setSortConfig] = React.useState(null);   // { key, dir: "asc"|"desc" }
       const colMenuRef = React.useRef(null);
+      const [sortTooltip, setSortTooltip] = React.useState(null); // { x, y, text, hiding }
+      const sortTooltipTimer = React.useRef(null);
+      const sortTooltipRef = React.useRef(null);
+      React.useLayoutEffect(() => {
+        if (!sortTooltip || !sortTooltipRef.current) return;
+        const el = sortTooltipRef.current;
+        const rect = el.getBoundingClientRect();
+        const pad = 8;
+        let finalLeft = sortTooltip.x;
+        if (rect.right > window.innerWidth - pad) {
+          finalLeft = sortTooltip.x - (rect.right - (window.innerWidth - pad));
+        } else if (rect.left < pad) {
+          finalLeft = sortTooltip.x + (pad - rect.left);
+        }
+        el.style.left = finalLeft + "px";
+        // Arrow always points at the icon center regardless of tooltip shift
+        const tooltipLeftEdge = finalLeft - rect.width / 2;
+        el.style.setProperty("--arrow-left", (sortTooltip.x - tooltipLeftEdge) + "px");
+      }, [sortTooltip, sortConfig]);
       const [dragHeaderKey, setDragHeaderKey] = React.useState(null);
       const [dropHeaderIdx, setDropHeaderIdx] = React.useState(null);
       React.useEffect(() => {
@@ -2191,6 +2185,21 @@
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
       }, [showEditCols]);
+      const tableScrollRef = React.useRef(null);
+      const [showRightScrim, setShowRightScrim] = React.useState(true);
+      const checkScrim = React.useCallback(() => {
+        const el = tableScrollRef.current;
+        if (!el) return;
+        setShowRightScrim(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+      }, []);
+      React.useEffect(() => {
+        const el = tableScrollRef.current;
+        if (!el) return;
+        checkScrim();
+        const ro = new ResizeObserver(checkScrim);
+        ro.observe(el);
+        return () => ro.disconnect();
+      }, [checkScrim]);
       const activeCols = colOrder.map(k => ALL_COLUMNS.find(c => c.key === k)).filter(Boolean);
       const sortedRows = React.useMemo(() => {
         if (!sortConfig) return TABLE_ROWS;
@@ -2227,10 +2236,28 @@
         setShowExportModal(false);
       };
       return (
-        <div style={{ flex:1, display:"flex", padding:"8px 0 0 8px", background:"#f7f8f8", overflow:"hidden", minWidth:0 }}>
+        <React.Fragment>
+        {sortTooltip && (() => {
+          const tc = ALL_COLUMNS.find(c => c.key === sortTooltip.colKey);
+          const isColSorted = sortConfig?.key === sortTooltip.colKey;
+          const sortedLabel = isColSorted
+            ? sortConfig.dir === "asc"
+              ? (tc?.sortType === "number" ? "lowest to highest" : tc?.sortType === "date" ? "oldest to newest" : "A to Z")
+              : (tc?.sortType === "number" ? "highest to lowest" : tc?.sortType === "date" ? "newest to oldest" : "Z to A")
+            : null;
+          const tipText = tc
+            ? `${tc.label} • ${isColSorted ? `Sorted ${sortedLabel}` : tc.sortType === "number" ? "sort lowest to highest" : tc.sortType === "date" ? "sort oldest to newest" : "sort A to Z"}`
+            : "";
+          return (
+            <div ref={sortTooltipRef} className={`col-sort-fixed-tip${sortTooltip.hiding ? " hiding" : ""}`} style={{ left: sortTooltip.x, top: sortTooltip.y }}>
+              {tipText}
+            </div>
+          );
+        })()}
+        <div style={{ flex:1, display:"flex", padding:"8px", background:"#f7f8f8", overflow:"hidden", minWidth:0 }}>
 
           {/* Find Property Table container */}
-          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", background:"white", borderRadius:"4px 4px 0 0", border:"1px solid #dfe3e5", borderRight:"none", borderBottom:"none" }}>
+          <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", background:"white", borderRadius:4, border:"1px solid #dfe3e5" }}>
 
             {/* Toolbar — 60px */}
             <div style={{ display:"flex", alignItems:"center", gap:8, padding:12, height:60, flexShrink:0, borderBottom:"1px solid #dfe3e5", background:"white" }}>
@@ -2311,7 +2338,8 @@
             </div>
 
             {/* Scrollable table area */}
-            <div style={{ flex:1, overflowX:"auto", overflowY:"auto" }}>
+            <div style={{ flex:1, position:"relative", overflow:"hidden" }}>
+            <div ref={tableScrollRef} onScroll={checkScrim} style={{ width:"100%", height:"100%", overflowX:"auto", overflowY:"auto" }}>
               {/* Fixed-width inner table */}
               {(() => {
                 const totalWidth = 44 + activeCols.reduce((s,c) => s+c.width, 0);
@@ -2341,15 +2369,13 @@
                         })()}
                       </div>
                       {activeCols.map((col, ci) => {
-                        const isMenuOpen = colMenuOpen === col.key;
                         const isSorted = sortConfig?.key === col.key;
                         const isDraggable = col.key !== "address";
                         const isDragging = dragHeaderKey === col.key;
                         const isDropTarget = dropHeaderIdx === ci && dragHeaderKey && dragHeaderKey !== col.key;
-                        const stickyStyle = ci === 0 ? { position:"sticky", left:44, zIndex: isMenuOpen ? 10 : 3, boxShadow:"2px 0 4px rgba(0,0,0,0.06)" } : {};
+                        const stickyStyle = ci === 0 ? { position:"sticky", left:44, zIndex:3, boxShadow:"2px 0 4px rgba(0,0,0,0.06)", clipPath:"inset(0 -8px 0 0)" } : {};
                         return (
                           <div key={col.key}
-                            ref={isMenuOpen ? colMenuRef : null}
                             draggable={isDraggable}
                             onDragStart={isDraggable ? e => { e.dataTransfer.effectAllowed="move"; setDragHeaderKey(col.key); } : null}
                             onDragOver={isDraggable ? e => { e.preventDefault(); e.dataTransfer.dropEffect="move"; setDropHeaderIdx(ci); } : null}
@@ -2368,43 +2394,23 @@
                             onDragEnd={() => { setDragHeaderKey(null); setDropHeaderIdx(null); }}
                             style={{ ...colStyle, width:col.width, ...stickyStyle, position: ci===0 ? "sticky" : "relative", cursor: isDraggable ? "grab" : "pointer", userSelect:"none", opacity: isDragging ? 0.4 : 1, borderLeft: isDropTarget ? "2px solid #0056ce" : undefined }}
                             onMouseEnter={e => e.currentTarget.style.background = "#eff1f2"}
-                            onMouseLeave={e => { if (!isMenuOpen) e.currentTarget.style.background = "#f7f8f8"; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "#f7f8f8"; }}
                           >
                             <span style={{ flex:1, fontSize:12, fontWeight:600, color:"#0e0f10", letterSpacing:"0.24px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontFamily:"'Inter', sans-serif" }}>
-                              {col.label}{isSorted ? (sortConfig.dir === "asc" ? " ↑" : " ↓") : ""}
+                              {col.label}
                             </span>
-                            <div onClick={e => { e.stopPropagation(); setColMenuOpen(isMenuOpen ? null : col.key); }}
-                              style={{ position:"absolute", right:4, top:"50%", transform:"translateY(-50%)", width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", borderRadius:4, opacity: isMenuOpen ? 1 : 0 }}
-                              className="col-menu-btn"
-                              onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.opacity=1; e.currentTarget.style.background="#c8cfd4"; }}
-                              onMouseLeave={e => { e.currentTarget.style.background="transparent"; if (!isMenuOpen) e.currentTarget.style.opacity=0; }}
+                            <div onClick={e => { e.stopPropagation(); setSortConfig(prev => { if (!prev || prev.key !== col.key) return { key:col.key, dir:"asc" }; if (prev.dir === "asc") return { key:col.key, dir:"desc" }; return null; }); }}
+                              style={{ position:"absolute", right:4, top:"50%", transform:"translateY(-50%)", width:20, height:20, display:"flex", alignItems:"center", justifyContent:"center", borderRadius:4, opacity: isSorted ? 1 : 0 }}
+                              className="col-sort-btn"
+                              onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.opacity=1; e.currentTarget.style.background="#c8cfd4"; clearTimeout(sortTooltipTimer.current); const r = e.currentTarget.getBoundingClientRect(); setSortTooltip({ x: r.left + r.width/2, y: r.bottom + 8, colKey: col.key, hiding: false }); }}
+                              onMouseLeave={e => { e.currentTarget.style.background="transparent"; if (!isSorted) e.currentTarget.style.opacity=0; setSortTooltip(prev => prev ? { ...prev, hiding: true } : null); sortTooltipTimer.current = setTimeout(() => setSortTooltip(null), 120); }}
                             >
-                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3" r="1.2" fill="#4e5a63"/><circle cx="8" cy="8" r="1.2" fill="#4e5a63"/><circle cx="8" cy="13" r="1.2" fill="#4e5a63"/></svg>
+                              <img src={`data:image/svg+xml;base64,${isSorted && sortConfig.dir === "desc" ? "PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjEyMDEgNEMxMi4zNzk5IDQgMTIuNTkwOCA0LjE5ODU2IDEyLjU5MDggNC40NDMzNlYxMC4zOTM2TDEzLjc4NzEgOS4xOTcyN0MxMy45NzA4IDkuMDEzNzUgMTQuMjY5MiA5LjAxNDA5IDE0LjQ1MzEgOS4xOTcyN0MxNC42MzcgOS4zODExMyAxNC42MzY5IDkuNjc5MzQgMTQuNDUzMSA5Ljg2MzI4TDEyLjQ1NTEgMTEuODYxM0MxMi4zNjI2IDExLjk1MzcgMTIuMjQxMyAxMS45OTk2IDEyLjEyMDEgMTEuOTk5QzExLjk5OTIgMTEuOTk5MyAxMS44Nzc0IDExLjk1MzYgMTEuNzg1MiAxMS44NjEzTDkuNzg3MTEgOS44NjMyOEM5LjYwMzk0IDkuNjc5MzggOS42MDM2NSA5LjM4MDk5IDkuNzg3MTEgOS4xOTcyN0M5Ljk3MDgyIDkuMDEzNzQgMTAuMjY5MiA5LjAxNDA4IDEwLjQ1MzEgOS4xOTcyN0wxMS42NDk0IDEwLjM5MzZWNC40NDMzNkMxMS42NDk0IDQuMTk4ODIgMTEuODYwNyA0LjAwMDQxIDEyLjEyMDEgNFpNNS45NzE2OCAxMC44MzNDNi4yMzQ4IDEwLjgzMyA2LjQ0ODI0IDExLjA0NjUgNi40NDgyNCAxMS4zMDk2QzYuNDQ4MDQgMTEuNTcyNSA2LjIzNDY3IDExLjc4NTIgNS45NzE2OCAxMS43ODUySDEuODA5NTdDMS41NDY2IDExLjc4NTEgMS4zMzMyMSAxMS41NzI1IDEuMzMzMDEgMTEuMzA5NkMxLjMzMzAxIDExLjA0NjUgMS41NDY0OCAxMC44MzMgMS44MDk1NyAxMC44MzNINS45NzE2OFpNNy42NTEzNyA3LjUyMTQ4QzcuOTE0NDQgNy41MjE0OCA4LjEyNzg2IDcuNzM0OTkgOC4xMjc5MyA3Ljk5ODA1QzguMTI3OTMgOC4yNjExNyA3LjkxNDQ5IDguNDc0NjEgNy42NTEzNyA4LjQ3NDYxSDEuODA5NTdDMS41NDY0OCA4LjQ3NDU4IDEuMzMzMDEgOC4yNjExNSAxLjMzMzAxIDcuOTk4MDVDMS4zMzMwOCA3LjczNTAxIDEuNTQ2NTIgNy41MjE1MiAxLjgwOTU3IDcuNTIxNDhINy42NTEzN1pNOS4zMzEwNSA0LjIxMDk0QzkuNTk0MTIgNC4yMTEgOS44MDc2MiA0LjQyNDQyIDkuODA3NjIgNC42ODc1QzkuODA3NDQgNC45NTA0MiA5LjU5NDAxIDUuMTYzMDIgOS4zMzEwNSA1LjE2MzA5SDEuODA5NTdDMS41NDY1OSA1LjE2MzA1IDEuMzMzMTkgNC45NTA0NCAxLjMzMzAxIDQuNjg3NUMxLjMzMzAxIDQuNDI0NCAxLjU0NjQ4IDQuMjEwOTcgMS44MDk1NyA0LjIxMDk0SDkuMzMxMDVaIiBmaWxsPSIjMjcyRDMyIi8+Cjwvc3ZnPgo=" : "PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyLjEyMDEgMy45OTgwNUMxMi4yNDA5IDMuOTk3NyAxMi4zNjE5IDQuMDQzNzcgMTIuNDU0MSA0LjEzNTc1TDE0LjQ1MzEgNi4xMzM3OUMxNC42MzY2IDYuMzE3NjQgMTQuNjM2NiA2LjYxNTk1IDE0LjQ1MzEgNi43OTk4MUMxNC4yNjkzIDYuOTgzNjQgMTMuOTcxMSA2Ljk4MzQ0IDEzLjc4NzEgNi43OTk4MUwxMi41OTA4IDUuNjA0NVYxMS41NTQ3QzEyLjU5MDggMTEuNzk5NCAxMi4zNzk5IDExLjk5OCAxMi4xMjAxIDExLjk5ODFDMTEuODYwNCAxMS45OTggMTEuNjQ5NCAxMS43OTk0IDExLjY0OTQgMTEuNTU0N1Y1LjYwMzUyTDEwLjQ1MjEgNi43OTk4MUMxMC4yNjgyIDYuOTgzNTIgOS45Njk5OSA2Ljk4MzY3IDkuNzg2MTMgNi43OTk4MUM5LjYwMjgzIDYuNjE1OTEgOS42MDI2IDYuMzE3NTYgOS43ODYxMyA2LjEzMzc5TDExLjc4NDIgNC4xMzU3NUMxMS44NzY3IDQuMDQzMzYgMTEuOTk4OSAzLjk5NzQ5IDEyLjEyMDEgMy45OTgwNVpNOS4zMzAwOCAxMC44MjkxQzkuNTkzMTggMTAuODI5MSA5LjgwNjY0IDExLjA0MjYgOS44MDY2NCAxMS4zMDU3QzkuODA2NTQgMTEuNTY4NyA5LjU5MzEyIDExLjc4MTMgOS4zMzAwOCAxMS43ODEzSDEuODA5NTdDMS41NDY1MyAxMS43ODEzIDEuMzMzMTEgMTEuNTY4NyAxLjMzMzAxIDExLjMwNTdDMS4zMzMwMSAxMS4wNDI2IDEuNTQ2NDcgMTAuODI5MSAxLjgwOTU3IDEwLjgyOTFIOS4zMzAwOFpNNy42NTEzNyA3LjUxODU2QzcuOTE0NDEgNy41MTg2MyA4LjEyNjk1IDcuNzMyMDYgOC4xMjY5NSA3Ljk5NTEyQzguMTI2NzEgOC4yNTc5OCA3LjkxNDI2IDguNDcwNjQgNy42NTEzNyA4LjQ3MDcxSDEuODA5NTdDMS41NDY2MiA4LjQ3MDcxIDEuMzMzMjUgOC4yNTgwMiAxLjMzMzAxIDcuOTk1MTJDMS4zMzMwMSA3LjczMjAyIDEuNTQ2NDcgNy41MTg1NiAxLjgwOTU3IDcuNTE4NTZINy42NTEzN1pNNS45NzE2OCA0LjIwODAxQzYuMjM0NTUgNC4yMDgxOCA2LjQ0NzExIDQuNDIwNzMgNi40NDcyNyA0LjY4MzZDNi40NDcyNyA0Ljk0NjYgNi4yMzQ2NCA1LjE2IDUuOTcxNjggNS4xNjAxNkgxLjgwOTU3QzEuNTQ2NDcgNS4xNjAxNiAxLjMzMzAxIDQuOTQ2NyAxLjMzMzAxIDQuNjgzNkMxLjMzMzE3IDQuNDIwNjMgMS41NDY1NiA0LjIwODAxIDEuODA5NTcgNC4yMDgwMUg1Ljk3MTY4WiIgZmlsbD0iIzI3MkQzMiIvPgo8L3N2Zz4K"}`} width="16" height="16" alt="" style={{ display:"block" }} />
                             </div>
-                            {isMenuOpen && (
-                              <div style={{ position:"absolute", top:"100%", right:0, background:"white", border:"1px solid #dfe3e5", borderRadius:8, boxShadow:"0 4px 12px rgba(0,0,0,0.12)", zIndex:100, minWidth:180, padding:"4px 0", marginTop:2 }}>
-                                {[{ label:"Sort A → Z", dir:"asc" }, { label:"Sort Z → A", dir:"desc" }].map(opt => (
-                                  <div key={opt.dir} onClick={e => { e.stopPropagation(); setSortConfig(isSorted && sortConfig.dir===opt.dir ? null : { key:col.key, dir:opt.dir }); setColMenuOpen(null); }}
-                                    style={{ padding:"8px 12px", fontSize:14, color:"#0e0f10", cursor:"pointer", background: isSorted && sortConfig.dir===opt.dir ? "#f0f4ff" : "white" }}
-                                    onMouseEnter={e => e.currentTarget.style.background="#f7f8f8"}
-                                    onMouseLeave={e => e.currentTarget.style.background = isSorted && sortConfig.dir===opt.dir ? "#f0f4ff" : "white"}
-                                  >{opt.label}</div>
-                                ))}
-                                {col.key !== "address" && (
-                                  <>
-                                    <div style={{ height:1, background:"#eff1f2", margin:"4px 0" }} />
-                                    <div onClick={e => { e.stopPropagation(); handleColChange(col.key, false); setColMenuOpen(null); }}
-                                      style={{ padding:"8px 12px", fontSize:14, color:"#0e0f10", cursor:"pointer" }}
-                                      onMouseEnter={e => e.currentTarget.style.background="#f7f8f8"}
-                                      onMouseLeave={e => e.currentTarget.style.background="white"}
-                                    >Hide column</div>
-                                  </>
-                                )}
-                              </div>
-                            )}
                           </div>
                         );
                       })}
+                      {showRightScrim && <div style={{ position:"sticky", right:0, width:0, alignSelf:"stretch", flexShrink:0, background:"#f7f8f8", boxShadow:"-2px 0 4px rgba(0,0,0,0.06)", clipPath:"inset(0 0 0 -8px)", zIndex:4, pointerEvents:"none" }} />}
                     </div>
 
                     {/* Data rows */}
@@ -2419,7 +2425,7 @@
                         onMouseLeave={() => setHoveredRow(null)}
                         onClick={() => !unlockedRows.has(ri) && toggleRow(ri)}>
                         {/* Checkbox — always clickable; for unlocked rows it's the only trigger */}
-                        <div style={{ ...cellStyle, width:44, borderRight:"1px solid #eff1f2", background:rowBg, justifyContent:"center", position:"sticky", left:0, zIndex:1 }}
+                        <div style={{ ...cellStyle, width:44, borderRight:"none", background:rowBg, justifyContent:"center", position:"sticky", left:0, zIndex:1 }}
                           onClick={(e) => { e.stopPropagation(); toggleRow(ri); }}>
                           {isSelected
                             ? <img alt="" src={imgEditColCheck2} style={{ width:20, height:20, display:"block", flexShrink:0 }} />
@@ -2434,7 +2440,7 @@
                           const count       = isOwners ? row.ownerCount : isResidents ? row.resCount : 0;
                           const isFirstCol  = ci === 0;
                           return (
-                            <div key={col.key} style={{ ...cellStyle, width:col.width, gap: (isOwners||isResidents||isOwnerType)?4:0, ...(isFirstCol ? { position:"sticky", left:44, zIndex:1, background:rowBg, boxShadow:"2px 0 4px rgba(0,0,0,0.06)" } : {}) }}>
+                            <div key={col.key} style={{ ...cellStyle, width:col.width, gap: (isOwners||isResidents||isOwnerType)?4:0, ...(isFirstCol ? { position:"sticky", left:44, zIndex:1, background:rowBg, boxShadow:"2px 0 4px rgba(0,0,0,0.06)", clipPath:"inset(0 -8px 0 0)" } : {}) }}>
                               {isPropType ? (
                                 <div style={{ display:"flex", flexDirection:"column", width:"100%" }}>
                                   <span style={{ fontSize:14, lineHeight:"20px", color:"#0e0f10", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{row.propType}</span>
@@ -2543,15 +2549,17 @@
                             </div>
                           );
                         })}
+                        {showRightScrim && <div style={{ position:"sticky", right:0, width:0, alignSelf:"stretch", flexShrink:0, background:rowBg, boxShadow:"-2px 0 4px rgba(0,0,0,0.06)", clipPath:"inset(0 0 0 -8px)", zIndex:1, pointerEvents:"none" }} />}
                       </div>
                     )})}
                   </div>
                 );
               })()}
             </div>
+            </div>
 
             {/* Pagination bar — 52px */}
-            <div style={{ display:"flex", alignItems:"center", gap:16, padding:"8px 24px 16px", flexShrink:0, borderTop:"1px solid #dfe3e5", background:"white" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:16, padding:"8px 24px", flexShrink:0, borderTop:"1px solid #dfe3e5", background:"white" }}>
               {/* Prev */}
               <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1} style={{ display:"flex", alignItems:"center", gap:8, background:"none", border:"none", cursor: currentPage === 1 ? "default" : "pointer", padding:0, fontFamily:"inherit", opacity: currentPage === 1 ? 0.35 : 1 }}>
                 <img alt="" width="24" height="24" style={{ display:"block", flexShrink:0 }} src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjcwNyA4LjQ1ODAxQzE1LjA5NzQgOC4wNjcyMiAxNS4wOTc3IDcuNDMzNjEgMTQuNzA3IDcuMDQyOTdDMTQuMzE2NCA2LjY1MjM3IDEzLjY4MjggNi42NTI1OCAxMy4yOTIgNy4wNDI5N0w5LjA0Njg3IDExLjI4ODFDOC44MzU1NiAxMS40OTk0IDguNzM5NiAxMS43ODIxIDguNzU2ODQgMTIuMDU4NkM4Ljc2OTY4IDEyLjI5NjMgOC44NjUzMiAxMi41MzA0IDkuMDQ2ODcgMTIuNzExOUwxMy4yOTIgMTYuOTU3QzEzLjY4MjggMTcuMzQ3NyAxNC4zMTYzIDE3LjM0NzcgMTQuNzA3IDE2Ljk1N0MxNS4wOTc2IDE2LjU2NjMgMTUuMDk3NiAxNS45MzI3IDE0LjcwNyAxNS41NDJMMTEuMTY1IDEyTDE0LjcwNyA4LjQ1ODAxWiIgZmlsbD0iIzBFMEYxMCIvPgo8L3N2Zz4K" />
@@ -2587,6 +2595,7 @@
 
           </div>
         </div>
+        </React.Fragment>
       );
     }
 
